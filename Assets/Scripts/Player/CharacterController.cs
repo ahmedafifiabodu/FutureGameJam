@@ -6,7 +6,7 @@ public class FirstPersonZoneController : MonoBehaviour
     [Header("View")]
     [SerializeField] private Transform cameraPivot;            // Make this a child of the Player
 
-    [SerializeField] private float mouseSensitivity = 0.12f;   // Tuned for Mouse Delta
+    [SerializeField] private float mouseSensitivity = 2.0f;    // Tuned for Mouse Delta
     [SerializeField] private bool lookInputIsDelta = true;     // True for Mouse Delta; false if using absolute stick look
 
     [Header("Movement")]
@@ -47,6 +47,12 @@ public class FirstPersonZoneController : MonoBehaviour
     private InputManager inputManager;
     private float yaw, pitch, yVel;
     private int overlapFramesLeft;
+
+    // Public properties for sharing with other controllers
+    public Transform CameraPivot => cameraPivot;
+    public float MouseSensitivity => mouseSensitivity;
+    public bool LookInputIsDelta => lookInputIsDelta;
+    public float Gravity => gravity;
 
     private void Awake()
     {
