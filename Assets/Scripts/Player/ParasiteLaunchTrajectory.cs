@@ -27,26 +27,13 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     [SerializeField] private float nearCameraFadeDistance = 0.5f; // Fade out line near camera
     [SerializeField] private bool enableNearCameraFade = true;
 
-    [Header("Material Settings")]
-    [SerializeField] private Material customLineMaterial; // Assign your own material here
-
-    [SerializeField] private bool useCustomMaterial = false; // Toggle to use custom material
-
-    [Tooltip("Tiling multiplier for the line texture/material. Higher values = more arrows. Lower = fewer arrows with more spacing.")]
-    [SerializeField][Range(0.1f, 10f)] private float textureTiling = 1f;
-
-    [Tooltip("Offset to animate or shift the texture along the line")]
-    [SerializeField][Range(-1f, 1f)] private float textureOffset = 0f;
-
     [Header("Arrow Animation")]
-    [Tooltip("Enable animated flowing arrows")]
     [SerializeField] private bool animateArrows = true;
 
-    [Tooltip("Speed of arrow animation. Positive = forward, Negative = backward")]
     [SerializeField][Range(-5f, 5f)] private float arrowAnimationSpeed = 1f;
-
-    [Tooltip("Start animating only when aiming")]
     [SerializeField] private bool animateOnlyWhenVisible = true;
+    [SerializeField] private Texture2D arrowTexture; // Assign your arrow texture here in inspector
+    [SerializeField] private Material lineMaterial; // Optional: Assign your existing material here
 
     [Header("Trajectory Positioning")]
     [SerializeField] private float horizontalOffset = 0f; // Visual offset left (-) or right (+) relative to camera
@@ -68,10 +55,8 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
     private PhysicsScene physicsScene;
     private GameObject landingIndicator;
-    private Material lineMaterial;
     private LineRenderer indicatorLineRenderer;
     private Transform cameraTransform;
-    private bool isUsingCustomMaterial = false;
     private float animatedTextureOffset = 0f; // Accumulated offset for animation
 
     private void Start()
@@ -101,11 +86,10 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
                     animatedTextureOffset = animatedTextureOffset % 1f;
                 }
 
-                // Apply animated offset to material
+                // Apply the texture offset to the material
                 if (line.material != null)
                 {
-                    float finalOffset = textureOffset + animatedTextureOffset;
-                    line.material.mainTextureOffset = new Vector2(finalOffset, 0f);
+                    line.material.mainTextureOffset = new Vector2(animatedTextureOffset, 0f);
                 }
             }
         }
@@ -139,70 +123,66 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         line.alignment = LineAlignment.View; // Always face camera
         line.textureMode = LineTextureMode.Tile; // IMPORTANT: Use Tile mode for proper arrow alignment
 
-        // Check if we should use custom material
-        if (useCustomMaterial && customLineMaterial != null)
+        // Use existing material if assigned, otherwise create a new one
+        if (lineMaterial != null)
         {
-            // Use the assigned custom material
-            lineMaterial = customLineMaterial;
-            isUsingCustomMaterial = true;
+            // Use the assigned material
+            line.material = lineMaterial;
         }
-        else
+        else if (line.material == null || line.sharedMaterial == null)
         {
-            // Generate material
-            isUsingCustomMaterial = false;
-
-            // URP-compatible shader selection
+            // Create a material with proper shader for color tinting
             Shader lineShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-            if (lineShader == null)
-            {
-                lineShader = Shader.Find("Universal Render Pipeline/Unlit");
-            }
-            if (lineShader == null)
-            {
-                lineShader = Shader.Find("Particles/Standard Unlit");
-            }
-            if (lineShader == null)
-            {
-                lineShader = Shader.Find("Unlit/Color");
-            }
+            if (lineShader == null) lineShader = Shader.Find("Particles/Standard Unlit");
+            if (lineShader == null) lineShader = Shader.Find("Sprites/Default"); // Good fallback with color tinting
+            if (lineShader == null) lineShader = Shader.Find("Unlit/Transparent");
 
-            lineMaterial = new Material(lineShader)
+            if (lineShader != null)
             {
-                renderQueue = 3000 // Transparent queue
-            };
+                Material newLineMaterial = new Material(lineShader);
+                
+                // Enable transparency
+                if (newLineMaterial.HasProperty("_Surface"))
+                {
+                    newLineMaterial.SetFloat("_Surface", 1); // Transparent
+                }
+                if (newLineMaterial.HasProperty("_Blend"))
+                {
+                    newLineMaterial.SetFloat("_Blend", 0); // Alpha blend
+                }
+                if (newLineMaterial.HasProperty("_SrcBlend"))
+                {
+                    newLineMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                }
+                if (newLineMaterial.HasProperty("_DstBlend"))
+                {
+                    newLineMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                }
+                if (newLineMaterial.HasProperty("_ZWrite"))
+                {
+                    newLineMaterial.SetFloat("_ZWrite", 0);
+                }
 
-            // Set initial color for URP
-            lineMaterial.SetColor("_BaseColor", validLaunchColor);
-            lineMaterial.SetColor("_Color", validLaunchColor);
-            if (lineMaterial.HasProperty("_TintColor"))
-            {
-                lineMaterial.SetColor("_TintColor", validLaunchColor);
-            }
+                // Enable color tinting from vertex colors
+                if (newLineMaterial.HasProperty("_ColorMode"))
+                {
+                    newLineMaterial.SetFloat("_ColorMode", 1); // Multiply mode
+                }
 
-            // Enable transparency for URP
-            if (lineMaterial.HasProperty("_Surface"))
-            {
-                lineMaterial.SetFloat("_Surface", 1);
-            }
-            if (lineMaterial.HasProperty("_Blend"))
-            {
-                lineMaterial.SetFloat("_Blend", 0);
-            }
-            if (lineMaterial.HasProperty("_SrcBlend"))
-            {
-                lineMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            }
-            if (lineMaterial.HasProperty("_DstBlend"))
-            {
-                lineMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            }
-            if (lineMaterial.HasProperty("_ZWrite"))
-            {
-                lineMaterial.SetFloat("_ZWrite", 0);
+                // Assign arrow texture if provided
+                if (arrowTexture != null)
+                {
+                    newLineMaterial.mainTexture = arrowTexture;
+                    if (newLineMaterial.HasProperty("_BaseMap"))
+                    {
+                        newLineMaterial.SetTexture("_BaseMap", arrowTexture);
+                    }
+                }
+
+                newLineMaterial.renderQueue = 3000; // Render in transparent queue
+                line.material = newLineMaterial;
             }
         }
-
-        line.material = lineMaterial;
 
         // Set solid colors for dots (no gradient fading)
         line.startColor = validLaunchColor;
@@ -210,28 +190,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
         line.positionCount = 0;
         line.enabled = true;
-        line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        line.receiveShadows = false;
         line.useWorldSpace = true;
-
-        // Apply texture tiling and offset
-        UpdateTextureTiling();
-    }
-
-    /// <summary>
-    /// Updates the texture tiling and offset on the line renderer material
-    /// </summary>
-    private void UpdateTextureTiling()
-    {
-        if (line != null && line.material != null)
-        {
-            // For LineRenderer with Tile mode, we need to set the tiling correctly
-            // The X value controls repetition along the line
-            // The Y value controls tiling perpendicular to the line (usually keep at 1)
-            line.material.mainTextureScale = new Vector2(1f, 1f); // Reset to default first
-
-            // Note: We'll update this dynamically in ApplyDottedLine based on trajectory length
-        }
     }
 
     private void CreateLandingIndicator()
@@ -500,44 +459,30 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         {
             line.SetPositions(dottedPoints.ToArray());
         }
-
-        // Update texture tiling for proper arrow spacing
-        // In Tile mode, the texture repeats based on world-space distance
-        if (line.material != null && totalDistance > 0f)
-        {
-            // For short distances, reduce tiling to prevent stretching
-            // For longer distances, scale normally
-            float baseRepetitions = Mathf.Max(1f, totalDistance * textureTiling);
-
-            // Ensure minimum repetitions to prevent stretching on very short trajectories
-            float minRepetitions = 2f;
-            float finalRepetitions = Mathf.Max(minRepetitions, baseRepetitions);
-
-            // Apply to material (for Tile mode, this affects world-space tiling)
-            line.material.mainTextureScale = new Vector2(finalRepetitions, 1f);
-
-            // Apply offset (animated offset will be added in Update method)
-            if (!animateArrows)
-                line.material.mainTextureOffset = new Vector2(textureOffset, 0f);
-        }
     }
 
     private void UpdateLineColor(Color baseColor)
     {
-        // Only update material colors if not using a custom material
-        if (lineMaterial != null && !isUsingCustomMaterial)
-        {
-            lineMaterial.SetColor("_BaseColor", baseColor);
-            lineMaterial.SetColor("_Color", baseColor);
-            if (lineMaterial.HasProperty("_TintColor"))
-            {
-                lineMaterial.SetColor("_TintColor", baseColor);
-            }
-        }
-
-        // Always update line renderer colors
         line.startColor = baseColor;
         line.endColor = baseColor;
+
+        // Also set color on the material for shader-based rendering
+        if (line.material != null)
+        {
+            // Try different common color properties
+            if (line.material.HasProperty("_BaseColor"))
+            {
+                line.material.SetColor("_BaseColor", baseColor);
+            }
+            if (line.material.HasProperty("_Color"))
+            {
+                line.material.SetColor("_Color", baseColor);
+            }
+            if (line.material.HasProperty("_TintColor"))
+            {
+                line.material.SetColor("_TintColor", baseColor);
+            }
+        }
     }
 
     private void UpdateLandingIndicator(Vector3 position, Vector3 normal, bool isValidTarget)
@@ -594,22 +539,9 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         HideLandingIndicator();
     }
 
-    /// <summary>
-    /// Shows the trajectory line (if it was hidden)
-    /// </summary>
-    public void ShowTrajectory()
-    {
-        if (line != null)
-            line.enabled = true;
-    }
-
     private void OnDestroy()
     {
         if (landingIndicator != null)
             Destroy(landingIndicator);
-
-        // Only destroy the material if it was generated (not a custom material)
-        if (lineMaterial != null && !isUsingCustomMaterial)
-            Destroy(lineMaterial);
     }
 }

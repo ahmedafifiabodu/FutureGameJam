@@ -1254,6 +1254,9 @@ MonoBehaviour:
   hostHeadLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
+  simulationLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   trajectorySystem: {fileID: 5475289690071473843}
   showTrajectory: 1
   showDebug: 1
@@ -1536,6 +1539,7 @@ MonoBehaviour:
   enableNearCameraFade: 1
   customLineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
   useCustomMaterial: 1
+  enableMaterialColorTint: 1
   textureTiling: 0.5
   textureOffset: 0
   animateArrows: 1
@@ -1548,6 +1552,7 @@ MonoBehaviour:
   showLandingIndicator: 1
   indicatorHeightOffset: 0.01
   indicatorLineWidth: 0.02
+  minimumDots: 10
   dotSpacing: 0.3
 --- !u!120 &5475289690071473844
 LineRenderer:
