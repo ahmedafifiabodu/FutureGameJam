@@ -1254,6 +1254,9 @@ MonoBehaviour:
   hostHeadLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
+  simulationLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   trajectorySystem: {fileID: 5475289690071473843}
   showTrajectory: 1
   showDebug: 1
@@ -1522,26 +1525,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParasiteLaunchTrajectory
   line: {fileID: 5475289690071473844}
-  maxPhysicsFrameIterations: 100
-  lineSegmentResolution: 50
+  maxPhysicsFrameIterations: 50
+  lineSegmentResolution: 25
   simulationRadius: 0.2
   simulationLayers:
     serializedVersion: 2
     m_Bits: 2097153
   validLaunchColor: {r: 0, g: 1, b: 0, a: 0.8}
   invalidLaunchColor: {r: 1, g: 0, b: 0, a: 0.8}
-  lineStartWidth: 0.05
-  lineEndWidth: 0.05
-  nearCameraFadeDistance: 1
+  lineStartWidth: 0.1
+  lineEndWidth: 0.1
+  nearCameraFadeDistance: 0.5
   enableNearCameraFade: 1
-  horizontalOffset: 0
+  customLineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
+  useCustomMaterial: 1
+  enableMaterialColorTint: 1
+  textureTiling: 0.5
+  textureOffset: 0
+  animateArrows: 1
+  arrowAnimationSpeed: 2
+  animateOnlyWhenVisible: 1
+  horizontalOffset: 0.5
   trajectoryStartOffset: {x: 0, y: 0, z: 0}
   landingIndicatorPrefab: {fileID: 0}
   indicatorRadius: 0.25
   showLandingIndicator: 1
-  indicatorHeightOffset: 0.04
-  indicatorLineWidth: 0.05
-  dotSpacing: 0.01
+  indicatorHeightOffset: 0.01
+  indicatorLineWidth: 0.02
+  minimumDots: 10
+  dotSpacing: 0.3
 --- !u!120 &5475289690071473844
 LineRenderer:
   serializedVersion: 2
@@ -1642,7 +1654,7 @@ LineRenderer:
     numCapVertices: 90
     alignment: 0
     textureMode: 0
-    textureScale: {x: 1, y: 1}
+    textureScale: {x: -1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
   m_MaskInteraction: 0

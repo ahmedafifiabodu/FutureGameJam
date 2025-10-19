@@ -17,6 +17,9 @@ public class ParasiteController : MonoBehaviour
     [Header("Host Detection")]
     [SerializeField] private LayerMask hostHeadLayerMask;
 
+    [Tooltip("Layers to check for trajectory collision (typically everything or ground + obstacles)")]
+    [SerializeField] private LayerMask simulationLayers = -1; // Default to everything
+
     [Header("Trajectory Visualization")]
     [SerializeField] private ParasiteLaunchTrajectory trajectorySystem;
 
@@ -224,7 +227,10 @@ public class ParasiteController : MonoBehaviour
             else
             {
                 if (showDebug)
-                    Debug.Log("[Parasite] Target too close - launch cancelled");
+                {
+                    if (!canLaunch)
+                        Debug.Log("[Parasite] Launch cancelled - target too close");
+                }
             }
         }
         else
@@ -330,29 +336,78 @@ public class ParasiteController : MonoBehaviour
         Vector3 launchDir = cameraPivot ? cameraPivot.forward : transform.forward;
         Vector3 launchVel = launchDir * launchForce;
 
-        // Check if target is within valid distance range
+        // Calculate the predicted landing position first
         float distanceToTarget = CalculateDistanceToTarget(launchDir);
-        canLaunch = distanceToTarget >= minLaunchDistance;
 
-        // Show trajectory with color indicating if launch is valid
+        // Check if the trajectory would land too close (nearly at feet)
+        // This is more reliable than checking pitch angle
+        bool isValidDistance = distanceToTarget >= minLaunchDistance;
+
+        // Can only launch if both angle and distance are valid
+        canLaunch = isValidDistance;
+
+        // Hide trajectory if either condition fails
+        if (!isValidDistance)
+        {
+            trajectorySystem.HideTrajectory();
+            return;
+        }
+
+        // Show trajectory only when both conditions are met
         trajectorySystem.SimulateTrajectory(
             transform.position,
             launchVel,
             gravity,
             maxLaunchDistance,
             hostHeadLayerMask,
-            canLaunch
+            isValidDistance
         );
     }
 
     private float CalculateDistanceToTarget(Vector3 direction)
     {
+        // First check for a direct hit on a target
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, maxLaunchDistance, hostHeadLayerMask))
         {
             return hit.distance;
         }
 
-        // No target found - return max distance
+        // If no target hit, simulate trajectory to find actual landing distance
+        // This prevents launching at the ground near the player
+        Vector3 currentPos = transform.position;
+        Vector3 currentVelocity = direction * launchForce;
+        float maxSimulationTime = launchDuration;
+        float timeStep = Time.fixedDeltaTime;
+
+        for (float t = 0; t < maxSimulationTime; t += timeStep)
+        {
+            // Apply gravity
+            currentVelocity.y += gravity * timeStep;
+            Vector3 nextPos = currentPos + currentVelocity * timeStep;
+
+            // Check if we hit anything (including ground)
+            Vector3 moveDelta = nextPos - currentPos;
+            if (Physics.Raycast(currentPos, moveDelta.normalized, out RaycastHit groundHit, moveDelta.magnitude, simulationLayers))
+            {
+                // Calculate horizontal distance to landing point
+                Vector3 landingPoint = groundHit.point;
+                Vector3 horizontalDelta = landingPoint - transform.position;
+                horizontalDelta.y = 0; // Only care about horizontal distance
+                return horizontalDelta.magnitude;
+            }
+
+            currentPos = nextPos;
+
+            // Safety check: if traveled too far horizontally, return that distance
+            Vector3 traveledHorizontal = currentPos - transform.position;
+            traveledHorizontal.y = 0;
+            if (traveledHorizontal.magnitude > maxLaunchDistance)
+            {
+                return traveledHorizontal.magnitude;
+            }
+        }
+
+        // No collision found - return max distance
         return maxLaunchDistance;
     }
 
@@ -384,8 +439,25 @@ public class ParasiteController : MonoBehaviour
 
         float cooldownRemaining = Mathf.Max(0, launchCooldown - (Time.time - lastLaunchTime));
 
-        string aimStatus = isAiming ? (canLaunch ? "READY" : "TOO CLOSE") : "Not Aiming";
-        Color statusColor = isAiming ? (canLaunch ? Color.green : Color.red) : Color.white;
+        // Determine aim status
+        string aimStatus;
+        Color statusColor;
+
+        if (!isAiming)
+        {
+            aimStatus = "Not Aiming";
+            statusColor = Color.white;
+        }
+        else if (!canLaunch)
+        {
+            aimStatus = "TOO CLOSE";
+            statusColor = Color.red;
+        }
+        else
+        {
+            aimStatus = "READY";
+            statusColor = Color.green;
+        }
 
         GUI.color = statusColor;
         GUI.Label(new Rect(8, 8, 480, 20), $"Parasite Mode | {aimStatus} | Cooldown: {cooldownRemaining:F1}s");
