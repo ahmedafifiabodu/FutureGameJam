@@ -1805,7 +1805,7 @@
     "m_Title": "Palette",
     "m_Position": {
         "x": 555.0,
-        "y": -118.99998474121094
+        "y": -119.0
     }
 }
 
@@ -2530,7 +2530,7 @@
     "m_Title": "Quantization",
     "m_Position": {
         "x": -1060.0,
-        "y": 28.000030517578126
+        "y": 28.0
     }
 }
 
@@ -3473,7 +3473,7 @@
     "m_ObjectId": "74e900202cf8400b9662f60d000f8e45",
     "m_Title": "Adding Dither to Render",
     "m_Position": {
-        "x": -2141.000244140625,
+        "x": -2141.0,
         "y": 185.0
     }
 }
