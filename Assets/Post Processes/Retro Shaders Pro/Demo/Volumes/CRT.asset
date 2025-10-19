@@ -68,6 +68,110 @@ MonoBehaviour:
   blueOutBlueIn:
     m_OverrideState: 0
     m_Value: 100
+--- !u!114 &-716594930516972672
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4265a041954897941afec871c608473b, type: 3}
+  m_Name: Crt
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::Crt
+  active: 0
+  scanlinesWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  noiseWeight:
+    m_OverrideState: 0
+    m_Value: 1
+  screenBendX:
+    m_OverrideState: 0
+    m_Value: 1000
+  screenBendY:
+    m_OverrideState: 0
+    m_Value: 1000
+  vignetteAmount:
+    m_OverrideState: 0
+    m_Value: 0
+  vignetteSize:
+    m_OverrideState: 0
+    m_Value: 2
+  vignetteRounding:
+    m_OverrideState: 0
+    m_Value: 2
+  vignetteSmoothing:
+    m_OverrideState: 0
+    m_Value: 1
+  scanlinesDensity:
+    m_OverrideState: 0
+    m_Value: 200
+  scanlinesSpeed:
+    m_OverrideState: 0
+    m_Value: -10
+  noiseAmount:
+    m_OverrideState: 0
+    m_Value: 250
+  chromaticRed:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0}
+  chromaticGreen:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0}
+  chromaticBlue:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0}
+  grilleOpacity:
+    m_OverrideState: 0
+    m_Value: 0.4
+  grilleCounterOpacity:
+    m_OverrideState: 0
+    m_Value: 0.2
+  grilleResolution:
+    m_OverrideState: 0
+    m_Value: 360
+  grilleCounterResolution:
+    m_OverrideState: 0
+    m_Value: 540
+  grilleUvRotation:
+    m_OverrideState: 0
+    m_Value: 90
+  grilleBrightness:
+    m_OverrideState: 0
+    m_Value: 15
+  grilleUvMidPoint:
+    m_OverrideState: 0
+    m_Value: 0.5
+  grilleShift:
+    m_OverrideState: 0
+    m_Value: {x: 1, y: 1, z: 1}
+--- !u!114 &-72514820723760123
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ea62842ddb6960488930897ba9ce398, type: 3}
+  m_Name: Dithering
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::PSX.Dithering
+  active: 0
+  patternIndex:
+    m_OverrideState: 1
+    m_Value: 100
+  ditherThreshold:
+    m_OverrideState: 1
+    m_Value: 512
+  ditherStrength:
+    m_OverrideState: 1
+    m_Value: 1
+  ditherScale:
+    m_OverrideState: 1
+    m_Value: 2
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88,6 +192,9 @@ MonoBehaviour:
   - {fileID: -7963550283623319360}
   - {fileID: 2193752943495523948}
   - {fileID: 9218048096844277737}
+  - {fileID: -716594930516972672}
+  - {fileID: 2872262564005449604}
+  - {fileID: -72514820723760123}
 --- !u!114 &576815941172598958
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -206,7 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
   m_Name: Bloom
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   skipIterations:
     m_OverrideState: 0
     m_Value: 1
@@ -217,13 +324,13 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 1
   scatter:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0.7
   clamp:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 65472
   tint:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {r: 1, g: 1, b: 1, a: 1}
   highQualityFiltering:
     m_OverrideState: 0
@@ -263,6 +370,22 @@ MonoBehaviour:
   colorPrecision:
     m_OverrideState: 0
     m_Value: 32
+--- !u!114 &2872262564005449604
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81180773991d8724ab7f2d216912b564, type: 3}
+  m_Name: ChromaticAberration
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ChromaticAberration
+  active: 0
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &5672435247923773864
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -275,15 +398,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5485954d14dfb9a4c8ead8edb0ded5b1, type: 3}
   m_Name: LiftGammaGain
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.LiftGammaGain
-  active: 1
+  active: 0
   lift:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 0.9958315, y: 0.96322644, z: 1, w: 0}
   gamma:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 0.9622874, y: 0.9684506, z: 1, w: 0}
   gain:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 1, y: 1, z: 1, w: 0}
 --- !u!114 &9218048096844277737
 MonoBehaviour:
@@ -305,5 +428,5 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: {r: 1, g: 0.88290584, b: 0.042452812, a: 1}
   balance:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0
