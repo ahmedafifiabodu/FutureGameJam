@@ -1250,18 +1250,12 @@ MonoBehaviour:
   launchCooldown: 1
   maxLaunchDistance: 10
   minLaunchDistance: 1.5
-  hostLayerMask:
-    serializedVersion: 2
-    m_Bits: 2097152
   launchDuration: 2
   hostHeadLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
   trajectorySystem: {fileID: 5475289690071473843}
   showTrajectory: 1
-  trajectoryCollisionLayers:
-    serializedVersion: 2
-    m_Bits: 1
   showDebug: 1
   aimColor: {r: 1, g: 0, b: 0, a: 1}
   tooCloseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
@@ -1504,9 +1498,9 @@ GameObject:
   - component: {fileID: 2844161752470046266}
   - component: {fileID: 499462819237113414}
   - component: {fileID: 4479589600648303307}
+  - component: {fileID: 5475289690071473844}
   - component: {fileID: 487222673177253200}
   - component: {fileID: 541752861679184650}
-  - component: {fileID: 5475289690071473844}
   - component: {fileID: 5475289690071473843}
   m_Layer: 0
   m_Name: Parasite
@@ -1540,40 +1534,13 @@ MonoBehaviour:
   lineEndWidth: 0.05
   nearCameraFadeDistance: 1
   enableNearCameraFade: 1
-  horizontalOffset: 0.5
+  horizontalOffset: 0
   trajectoryStartOffset: {x: 0, y: 0, z: 0}
-  widthCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 0.2
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  useGradient: 0
-  useSmoothColors: 0
   landingIndicatorPrefab: {fileID: 0}
   indicatorRadius: 0.25
   showLandingIndicator: 1
   indicatorHeightOffset: 0.04
   indicatorLineWidth: 0.05
-  useDottedLine: 1
   dotSpacing: 0.01
 --- !u!120 &5475289690071473844
 LineRenderer:
@@ -1671,8 +1638,8 @@ LineRenderer:
       m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    numCornerVertices: 0
-    numCapVertices: 0
+    numCornerVertices: 90
+    numCapVertices: 90
     alignment: 0
     textureMode: 0
     textureScale: {x: 1, y: 1}
