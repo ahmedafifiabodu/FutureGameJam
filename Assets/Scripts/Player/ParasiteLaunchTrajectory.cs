@@ -27,10 +27,31 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     [SerializeField] private float nearCameraFadeDistance = 0.5f; // Fade out line near camera
     [SerializeField] private bool enableNearCameraFade = true;
 
-    [Header("Trajectory Positioning")]
-    [SerializeField] private float horizontalOffset = 0f; // Offset trajectory left (-) or right (+) - set to 0 for accurate prediction
+    [Header("Material Settings")]
+    [SerializeField] private Material customLineMaterial; // Assign your own material here
 
-    [SerializeField] private Vector3 trajectoryStartOffset = Vector3.zero; // Additional start position offset
+    [SerializeField] private bool useCustomMaterial = false; // Toggle to use custom material
+
+    [Tooltip("Tiling multiplier for the line texture/material. Higher values = more arrows. Lower = fewer arrows with more spacing.")]
+    [SerializeField][Range(0.1f, 10f)] private float textureTiling = 1f;
+
+    [Tooltip("Offset to animate or shift the texture along the line")]
+    [SerializeField][Range(-1f, 1f)] private float textureOffset = 0f;
+
+    [Header("Arrow Animation")]
+    [Tooltip("Enable animated flowing arrows")]
+    [SerializeField] private bool animateArrows = true;
+
+    [Tooltip("Speed of arrow animation. Positive = forward, Negative = backward")]
+    [SerializeField][Range(-5f, 5f)] private float arrowAnimationSpeed = 1f;
+
+    [Tooltip("Start animating only when aiming")]
+    [SerializeField] private bool animateOnlyWhenVisible = true;
+
+    [Header("Trajectory Positioning")]
+    [SerializeField] private float horizontalOffset = 0f; // Visual offset left (-) or right (+) relative to camera
+
+    [SerializeField] private Vector3 trajectoryStartOffset = Vector3.zero; // Additional visual start position offset
 
     [Header("Landing Indicator")]
     [SerializeField] private GameObject landingIndicatorPrefab;
@@ -41,6 +62,8 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     [SerializeField] private float indicatorLineWidth = 0.02f;
 
     [Header("Point Visualization (Optional)")]
+    [SerializeField] private int minimumDots = 5; // Ensure at least 5 dots even for short trajectories
+
     [SerializeField] private float dotSpacing = 0.3f; // Space between dots
 
     private PhysicsScene physicsScene;
@@ -48,6 +71,8 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     private Material lineMaterial;
     private LineRenderer indicatorLineRenderer;
     private Transform cameraTransform;
+    private bool isUsingCustomMaterial = false;
+    private float animatedTextureOffset = 0f; // Accumulated offset for animation
 
     private void Start()
     {
@@ -57,6 +82,33 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
         // Cache camera transform for fade calculations
         cameraTransform = Camera.main != null ? Camera.main.transform : null;
+    }
+
+    private void Update()
+    {
+        // Animate arrow texture if enabled
+        if (animateArrows && line != null && line.positionCount > 0)
+        {
+            // Only animate if visible or if we don't care about visibility
+            if (!animateOnlyWhenVisible || line.enabled)
+            {
+                // Accumulate offset over time
+                animatedTextureOffset += arrowAnimationSpeed * Time.deltaTime;
+
+                // Keep offset in reasonable range to prevent floating point precision issues
+                if (Mathf.Abs(animatedTextureOffset) > 100f)
+                {
+                    animatedTextureOffset = animatedTextureOffset % 1f;
+                }
+
+                // Apply animated offset to material
+                if (line.material != null)
+                {
+                    float finalOffset = textureOffset + animatedTextureOffset;
+                    line.material.mainTextureOffset = new Vector2(finalOffset, 0f);
+                }
+            }
+        }
     }
 
     private void CreatePhysicsScene()
@@ -85,56 +137,69 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         line.numCornerVertices = 5; // Rounder dots
         line.numCapVertices = 5; // Rounded caps make spherical dots
         line.alignment = LineAlignment.View; // Always face camera
-        line.textureMode = LineTextureMode.Stretch;
+        line.textureMode = LineTextureMode.Tile; // IMPORTANT: Use Tile mode for proper arrow alignment
 
-        // URP-compatible shader selection
-        Shader lineShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-        if (lineShader == null)
+        // Check if we should use custom material
+        if (useCustomMaterial && customLineMaterial != null)
         {
-            lineShader = Shader.Find("Universal Render Pipeline/Unlit");
+            // Use the assigned custom material
+            lineMaterial = customLineMaterial;
+            isUsingCustomMaterial = true;
         }
-        if (lineShader == null)
+        else
         {
-            lineShader = Shader.Find("Particles/Standard Unlit");
-        }
-        if (lineShader == null)
-        {
-            lineShader = Shader.Find("Unlit/Color");
-        }
+            // Generate material
+            isUsingCustomMaterial = false;
 
-        lineMaterial = new Material(lineShader)
-        {
-            renderQueue = 3000 // Transparent queue
-        };
+            // URP-compatible shader selection
+            Shader lineShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (lineShader == null)
+            {
+                lineShader = Shader.Find("Universal Render Pipeline/Unlit");
+            }
+            if (lineShader == null)
+            {
+                lineShader = Shader.Find("Particles/Standard Unlit");
+            }
+            if (lineShader == null)
+            {
+                lineShader = Shader.Find("Unlit/Color");
+            }
 
-        // Set initial color for URP
-        lineMaterial.SetColor("_BaseColor", validLaunchColor);
-        lineMaterial.SetColor("_Color", validLaunchColor);
-        if (lineMaterial.HasProperty("_TintColor"))
-        {
-            lineMaterial.SetColor("_TintColor", validLaunchColor);
-        }
+            lineMaterial = new Material(lineShader)
+            {
+                renderQueue = 3000 // Transparent queue
+            };
 
-        // Enable transparency for URP
-        if (lineMaterial.HasProperty("_Surface"))
-        {
-            lineMaterial.SetFloat("_Surface", 1);
-        }
-        if (lineMaterial.HasProperty("_Blend"))
-        {
-            lineMaterial.SetFloat("_Blend", 0);
-        }
-        if (lineMaterial.HasProperty("_SrcBlend"))
-        {
-            lineMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        }
-        if (lineMaterial.HasProperty("_DstBlend"))
-        {
-            lineMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        }
-        if (lineMaterial.HasProperty("_ZWrite"))
-        {
-            lineMaterial.SetFloat("_ZWrite", 0);
+            // Set initial color for URP
+            lineMaterial.SetColor("_BaseColor", validLaunchColor);
+            lineMaterial.SetColor("_Color", validLaunchColor);
+            if (lineMaterial.HasProperty("_TintColor"))
+            {
+                lineMaterial.SetColor("_TintColor", validLaunchColor);
+            }
+
+            // Enable transparency for URP
+            if (lineMaterial.HasProperty("_Surface"))
+            {
+                lineMaterial.SetFloat("_Surface", 1);
+            }
+            if (lineMaterial.HasProperty("_Blend"))
+            {
+                lineMaterial.SetFloat("_Blend", 0);
+            }
+            if (lineMaterial.HasProperty("_SrcBlend"))
+            {
+                lineMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            }
+            if (lineMaterial.HasProperty("_DstBlend"))
+            {
+                lineMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            }
+            if (lineMaterial.HasProperty("_ZWrite"))
+            {
+                lineMaterial.SetFloat("_ZWrite", 0);
+            }
         }
 
         line.material = lineMaterial;
@@ -148,6 +213,25 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         line.receiveShadows = false;
         line.useWorldSpace = true;
+
+        // Apply texture tiling and offset
+        UpdateTextureTiling();
+    }
+
+    /// <summary>
+    /// Updates the texture tiling and offset on the line renderer material
+    /// </summary>
+    private void UpdateTextureTiling()
+    {
+        if (line != null && line.material != null)
+        {
+            // For LineRenderer with Tile mode, we need to set the tiling correctly
+            // The X value controls repetition along the line
+            // The Y value controls tiling perpendicular to the line (usually keep at 1)
+            line.material.mainTextureScale = new Vector2(1f, 1f); // Reset to default first
+
+            // Note: We'll update this dynamically in ApplyDottedLine based on trajectory length
+        }
     }
 
     private void CreateLandingIndicator()
@@ -251,26 +335,16 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             return;
         }
 
-        // Apply offsets to starting position
-        // NOTE: horizontalOffset should be 0 for accurate prediction matching actual launch
-        // Any offset will cause the trajectory to show landing at a different position than actual
-        Vector3 offsetStartPosition = startPosition + trajectoryStartOffset;
-
-        // Apply horizontal offset relative to camera's right direction (for FPS view)
-        // WARNING: Non-zero horizontalOffset will cause visual mismatch with actual landing position
-        if (Mathf.Abs(horizontalOffset) > 0.001f && cameraTransform != null)
-        {
-            offsetStartPosition += cameraTransform.right * horizontalOffset;
-        }
-
+        // Calculate trajectory using the ACTUAL start position (no offset)
+        // This ensures accurate physics prediction
         Vector3[] trajectoryPoints = new Vector3[maxPhysicsFrameIterations];
         bool hitTarget = false;
         int actualPoints = 0;
-        Vector3 landingPosition = offsetStartPosition;
+        Vector3 landingPosition = startPosition;
         Vector3 landingNormal = Vector3.up;
         bool foundLanding = false;
 
-        Vector3 currentPos = offsetStartPosition;
+        Vector3 currentPos = startPosition; // Use actual position for physics
         Vector3 currentVelocity = velocity;
 
         // Simulate trajectory using simple physics
@@ -306,7 +380,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             currentPos = nextPos;
 
             // Check if we've traveled too far
-            if (Vector3.Distance(offsetStartPosition, currentPos) > maxDistance)
+            if (Vector3.Distance(startPosition, currentPos) > maxDistance)
             {
                 landingPosition = currentPos;
                 break;
@@ -324,12 +398,20 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             }
         }
 
-        // Apply smooth curve to line renderer
-        ApplyDottedLine(trajectoryPoints, actualPoints, offsetStartPosition);
+        // Calculate visual start position with offsets
+        // This only affects how the trajectory line is displayed, not the physics
+        Vector3 visualStartPosition = startPosition + trajectoryStartOffset;
+
+        // Apply horizontal offset relative to camera's right direction (for FPS view)
+        if (Mathf.Abs(horizontalOffset) > 0.001f && cameraTransform != null)
+        {
+            visualStartPosition += cameraTransform.right * horizontalOffset;
+        }
+
+        // Apply visual offset to trajectory line rendering
+        ApplyDottedLine(trajectoryPoints, actualPoints, visualStartPosition);
 
         // Update line color based on valid distance AND hit target
-        // If distance is invalid, always show invalid color
-        // If distance is valid, show valid/invalid based on whether we hit a target
         Color lineColor;
         if (!isValidDistance)
         {
@@ -344,14 +426,14 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
         UpdateLineColor(lineColor);
 
-        // Update landing indicator
+        // Update landing indicator (uses ACTUAL landing position, not offset)
         if (foundLanding)
             UpdateLandingIndicator(landingPosition, landingNormal, hitTarget && isValidDistance);
         else
             HideLandingIndicator();
     }
 
-    private void ApplyDottedLine(Vector3[] points, int pointCount, Vector3 startPosition)
+    private void ApplyDottedLine(Vector3[] points, int pointCount, Vector3 visualStartPosition)
     {
         if (pointCount < 2)
         {
@@ -361,11 +443,19 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
         System.Collections.Generic.List<Vector3> dottedPoints = new System.Collections.Generic.List<Vector3>();
 
+        // Calculate the offset for the start point only
+        Vector3 startOffset = visualStartPosition - points[0];
+
+        // Calculate total trajectory length for interpolation
         float totalDistance = 0f;
         for (int i = 0; i < pointCount - 1; i++)
-        {
             totalDistance += Vector3.Distance(points[i], points[i + 1]);
-        }
+
+        // For very short trajectories, adjust dot spacing to ensure enough points
+        float effectiveDotSpacing = dotSpacing;
+
+        if (totalDistance / dotSpacing < minimumDots)
+            effectiveDotSpacing = totalDistance / minimumDots;
 
         float currentDistance = 0f;
         int segmentIndex = 0;
@@ -388,14 +478,20 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
                 Vector3 point = Vector3.Lerp(segmentStart, segmentEnd, t);
 
+                // Calculate how far along the trajectory we are (0 = start, 1 = end)
+                float trajectoryProgress = currentDistance / totalDistance;
+
+                // Apply offset that gradually reduces from start (full offset) to end (no offset)
+                // This creates a diverging trajectory that converges back to the actual landing point
+                Vector3 interpolatedOffset = Vector3.Lerp(startOffset, Vector3.zero, trajectoryProgress);
+                Vector3 visualPoint = point + interpolatedOffset;
+
                 // Skip points near camera
                 if (!enableNearCameraFade || cameraTransform == null ||
-                    Vector3.Distance(point, cameraTransform.position) >= nearCameraFadeDistance)
-                {
-                    dottedPoints.Add(point);
-                }
+                    Vector3.Distance(visualPoint, cameraTransform.position) >= nearCameraFadeDistance)
+                    dottedPoints.Add(visualPoint);
 
-                currentDistance += dotSpacing;
+                currentDistance += effectiveDotSpacing;
             }
         }
 
@@ -404,11 +500,32 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         {
             line.SetPositions(dottedPoints.ToArray());
         }
+
+        // Update texture tiling for proper arrow spacing
+        // In Tile mode, the texture repeats based on world-space distance
+        if (line.material != null && totalDistance > 0f)
+        {
+            // For short distances, reduce tiling to prevent stretching
+            // For longer distances, scale normally
+            float baseRepetitions = Mathf.Max(1f, totalDistance * textureTiling);
+
+            // Ensure minimum repetitions to prevent stretching on very short trajectories
+            float minRepetitions = 2f;
+            float finalRepetitions = Mathf.Max(minRepetitions, baseRepetitions);
+
+            // Apply to material (for Tile mode, this affects world-space tiling)
+            line.material.mainTextureScale = new Vector2(finalRepetitions, 1f);
+
+            // Apply offset (animated offset will be added in Update method)
+            if (!animateArrows)
+                line.material.mainTextureOffset = new Vector2(textureOffset, 0f);
+        }
     }
 
     private void UpdateLineColor(Color baseColor)
     {
-        if (lineMaterial != null)
+        // Only update material colors if not using a custom material
+        if (lineMaterial != null && !isUsingCustomMaterial)
         {
             lineMaterial.SetColor("_BaseColor", baseColor);
             lineMaterial.SetColor("_Color", baseColor);
@@ -418,7 +535,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             }
         }
 
-        // Simple solid color for dots
+        // Always update line renderer colors
         line.startColor = baseColor;
         line.endColor = baseColor;
     }
@@ -428,9 +545,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         if (!showLandingIndicator || landingIndicator == null) return;
 
         landingIndicator.SetActive(true);
-        landingIndicator.transform.position = position + normal * indicatorHeightOffset;
-        landingIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, normal);
-
+        landingIndicator.transform.SetPositionAndRotation(position + normal * indicatorHeightOffset, Quaternion.FromToRotation(Vector3.up, normal));
         Color indicatorColor = isValidTarget ? validLaunchColor : invalidLaunchColor;
         indicatorColor.a = 0.6f; // Semi-transparent indicator
 
@@ -444,9 +559,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
                 indicatorLineRenderer.material.SetColor("_BaseColor", indicatorColor);
                 indicatorLineRenderer.material.SetColor("_Color", indicatorColor);
                 if (indicatorLineRenderer.material.HasProperty("_TintColor"))
-                {
                     indicatorLineRenderer.material.SetColor("_TintColor", indicatorColor);
-                }
             }
         }
         else
@@ -463,9 +576,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     private void HideLandingIndicator()
     {
         if (landingIndicator != null)
-        {
             landingIndicator.SetActive(false);
-        }
     }
 
     /// <summary>
@@ -474,9 +585,11 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     public void HideTrajectory()
     {
         if (line != null)
-        {
             line.positionCount = 0;
-        }
+
+        // Reset animation offset when hiding
+        if (animateOnlyWhenVisible)
+            animatedTextureOffset = 0f;
 
         HideLandingIndicator();
     }
@@ -487,21 +600,16 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     public void ShowTrajectory()
     {
         if (line != null)
-        {
             line.enabled = true;
-        }
     }
 
     private void OnDestroy()
     {
         if (landingIndicator != null)
-        {
             Destroy(landingIndicator);
-        }
 
-        if (lineMaterial != null)
-        {
+        // Only destroy the material if it was generated (not a custom material)
+        if (lineMaterial != null && !isUsingCustomMaterial)
             Destroy(lineMaterial);
-        }
     }
 }
