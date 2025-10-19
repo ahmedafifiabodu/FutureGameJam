@@ -150,7 +150,7 @@ MonoBehaviour:
     m_Value: 6
   scrollSpeed:
     m_OverrideState: 1
-    m_Value: 8
+    m_Value: 0.05
   pixelSize:
     m_OverrideState: 1
     m_Value: 1
