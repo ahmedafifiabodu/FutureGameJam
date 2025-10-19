@@ -1249,6 +1249,7 @@ MonoBehaviour:
   launchForce: 15
   launchCooldown: 1
   maxLaunchDistance: 10
+  minLaunchDistance: 1.5
   hostLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
@@ -1263,6 +1264,7 @@ MonoBehaviour:
     m_Bits: 1
   showDebug: 1
   aimColor: {r: 1, g: 0, b: 0, a: 1}
+  tooCloseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!33 &1667444199430107346
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1526,8 +1528,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParasiteLaunchTrajectory
   line: {fileID: 5475289690071473844}
-  maxPhysicsFrameIterations: 50
-  lineSegmentResolution: 25
+  maxPhysicsFrameIterations: 100
+  lineSegmentResolution: 50
   simulationRadius: 0.2
   simulationLayers:
     serializedVersion: 2
@@ -1565,7 +1567,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   useGradient: 0
-  useSmoothColors: 1
+  useSmoothColors: 0
   landingIndicatorPrefab: {fileID: 0}
   indicatorRadius: 0.25
   showLandingIndicator: 1
