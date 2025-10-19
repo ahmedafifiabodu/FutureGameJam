@@ -11,16 +11,24 @@ public class ParasiteController : MonoBehaviour
 
     [SerializeField] private float launchCooldown = 1f;
     [SerializeField] private float maxLaunchDistance = 10f;
+    [SerializeField] private float minLaunchDistance = 1.5f; // Minimum distance to launch
     [SerializeField] private LayerMask hostLayerMask;
     [SerializeField] private float launchDuration = 2f;
 
     [Header("Host Detection")]
     [SerializeField] private LayerMask hostHeadLayerMask;
 
+    [Header("Trajectory Visualization")]
+    [SerializeField] private ParasiteLaunchTrajectory trajectorySystem;
+
+    [SerializeField] private bool showTrajectory = true;
+    [SerializeField] private LayerMask trajectoryCollisionLayers;
+
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
 
     [SerializeField] private Color aimColor = Color.red;
+    [SerializeField] private Color tooCloseColor = Color.yellow;
 
     private CharacterController controller;
     private InputManager inputManager;
@@ -36,9 +44,11 @@ public class ParasiteController : MonoBehaviour
     private float yaw, pitch;
     private float yVel;
     private bool isLaunching;
+    private bool isAiming; // Track if player is holding aim button
     private float lastLaunchTime;
     private float launchStartTime;
     private Vector3 launchVelocity;
+    private bool canLaunch; // Track if target is far enough to launch
 
     private void Awake()
     {
@@ -59,6 +69,17 @@ public class ParasiteController : MonoBehaviour
         else
         {
             Debug.LogError("[Parasite] FirstPersonZoneController not found on GameObject! ParasiteController requires it.");
+        }
+
+        // Setup trajectory system if not assigned
+        if (trajectorySystem == null)
+        {
+            trajectorySystem = GetComponent<ParasiteLaunchTrajectory>();
+            if (trajectorySystem == null && showTrajectory)
+            {
+                Debug.LogWarning("[Parasite] ParasiteLaunchTrajectory component not found. Trajectory visualization will be disabled.");
+                showTrajectory = false;
+            }
         }
     }
 
@@ -82,6 +103,12 @@ public class ParasiteController : MonoBehaviour
             if (showDebug)
                 Debug.Log("[Parasite] Re-enabled FirstPersonZoneController");
         }
+
+        // Hide trajectory when disabled
+        if (trajectorySystem != null)
+        {
+            trajectorySystem.HideTrajectory();
+        }
     }
 
     private void Start()
@@ -91,7 +118,7 @@ public class ParasiteController : MonoBehaviour
         if (!cameraPivot)
             Debug.LogWarning("[Parasite] CameraPivot not found! Ensure FirstPersonZoneController has cameraPivot assigned.");
 
-        inputManager?.EnableParasiteActions();
+        inputManager.EnableParasiteActions();
     }
 
     private void Update()
@@ -103,10 +130,16 @@ public class ParasiteController : MonoBehaviour
         if (!isLaunching)
         {
             HandleCrawling();
-            HandleLaunchInput();
+            HandleAimingAndLaunch();
         }
         else
         {
+            // Hide trajectory while launching
+            if (showTrajectory && trajectorySystem != null)
+            {
+                trajectorySystem.HideTrajectory();
+            }
+
             HandleLaunchMovement();
             CheckForLaunchTimeout();
         }
@@ -150,17 +183,59 @@ public class ParasiteController : MonoBehaviour
         controller.Move(move * Time.deltaTime);
     }
 
-    private void HandleLaunchInput()
+    private void HandleAimingAndLaunch()
     {
+        // Check if on cooldown
         if (Time.time - lastLaunchTime < launchCooldown)
-            return;
-
-        bool attackPressed = inputManager.ParasiteActions.Attack.triggered;
-        bool interactPressed = inputManager.ParasiteActions.Interact.triggered;
-
-        if (attackPressed || interactPressed)
         {
-            LaunchAtTarget();
+            isAiming = false;
+            if (trajectorySystem != null)
+            {
+                trajectorySystem.HideTrajectory();
+            }
+            return;
+        }
+
+        // Check if attack button is held down
+        bool attackHeld = inputManager.ParasiteActions.Attack.IsPressed();
+
+        if (attackHeld)
+        {
+            // Player is aiming - show trajectory
+            isAiming = true;
+
+            if (showTrajectory && trajectorySystem != null)
+            {
+                UpdateTrajectoryVisualization();
+            }
+        }
+        else if (isAiming)
+        {
+            // Button released - try to launch if valid
+            isAiming = false;
+
+            if (trajectorySystem != null)
+            {
+                trajectorySystem.HideTrajectory();
+            }
+
+            if (canLaunch)
+            {
+                LaunchAtTarget();
+            }
+            else
+            {
+                if (showDebug)
+                    Debug.Log("[Parasite] Target too close - launch cancelled");
+            }
+        }
+        else
+        {
+            // Not aiming - hide trajectory
+            if (trajectorySystem != null)
+            {
+                trajectorySystem.HideTrajectory();
+            }
         }
     }
 
@@ -263,6 +338,37 @@ public class ParasiteController : MonoBehaviour
             Debug.Log("[Parasite] Returned to crawling state");
     }
 
+    private void UpdateTrajectoryVisualization()
+    {
+        Vector3 launchDir = cameraPivot ? cameraPivot.forward : transform.forward;
+        Vector3 launchVel = launchDir * launchForce;
+
+        // Check if target is within valid distance range
+        float distanceToTarget = CalculateDistanceToTarget(launchDir);
+        canLaunch = distanceToTarget >= minLaunchDistance;
+
+        // Show trajectory with color indicating if launch is valid
+        trajectorySystem.SimulateTrajectory(
+            transform.position,
+            launchVel,
+            gravity,
+            maxLaunchDistance,
+            hostHeadLayerMask,
+            canLaunch
+        );
+    }
+
+    private float CalculateDistanceToTarget(Vector3 direction)
+    {
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, maxLaunchDistance, hostLayerMask))
+        {
+            return hit.distance;
+        }
+
+        // No target found - return max distance
+        return maxLaunchDistance;
+    }
+
     private void OnDrawGizmos()
     {
         if (!showDebug || !Application.isPlaying) return;
@@ -272,6 +378,10 @@ public class ParasiteController : MonoBehaviour
             Gizmos.color = aimColor;
             Vector3 aimDir = cameraPivot.forward;
             Gizmos.DrawRay(transform.position, aimDir * maxLaunchDistance);
+
+            // Draw minimum launch distance sphere
+            Gizmos.color = tooCloseColor;
+            Gizmos.DrawWireSphere(transform.position, minLaunchDistance);
         }
 
         if (isLaunching)
@@ -286,12 +396,24 @@ public class ParasiteController : MonoBehaviour
         if (!showDebug || inputManager == null) return;
 
         float cooldownRemaining = Mathf.Max(0, launchCooldown - (Time.time - lastLaunchTime));
-        GUI.Label(new Rect(8, 8, 480, 20), $"Parasite Mode | Launching: {isLaunching} | Cooldown: {cooldownRemaining:F1}s");
+
+        string aimStatus = isAiming ? (canLaunch ? "READY" : "TOO CLOSE") : "Not Aiming";
+        Color statusColor = isAiming ? (canLaunch ? Color.green : Color.red) : Color.white;
+
+        GUI.color = statusColor;
+        GUI.Label(new Rect(8, 8, 480, 20), $"Parasite Mode | {aimStatus} | Cooldown: {cooldownRemaining:F1}s");
+        GUI.color = Color.white;
 
         Vector2 mv = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
         GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
 
         GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1}");
         GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
+
+        if (isAiming)
+        {
+            float distance = CalculateDistanceToTarget(cameraPivot ? cameraPivot.forward : transform.forward);
+            GUI.Label(new Rect(8, 88, 400, 20), $"Target Distance: {distance:F1}m (Min: {minLaunchDistance:F1}m)");
+        }
     }
 }
