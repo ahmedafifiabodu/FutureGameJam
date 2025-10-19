@@ -926,7 +926,7 @@ GameObject:
   - component: {fileID: 9065347011631452553}
   - component: {fileID: 4838264711053638705}
   m_Layer: 0
-  m_Name: Corridor_Base
+  m_Name: Corridor_Straight_Thin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
