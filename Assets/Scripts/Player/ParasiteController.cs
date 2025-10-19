@@ -11,8 +11,7 @@ public class ParasiteController : MonoBehaviour
 
     [SerializeField] private float launchCooldown = 1f;
     [SerializeField] private float maxLaunchDistance = 10f;
-    [SerializeField] private float minLaunchDistance = 1.5f; // Minimum distance to launch
-    [SerializeField] private LayerMask hostLayerMask;
+    [SerializeField] private float minLaunchDistance = 1.5f;
     [SerializeField] private float launchDuration = 2f;
 
     [Header("Host Detection")]
@@ -22,7 +21,6 @@ public class ParasiteController : MonoBehaviour
     [SerializeField] private ParasiteLaunchTrajectory trajectorySystem;
 
     [SerializeField] private bool showTrajectory = true;
-    [SerializeField] private LayerMask trajectoryCollisionLayers;
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
@@ -243,7 +241,7 @@ public class ParasiteController : MonoBehaviour
     {
         Vector3 launchDir = cameraPivot ? cameraPivot.forward : transform.forward;
 
-        if (Physics.Raycast(transform.position, launchDir, out RaycastHit hit, maxLaunchDistance, hostLayerMask))
+        if (Physics.Raycast(transform.position, launchDir, out RaycastHit hit, maxLaunchDistance, hostHeadLayerMask))
         {
             launchDir = (hit.point - transform.position).normalized;
         }
@@ -289,9 +287,7 @@ public class ParasiteController : MonoBehaviour
         if (!isLaunching) return;
 
         if (IsHostHead(hit.gameObject))
-        {
             AttachToHost(hit.gameObject);
-        }
     }
 
     private void CheckForHostCollision()
@@ -299,19 +295,12 @@ public class ParasiteController : MonoBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, 0.5f, hostHeadLayerMask);
 
         if (hits.Length > 0)
-        {
             AttachToHost(hits[0].gameObject);
-        }
         else
-        {
             Invoke(nameof(ResetToGroundedState), 0.3f);
-        }
     }
 
-    private bool IsHostHead(GameObject obj)
-    {
-        return ((1 << obj.layer) & hostHeadLayerMask) != 0;
-    }
+    private bool IsHostHead(GameObject obj) => ((1 << obj.layer) & hostHeadLayerMask) != 0;
 
     private void AttachToHost(GameObject hostHead)
     {
@@ -320,11 +309,9 @@ public class ParasiteController : MonoBehaviour
 
         var hostController = hostHead.GetComponentInParent<HostController>();
         if (hostController != null)
-        {
             hostController.OnParasiteAttached(this);
-        }
 
-        GameStateManager.Instance?.SwitchToHostMode(hostHead.transform.root.gameObject);
+        GameStateManager.Instance.SwitchToHostMode(hostHead.transform.root.gameObject);
 
         this.enabled = false;
     }
@@ -360,7 +347,7 @@ public class ParasiteController : MonoBehaviour
 
     private float CalculateDistanceToTarget(Vector3 direction)
     {
-        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, maxLaunchDistance, hostLayerMask))
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, maxLaunchDistance, hostHeadLayerMask))
         {
             return hit.distance;
         }

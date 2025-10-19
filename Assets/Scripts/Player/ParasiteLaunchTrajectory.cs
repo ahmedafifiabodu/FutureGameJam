@@ -19,9 +19,9 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     [SerializeField] private LayerMask simulationLayers;
 
     [Header("Visual Settings - FPS Optimized")]
-    [SerializeField] private Color validLaunchColor = new Color(0.0f, 1f, 0.0f, 0.8f); // Bright green, higher alpha for dots
+    [SerializeField] private Color validLaunchColor = new(0.0f, 1f, 0.0f, 0.8f); // Bright green, higher alpha for dots
 
-    [SerializeField] private Color invalidLaunchColor = new Color(1f, 0.0f, 0.0f, 0.8f); // Bright red, higher alpha for dots
+    [SerializeField] private Color invalidLaunchColor = new(1f, 0.0f, 0.0f, 0.8f); // Bright red, higher alpha for dots
     [SerializeField] private float lineStartWidth = 0.05f; // Dot size
     [SerializeField] private float lineEndWidth = 0.05f; // Consistent dot size
     [SerializeField] private float nearCameraFadeDistance = 0.5f; // Fade out line near camera
@@ -32,12 +32,6 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
     [SerializeField] private Vector3 trajectoryStartOffset = Vector3.zero; // Additional start position offset
 
-    [Header("Trajectory Curve")]
-    [SerializeField] private AnimationCurve widthCurve = AnimationCurve.EaseInOut(0, 1, 1, 0.2f);
-
-    [SerializeField] private bool useGradient = false; // Disable gradient for dots
-    [SerializeField] private bool useSmoothColors = false; // Disable smooth colors for dots
-
     [Header("Landing Indicator")]
     [SerializeField] private GameObject landingIndicatorPrefab;
 
@@ -47,8 +41,6 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     [SerializeField] private float indicatorLineWidth = 0.02f;
 
     [Header("Point Visualization (Optional)")]
-    [SerializeField] private bool useDottedLine = true; // Enable dotted line
-
     [SerializeField] private float dotSpacing = 0.3f; // Space between dots
 
     private PhysicsScene physicsScene;
@@ -64,7 +56,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         CreateLandingIndicator();
 
         // Cache camera transform for fade calculations
-        cameraTransform = Camera.main?.transform;
+        cameraTransform = Camera.main != null ? Camera.main.transform : null;
     }
 
     private void CreatePhysicsScene()
@@ -110,8 +102,10 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             lineShader = Shader.Find("Unlit/Color");
         }
 
-        lineMaterial = new Material(lineShader);
-        lineMaterial.renderQueue = 3000; // Transparent queue
+        lineMaterial = new Material(lineShader)
+        {
+            renderQueue = 3000 // Transparent queue
+        };
 
         // Set initial color for URP
         lineMaterial.SetColor("_BaseColor", validLaunchColor);
@@ -193,10 +187,12 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             if (indicatorShader == null) indicatorShader = Shader.Find("Particles/Standard Unlit");
             if (indicatorShader == null) indicatorShader = Shader.Find("Unlit/Color");
 
-            Material indicatorMat = new Material(indicatorShader);
-            indicatorMat.renderQueue = 3000;
+            Material indicatorMat = new(indicatorShader)
+            {
+                renderQueue = 3000
+            };
 
-            Color indicatorColor = new Color(validLaunchColor.r, validLaunchColor.g, validLaunchColor.b, 0.6f);
+            Color indicatorColor = new(validLaunchColor.r, validLaunchColor.g, validLaunchColor.b, 0.6f);
             indicatorMat.SetColor("_BaseColor", indicatorColor);
             indicatorMat.SetColor("_Color", indicatorColor);
             if (indicatorMat.HasProperty("_TintColor"))
@@ -329,14 +325,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         }
 
         // Apply smooth curve to line renderer
-        if (useDottedLine)
-        {
-            ApplyDottedLine(trajectoryPoints, actualPoints, offsetStartPosition);
-        }
-        else
-        {
-            ApplySmoothLine(trajectoryPoints, actualPoints, offsetStartPosition);
-        }
+        ApplyDottedLine(trajectoryPoints, actualPoints, offsetStartPosition);
 
         // Update line color based on valid distance AND hit target
         // If distance is invalid, always show invalid color
@@ -357,56 +346,9 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
         // Update landing indicator
         if (foundLanding)
-        {
             UpdateLandingIndicator(landingPosition, landingNormal, hitTarget && isValidDistance);
-        }
         else
-        {
             HideLandingIndicator();
-        }
-    }
-
-    private void ApplySmoothLine(Vector3[] points, int pointCount, Vector3 startPosition)
-    {
-        if (pointCount < 2)
-        {
-            line.positionCount = 0;
-            return;
-        }
-
-        // Use fewer points but smooth them out
-        int smoothPoints = Mathf.Min(lineSegmentResolution, pointCount);
-        line.positionCount = smoothPoints;
-
-        for (int i = 0; i < smoothPoints; i++)
-        {
-            float t = i / (float)(smoothPoints - 1);
-            int index = Mathf.FloorToInt(t * (pointCount - 1));
-            index = Mathf.Clamp(index, 0, pointCount - 1);
-
-            Vector3 smoothPoint;
-            if (index < pointCount - 1)
-            {
-                float localT = (t * (pointCount - 1)) - index;
-                smoothPoint = Vector3.Lerp(points[index], points[index + 1], localT);
-            }
-            else
-            {
-                smoothPoint = points[index];
-            }
-
-            // Skip points very close to camera for cleaner FPS view
-            if (enableNearCameraFade && cameraTransform != null)
-            {
-                float distToCamera = Vector3.Distance(smoothPoint, cameraTransform.position);
-                if (distToCamera < nearCameraFadeDistance)
-                {
-                    continue; // Skip this point
-                }
-            }
-
-            line.SetPosition(i, smoothPoint);
-        }
     }
 
     private void ApplyDottedLine(Vector3[] points, int pointCount, Vector3 startPosition)
