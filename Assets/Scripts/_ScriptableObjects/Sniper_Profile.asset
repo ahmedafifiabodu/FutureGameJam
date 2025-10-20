@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddc7acc27d49e964889c501fe9ab0309, type: 3}
+  m_Name: Sniper_Profile
+  m_EditorClassIdentifier: Assembly-CSharp::RangedWeaponProfile
+  weaponName: Sniper Rifle
+  description: High-damage, long-range precision rifle
+  fireRate: 1.2
+  damage: 100
+  range: 300
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  magazineSize: 5
+  startingAmmo: 5
+  reserveAmmo: 20
+  reloadTime: 3
+  recoilAmount: 5
+  recoilSpeed: 10
+  recoilReturnSpeed: 5
+  recoilRotation: {x: -5, y: 0, z: 0}
+  recoilKickback: {x: 0, y: 0, z: -0.15}
+  swayAmount: 0.02
+  swaySpeed: 2
+  swayResetSpeed: 2
+  enableADS: 1
+  aimFOV: 25
+  aimSpeed: 5
+  aimPositionOffset: {x: 0, y: -0.15, z: 0.3}
+  aimSwayMultiplier: 0.1
+  aimRecoilMultiplier: 0.5
+  muzzleFlashPrefab: {fileID: 0}
+  impactEffectPrefab: {fileID: 0}
+  bulletTrailPrefab: {fileID: 0}
+  shootSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  emptySound: {fileID: 0}
+  feedbackProfile: {fileID: 11400000, guid: 9b0cbea5345fb3a49a1805fccc3064cc, type: 2}

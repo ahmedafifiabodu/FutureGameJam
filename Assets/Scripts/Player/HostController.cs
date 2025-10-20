@@ -2,22 +2,26 @@ using UnityEngine;
 
 /// <summary>
 /// Controls a host body that the parasite can attach to.
-/// Manages host health/timer and death.
+/// Manages host health/timer, death, and weapons.
 /// </summary>
 public class HostController : MonoBehaviour
 {
     [Header("Host Stats")]
     [SerializeField] private float hostLifetime = 30f; // How long the host survives
+
     [SerializeField] private bool decreaseLifetimeEachHost = true;
     [SerializeField] private float lifetimeDecreasePerHost = 5f;
     [SerializeField] private float minLifetime = 5f;
 
     [Header("References")]
     [SerializeField] private Transform cameraPivot;
+
     [SerializeField] private FirstPersonZoneController hostMovementController;
+    [SerializeField] private WeaponManager weaponManager;
 
     [Header("Death")]
     [SerializeField] private GameObject deathEffect;
+
     [SerializeField] private float ragdollDuration = 3f;
 
     private bool isControlled = false;
@@ -25,6 +29,7 @@ public class HostController : MonoBehaviour
     private float timeSinceAttached;
     private ParasiteController attachedParasite;
     private Camera hostCamera;
+    private InputManager inputManager;
 
     private static int hostCount = 0; // Track number of hosts used
 
@@ -32,6 +37,9 @@ public class HostController : MonoBehaviour
     {
         if (!hostMovementController)
             hostMovementController = GetComponent<FirstPersonZoneController>();
+
+        if (!weaponManager)
+            weaponManager = GetComponent<WeaponManager>();
 
         if (!cameraPivot)
             Debug.LogWarning($"[Host] CameraPivot not assigned on {gameObject.name}");
@@ -43,21 +51,27 @@ public class HostController : MonoBehaviour
             if (hostCamera)
             {
                 // Disable host camera by default (parasite isn't attached yet)
-                hostCamera.enabled = false;
                 Debug.Log($"[Host] Found and disabled host camera: {hostCamera.name}");
-            }
-            else
-            {
-                Debug.LogWarning($"[Host] No camera found in CameraPivot on {gameObject.name}");
+                hostCamera.enabled = false;
             }
         }
     }
 
     private void Start()
     {
+        // Get InputManager from ServiceLocator
+        inputManager = ServiceLocator.Instance.GetService<InputManager>();
+
         // Initially disable host movement
         if (hostMovementController)
             hostMovementController.enabled = false;
+
+        // Initialize weapon manager
+        if (weaponManager && inputManager)
+        {
+            weaponManager.Initialize(inputManager);
+            weaponManager.Disable();
+        }
 
         // Calculate lifetime based on host count
         remainingLifetime = hostLifetime;
@@ -91,6 +105,10 @@ public class HostController : MonoBehaviour
         if (hostMovementController)
             hostMovementController.enabled = true;
 
+        // Enable weapon manager
+        if (weaponManager)
+            weaponManager.Enable();
+
         // Enable host camera
         if (hostCamera)
         {
@@ -120,6 +138,10 @@ public class HostController : MonoBehaviour
         if (hostMovementController)
             hostMovementController.enabled = false;
 
+        // Disable weapon manager
+        if (weaponManager)
+            weaponManager.Disable();
+
         Debug.Log($"[Host] Parasite detached");
     }
 
@@ -135,12 +157,16 @@ public class HostController : MonoBehaviour
         if (hostMovementController)
             hostMovementController.enabled = false;
 
+        // Disable weapons
+        if (weaponManager)
+            weaponManager.Disable();
+
         // Spawn death effect
         if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
         // Notify game manager to switch back to parasite mode
-        GameStateManager.Instance?.OnHostDied(attachedParasite);
+        GameStateManager.Instance.OnHostDied(attachedParasite);
 
         // Optional: Enable ragdoll or death animation
         EnableRagdoll();
@@ -170,6 +196,8 @@ public class HostController : MonoBehaviour
     public float GetLifetimePercentage() => remainingLifetime / hostLifetime;
 
     public bool IsControlled() => isControlled;
+
+    public WeaponManager GetWeaponManager() => weaponManager;
 
     private void OnGUI()
     {

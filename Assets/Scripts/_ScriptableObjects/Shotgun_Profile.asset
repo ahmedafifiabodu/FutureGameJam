@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddc7acc27d49e964889c501fe9ab0309, type: 3}
+  m_Name: Shotgun_Profile
+  m_EditorClassIdentifier: Assembly-CSharp::RangedWeaponProfile
+  weaponName: Shotgun
+  description: Heavy damage pump-action shotgun
+  fireRate: 0.8
+  damage: 60
+  range: 30
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  magazineSize: 8
+  startingAmmo: 8
+  reserveAmmo: 32
+  reloadTime: 2.5
+  recoilAmount: 4
+  recoilSpeed: 10
+  recoilReturnSpeed: 5
+  recoilRotation: {x: -4, y: 0, z: 0}
+  recoilKickback: {x: 0, y: 0, z: -0.1}
+  swayAmount: 0.02
+  swaySpeed: 2
+  swayResetSpeed: 2
+  enableADS: 1
+  aimFOV: 50
+  aimSpeed: 6
+  aimPositionOffset: {x: 0, y: -0.1, z: 0.25}
+  aimSwayMultiplier: 0.3
+  aimRecoilMultiplier: 0.7
+  muzzleFlashPrefab: {fileID: 0}
+  impactEffectPrefab: {fileID: 0}
+  bulletTrailPrefab: {fileID: 0}
+  shootSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  emptySound: {fileID: 0}
+  feedbackProfile: {fileID: 11400000, guid: af6558444049c6d499b4e25e332ad729, type: 2}
