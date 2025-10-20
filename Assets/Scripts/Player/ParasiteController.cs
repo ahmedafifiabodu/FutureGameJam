@@ -161,7 +161,7 @@ public class ParasiteController : MonoBehaviour
         float my = look.y * mouseSensitivity * (lookInputIsDelta ? 1f : Time.deltaTime);
 
         yaw += mx;
-        pitch = Mathf.Clamp(pitch - my, -90f, 90f);
+        pitch = Mathf.Clamp(pitch - my, -85f, 85f);
 
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
         cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
