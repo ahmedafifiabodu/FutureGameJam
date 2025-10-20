@@ -98,6 +98,7 @@ public class FirstPersonZoneController : MonoBehaviour
 
         if (allowedZones != null && allowedZones.Length > 0 && !CapsuleInsideAnyZone(GetControllerWorldCenter()))
             Debug.LogWarning("Player starts outside all allowed zones.");
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()

@@ -27,9 +27,15 @@ public class ParasiteController : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
-
     [SerializeField] private Color aimColor = Color.red;
     [SerializeField] private Color tooCloseColor = Color.yellow;
+
+    [Header("Bobbing")]
+    [SerializeField] private Vector3 restPosition;
+    [SerializeField] private float bobSpeed = 4.8f;
+    [SerializeField] private float bobAmount = 0.05f;
+    [SerializeField] private float bobTimer = Mathf.PI / 2;
+
 
     private CharacterController controller;
     private InputManager inputManager;
@@ -182,6 +188,23 @@ public class ParasiteController : MonoBehaviour
         move.y = yVel;
 
         controller.Move(move * Time.deltaTime);
+        if (!cameraPivot) return;
+        if (moveDir != Vector3.zero)
+        {
+            bobTimer += bobSpeed * Time.deltaTime;
+
+        }
+        else
+        {
+            bobTimer = Mathf.MoveTowards(bobTimer, Mathf.PI / 2, 5f * Time.deltaTime);
+        }
+
+        if (bobTimer > Mathf.PI * 2)
+        {
+            bobTimer -= Mathf.PI * 2;    
+        }
+        cameraPivot.localPosition = new Vector3(restPosition.x + (Mathf.Sin(bobTimer) * bobAmount) * 0.1f,
+            restPosition.y + (Mathf.Sin(bobTimer * 2f) * bobAmount), restPosition.z);
     }
 
     private void HandleAimingAndLaunch()
@@ -467,7 +490,7 @@ public class ParasiteController : MonoBehaviour
         GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
 
         GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1}");
-        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
+        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}ï¿½ | Pitch: {pitch:F1}ï¿½");
 
         if (isAiming)
         {
