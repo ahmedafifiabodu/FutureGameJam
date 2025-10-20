@@ -161,7 +161,7 @@ public class ParasiteController : MonoBehaviour
         float my = look.y * mouseSensitivity * (lookInputIsDelta ? 1f : Time.deltaTime);
 
         yaw += mx;
-        pitch = Mathf.Clamp(pitch - my, -60f, 60f);
+        pitch = Mathf.Clamp(pitch - my, -90f, 90f);
 
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
         cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
@@ -196,7 +196,7 @@ public class ParasiteController : MonoBehaviour
         }
         else
         {
-            bobTimer = Mathf.MoveTowards(bobTimer, Mathf.PI / 2, 5f * Time.deltaTime);
+            bobTimer = Mathf.MoveTowards(bobTimer, bobTimer > Mathf.PI / 2 ? Mathf.PI : Mathf.PI / 2, 10f * Time.deltaTime);
         }
 
         if (bobTimer > Mathf.PI * 2)
