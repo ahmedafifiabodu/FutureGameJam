@@ -5003,7 +5003,7 @@ GameObject:
   - component: {fileID: 646676971553826823}
   - component: {fileID: 4506358885198219646}
   m_Layer: 0
-  m_Name: 7_Medium_Shorwalls_Room
+  m_Name: 7_Medium_Shorwalls_Room 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
