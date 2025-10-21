@@ -337,7 +337,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &681777858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -357,12 +357,6 @@ MonoBehaviour:
   - roomPrefab: {fileID: 6678304392768885654, guid: 3870d6bd9ddeea741a13503b71446289, type: 3}
     weight: 68
     description: 
-  - roomPrefab: {fileID: 1528017317578954111, guid: 4a19a51ca2be01b41862af0901655cc3, type: 3}
-    weight: 68
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: 1dea9c5ae9792ae4a977f5ee37b0c14b, type: 3}
-    weight: 68
-    description: 
   corridorPrefabs:
   - corridorPrefab: {fileID: 6710388576276403975, guid: 42110a788944743498bbe37f4330c9fe, type: 3}
     weight: 53
@@ -374,8 +368,9 @@ MonoBehaviour:
     weight: 53
     description: 
   startingRoomPrefab: {fileID: 6181002203944844611, guid: 9e4ba49b2dfaec74ba9d6cc53878cceb, type: 3}
-  player: {fileID: 705167261}
+  player: {fileID: 3366760321929721171}
   proximityCheckDistance: 3
+  currentRoomIteration: 0
   enableDebugLogs: 1
 --- !u!4 &681777859
 Transform:
@@ -413,7 +408,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &705167256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,6 +612,7 @@ MonoBehaviour:
   minLifetime: 5
   cameraPivot: {fileID: 1510529131}
   hostMovementController: {fileID: 705167256}
+  weaponManager: {fileID: 0}
   deathEffect: {fileID: 0}
   ragdollDuration: 3
 --- !u!1 &832575517
@@ -883,7 +879,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1626064685
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -974,6 +970,62 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1858874233
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1858874235}
+  - component: {fileID: 1858874234}
+  m_Layer: 0
+  m_Name: EnemySpawnManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1858874234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858874233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a6f22648d214124dab5c4b27671e94a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.EnemySpawnManager
+  enemyPrefabs:
+  - enemyPrefab: {fileID: 2784751966053908874, guid: 1dd4acbf3461e894fa76d41b9dfa1d4c, type: 3}
+    profile: {fileID: 11400000, guid: 01ae7b6f23699a64e9264f597f52d776, type: 2}
+    weight: 0
+  baseEnemiesPerRoom: 2
+  enemiesPerIteration: 0.5
+  maxEnemiesPerRoom: 8
+  enemySpawnChance: 0.7
+  spawnChanceIncreasePerIteration: 0.05
+  corridorSpawnChance: 0.3
+  maxEnemiesPerCorridor: 2
+  enableDebugLogs: 1
+--- !u!4 &1858874235
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858874233}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1537,14 +1589,11 @@ MonoBehaviour:
   lineEndWidth: 0.1
   nearCameraFadeDistance: 0.5
   enableNearCameraFade: 1
-  customLineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
-  useCustomMaterial: 1
-  enableMaterialColorTint: 1
-  textureTiling: 0.5
-  textureOffset: 0
   animateArrows: 1
   arrowAnimationSpeed: 2
   animateOnlyWhenVisible: 1
+  arrowTexture: {fileID: 0}
+  lineMaterial: {fileID: 0}
   horizontalOffset: 0.5
   trajectoryStartOffset: {x: 0, y: 0, z: 0}
   landingIndicatorPrefab: {fileID: 0}
@@ -1683,3 +1732,4 @@ SceneRoots:
   - {fileID: 423863511}
   - {fileID: 681777859}
   - {fileID: 835765377}
+  - {fileID: 1858874235}

@@ -20,6 +20,9 @@ namespace ProceduralGeneration
         [SerializeField] private Transform player;
         [SerializeField] private float proximityCheckDistance = 3f;
 
+        [Header("Difficulty Scaling")]
+        [SerializeField] private int currentRoomIteration = 0; // Track progression
+
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
@@ -33,8 +36,20 @@ namespace ProceduralGeneration
         private bool isGenerating = false;
         private HashSet<ConnectionPoint> processedPoints = new HashSet<ConnectionPoint>();
 
+        // Reference to spawn manager
+        private AI.Spawning.EnemySpawnManager spawnManager;
+
         private void Start()
         {
+            // Find or create spawn manager
+            spawnManager = FindObjectOfType<AI.Spawning.EnemySpawnManager>();
+            if (!spawnManager)
+            {
+                var managerObj = new GameObject("EnemySpawnManager");
+                spawnManager = managerObj.AddComponent<AI.Spawning.EnemySpawnManager>();
+                Debug.Log("[ProceduralLevelGenerator] Created EnemySpawnManager");
+            }
+
             ValidatePrefabs();
             SpawnStartingRoom();
         }
@@ -124,6 +139,13 @@ namespace ProceduralGeneration
             if (isGenerating) return;
             isGenerating = true;
 
+            // Increment room iteration for difficulty scaling
+            currentRoomIteration++;
+
+            // Update spawn manager with current iteration
+            if (spawnManager)
+                spawnManager.SetRoomIteration(currentRoomIteration);
+
             // Step 1: Spawn corridor with its entrance (Point B) connected to room's exit (Point B)
             Corridor newCorridor = SpawnCorridor(roomExitPoint);
             
@@ -162,7 +184,7 @@ namespace ProceduralGeneration
             currentRoom = newRoom;
 
             if (enableDebugLogs)
-                Debug.Log($"[ProceduralLevelGenerator] Generated: {newCorridor.CorridorName} -> {newRoom.RoomName}");
+                Debug.Log($"[ProceduralLevelGenerator] Generated: {newCorridor.CorridorName} -> {newRoom.RoomName} (Iteration {currentRoomIteration})");
 
             isGenerating = false;
         }
@@ -187,6 +209,9 @@ namespace ProceduralGeneration
             // Corridor flows: B (entrance) -----> A (exit)
             AlignConnectionPoints(corridorObj.transform, corridor.PointB, roomExitPoint, true);
 
+            // Trigger spawning for corridor
+            corridor.OnSpawned(currentRoomIteration);
+
             return corridor;
         }
 
@@ -208,6 +233,9 @@ namespace ProceduralGeneration
 
             // FIXED: Align room's entrance (Point A) with corridor's exit (Point A)
             AlignConnectionPoints(roomObj.transform, room.PointA, corridorExitPoint, true);
+
+            // Trigger spawning for room
+            room.OnSpawned(currentRoomIteration);
 
             return room;
         }
