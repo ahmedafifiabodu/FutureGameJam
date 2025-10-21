@@ -7422,7 +7422,7 @@ GameObject:
   - component: {fileID: 646676971553826823}
   - component: {fileID: 4506358885198219646}
   m_Layer: 0
-  m_Name: Pillar_Room
+  m_Name: 4_Small_Pilar_Room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
