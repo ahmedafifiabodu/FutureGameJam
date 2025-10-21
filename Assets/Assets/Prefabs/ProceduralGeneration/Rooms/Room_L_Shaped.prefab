@@ -134,7 +134,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   m_UseGeometry: 0
   m_DefaultArea: 0
-  m_GenerateLinks: 0
+  m_GenerateLinks: 1
   m_IgnoreNavMeshAgent: 1
   m_IgnoreNavMeshObstacle: 1
   m_OverrideTileSize: 0
@@ -300,12 +300,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &1601261875292492344
 GameObject:
   m_ObjectHideFlags: 0
@@ -487,7 +483,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   m_UseGeometry: 0
   m_DefaultArea: 0
-  m_GenerateLinks: 0
+  m_GenerateLinks: 1
   m_IgnoreNavMeshAgent: 1
   m_IgnoreNavMeshObstacle: 1
   m_OverrideTileSize: 0
@@ -799,12 +795,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &5665152014325041950
 GameObject:
   m_ObjectHideFlags: 0
@@ -1029,8 +1021,10 @@ MonoBehaviour:
   - {fileID: 4666042937210405249}
   - {fileID: 4732717567141994856}
   - {fileID: 2621024700657259427}
+  playerHasEntered: 0
   roomName: Room
   startingRoom: 0
+  enemySpawnDelay: 0.5
 --- !u!1 &6829019721881334542
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,12 +1070,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &6928829569997076189
 GameObject:
   m_ObjectHideFlags: 0
@@ -1238,12 +1228,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &8035913033467661472
 GameObject:
   m_ObjectHideFlags: 0
@@ -1652,5 +1638,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e1e11a97f018ab45bc0fdaa9e0f9d95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.RoomEntranceTrigger
-  parentRoom: {fileID: 0}
+  parentLevelPiece: {fileID: 0}
   debugLogs: 1

@@ -45,14 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  autoAlignToNavMesh: 1
-  navMeshSearchDistance: 5
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &1187425914774603379
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,14 +238,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  autoAlignToNavMesh: 1
-  navMeshSearchDistance: 5
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &1513185271946583427
 GameObject:
   m_ObjectHideFlags: 0
@@ -429,8 +417,10 @@ MonoBehaviour:
   - {fileID: 5856820201555239272}
   - {fileID: 3522133031224015305}
   - {fileID: 5504504693473038456}
+  playerHasEntered: 0
   roomName: Room
   startingRoom: 0
+  enemySpawnDelay: 0.5
 --- !u!1 &3577644436611353357
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,14 +466,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  autoAlignToNavMesh: 1
-  navMeshSearchDistance: 5
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &3630325952847257613
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,7 +590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e1e11a97f018ab45bc0fdaa9e0f9d95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.RoomEntranceTrigger
-  parentRoom: {fileID: 0}
+  parentLevelPiece: {fileID: 0}
   debugLogs: 1
 --- !u!1 &4680518223433619007
 GameObject:
@@ -1257,14 +1241,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
   spawnType: 0
-  specificEnemyPrefabs: []
-  spawnOnStart: 0
-  spawnOnlyOnce: 1
-  autoAlignToNavMesh: 1
-  navMeshSearchDistance: 5
-  propPrefab: {fileID: 0}
-  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoSize: 0.5
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &7584598134643131736
 GameObject:
   m_ObjectHideFlags: 0
@@ -1621,7 +1599,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   m_UseGeometry: 0
   m_DefaultArea: 0
-  m_GenerateLinks: 0
+  m_GenerateLinks: 1
   m_IgnoreNavMeshAgent: 1
   m_IgnoreNavMeshObstacle: 1
   m_OverrideTileSize: 0

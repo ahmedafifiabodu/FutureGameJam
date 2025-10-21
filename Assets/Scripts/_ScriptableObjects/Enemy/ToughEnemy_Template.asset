@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b20988af54ac104d8f3a60ffc3a661b, type: 3}
+  m_Name: ToughEnemy_Template
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Enemy.Configuration.EnemyConfigSO
+  enemyName: Tough Shotgunner
+  enemyType: 1
+  enemyPrefab: {fileID: 0}
+  maxHealth: 100
+  attackDamage: 25
+  moveSpeed: 2.5
+  instantAggroRadius: 6
+  delayedAggroRadius: 18
+  aggroDelay: 1.5
+  attackRange: 8
+  attackCooldown: 3
+  staggerChance: 0.2
+  staggerDuration: 0.3
+  spawnWeight: 30
+  minRoomIteration: 2
+  memoryDelay: 1
+  shotgunConeAngle: 30
+  shotgunRange: 8
+  aimDuration: 1.5
+  jumpDistance: 10
+  jumpCooldown: 3
+  mediumRangeMin: 5
+  mediumRangeMax: 12
+  isRanged: 0
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 20
+  hasCustomAnimations: 0
+  idleAnimation: Idle
+  chaseAnimation: Chase
+  attackAnimation: Attack
+  staggerAnimation: Stagger
+  deathAnimation: Death
+  jumpAnimation: Jump

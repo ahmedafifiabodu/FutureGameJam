@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b20988af54ac104d8f3a60ffc3a661b, type: 3}
+  m_Name: BasicEnemy_Template
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Enemy.Configuration.EnemyConfigSO
+  enemyName: Basic Soldier
+  enemyType: 0
+  enemyPrefab: {fileID: 2784751966053908874, guid: 1dd4acbf3461e894fa76d41b9dfa1d4c, type: 3}
+  maxHealth: 50
+  attackDamage: 15
+  moveSpeed: 3
+  patrolSpeed: 2
+  patrolWaitTime: 2
+  usePatrolPoints: 1
+  sightRange: 15
+  fieldOfViewAngle: 90
+  visionCheckInterval: 0.5
+  visionObstacleMask:
+    serializedVersion: 2
+    m_Bits: 2097153
+  attackRange: 2
+  attackCooldown: 2
+  chaseSpeed: 5
+  chaseLostSightTime: 3
+  staggerChance: 0.3
+  staggerDuration: 0.5
+  spawnWeight: 50
+  minRoomIteration: 0
+  memoryDelay: 1
+  shotgunConeAngle: 30
+  shotgunRange: 8
+  aimDuration: 1.5
+  jumpDistance: 10
+  jumpCooldown: 3
+  mediumRangeMin: 5
+  mediumRangeMax: 12
+  isRanged: 0
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 20
+  hasCustomAnimations: 1
+  idleAnimation: Idle
+  patrolAnimation: IsChasing
+  chaseAnimation: IsChasing
+  attackAnimation: Attack
+  staggerAnimation: Stagger
+  deathAnimation: Death
+  jumpAnimation: Jump

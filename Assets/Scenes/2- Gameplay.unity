@@ -331,6 +331,7 @@ GameObject:
   m_Component:
   - component: {fileID: 681777859}
   - component: {fileID: 681777858}
+  - component: {fileID: 681777860}
   m_Layer: 0
   m_Name: ProceduralLevelGenerator
   m_TagString: Untagged
@@ -371,7 +372,7 @@ MonoBehaviour:
   player: {fileID: 3366760321929721171}
   proximityCheckDistance: 3
   currentRoomIteration: 0
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!4 &681777859
 Transform:
   m_ObjectHideFlags: 0
@@ -387,6 +388,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &681777860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681777857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 658fe08d9161e924583b968ace616ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.LevelGeneratorEnemyIntegration
+  spawnManager: {fileID: 1237935481}
+  despawnEnemiesWithRoom: 1
+  enableDebugLogs: 0
 --- !u!1 &705167255
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,6 +631,37 @@ MonoBehaviour:
   weaponManager: {fileID: 0}
   deathEffect: {fileID: 0}
   ragdollDuration: 3
+--- !u!1 &790207962
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 790207963}
+  m_Layer: 0
+  m_Name: Enemy Pool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &790207963
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 790207962}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1237935482}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -748,6 +795,61 @@ Transform:
   m_Children:
   - {fileID: 4317018894261755555}
   m_Father: {fileID: 3366760321929721171}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1237935480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1237935482}
+  - component: {fileID: 1237935481}
+  m_Layer: 0
+  m_Name: EnemySpawnManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1237935481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237935480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a6f22648d214124dab5c4b27671e94a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.EnemySpawnManager
+  enemyConfigs:
+  - {fileID: 11400000, guid: cf0e28ce7cf7ec3419628a0d22fd156d, type: 2}
+  baseEnemiesPerRoom: 3
+  enemiesPerIteration: 0.5
+  maxEnemiesPerRoom: 10
+  baseRoomSpawnChance: 0.8
+  baseCorridorSpawnChance: 0.3
+  propPrefabs: []
+  propSpawnChance: 0.5
+  enemyPoolParent: {fileID: 790207963}
+--- !u!4 &1237935482
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237935480}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 790207963}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1510529130
 GameObject:
@@ -970,62 +1072,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 1
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1858874233
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1858874235}
-  - component: {fileID: 1858874234}
-  m_Layer: 0
-  m_Name: EnemySpawnManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1858874234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1858874233}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a6f22648d214124dab5c4b27671e94a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.EnemySpawnManager
-  enemyPrefabs:
-  - enemyPrefab: {fileID: 2784751966053908874, guid: 1dd4acbf3461e894fa76d41b9dfa1d4c, type: 3}
-    profile: {fileID: 11400000, guid: 01ae7b6f23699a64e9264f597f52d776, type: 2}
-    weight: 0
-  baseEnemiesPerRoom: 2
-  enemiesPerIteration: 0.5
-  maxEnemiesPerRoom: 8
-  enemySpawnChance: 0.7
-  spawnChanceIncreasePerIteration: 0.05
-  corridorSpawnChance: 0.3
-  maxEnemiesPerCorridor: 2
-  enableDebugLogs: 1
---- !u!4 &1858874235
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1858874233}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1311,7 +1357,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   trajectorySystem: {fileID: 5475289690071473843}
   showTrajectory: 1
-  showDebug: 1
+  showDebug: 0
   aimColor: {r: 1, g: 0, b: 0, a: 1}
   tooCloseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!33 &1667444199430107346
@@ -1450,7 +1496,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.5, y: 0.87, z: 0.3463316}
-  m_LocalScale: {x: 0.33, y: 0.16, z: 0.29}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 981524494}
@@ -1489,13 +1535,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.4
-  m_Radius: 0.2
+  m_Height: 2
+  m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.1
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 0.2, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5045198081280610569
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1732,4 +1778,4 @@ SceneRoots:
   - {fileID: 423863511}
   - {fileID: 681777859}
   - {fileID: 835765377}
-  - {fileID: 1858874235}
+  - {fileID: 1237935482}
