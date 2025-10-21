@@ -1,4 +1,5 @@
 using UnityEngine;
+using AI.Spawning;
 
 namespace ProceduralGeneration
 {
@@ -14,8 +15,16 @@ namespace ProceduralGeneration
         [Header("Doors")]
         [SerializeField] protected GameObject[] doors;
 
+        [Header("Spawn Points")]
+        [SerializeField] protected SpawnPoint[] spawnPoints;
+
+        [Header("Player Tracking")]
+        [SerializeField] protected bool playerHasEntered = false;
+
         public ConnectionPoint PointA => pointA;
         public ConnectionPoint PointB => pointB;
+        public SpawnPoint[] SpawnPoints => spawnPoints;
+        public bool PlayerHasEntered => playerHasEntered;
 
         protected virtual void Awake()
         {
@@ -36,6 +45,12 @@ namespace ProceduralGeneration
                 Debug.LogWarning($"[{gameObject.name}] Point A (Entrance) not found!");
             if (pointB == null)
                 Debug.LogWarning($"[{gameObject.name}] Point B (Exit) not found!");
+
+            // Auto-find spawn points if not assigned
+            if (spawnPoints == null || spawnPoints.Length == 0)
+            {
+                spawnPoints = GetComponentsInChildren<SpawnPoint>();
+            }
         }
 
         public virtual void CloseDoors()
@@ -58,6 +73,24 @@ namespace ProceduralGeneration
                 if (door != null)
                     door.SetActive(false);
             }
+        }
+
+        /// <summary>
+        /// Called when player enters this level piece through the entrance
+        /// </summary>
+        public virtual void OnPlayerEntered()
+        {
+            playerHasEntered = true;
+            Debug.Log($"[LevelPiece] Player entered {gameObject.name}");
+        }
+
+        /// <summary>
+        /// Called when this level piece is spawned
+        /// Override to handle spawn-time initialization
+        /// </summary>
+        public virtual void OnSpawned(int roomIteration)
+        {
+            // Override in derived classes
         }
     }
 }

@@ -11,6 +11,7 @@ namespace ProceduralGeneration
     {
         [Header("Prefab Pools")]
         [SerializeField] private WeightedRoomPrefab[] roomPrefabs;
+
         [SerializeField] private WeightedCorridorPrefab[] corridorPrefabs;
 
         [Header("Starting Room")]
@@ -18,23 +19,35 @@ namespace ProceduralGeneration
 
         [Header("Player Reference")]
         [SerializeField] private Transform player;
+
         [SerializeField] private float proximityCheckDistance = 3f;
+
+        [Header("Difficulty Scaling")]
+        [SerializeField] private int currentRoomIteration = 0; // Track progression
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
         // Track current level pieces
         private Room currentRoom;
+
         private Corridor currentCorridor;
         private Room previousRoom;
         private Corridor previousCorridor;
 
         // Track if we're generating to prevent multiple generations
         private bool isGenerating = false;
+
         private HashSet<ConnectionPoint> processedPoints = new HashSet<ConnectionPoint>();
+
+        // Reference to spawn manager
+        private AI.Spawning.EnemySpawnManager spawnManager;
 
         private void Start()
         {
+            // Find or create spawn manager
+            spawnManager = FindObjectOfType<AI.Spawning.EnemySpawnManager>();
+
             ValidatePrefabs();
             SpawnStartingRoom();
         }
@@ -124,9 +137,16 @@ namespace ProceduralGeneration
             if (isGenerating) return;
             isGenerating = true;
 
+            // Increment room iteration for difficulty scaling
+            currentRoomIteration++;
+
+            // Update spawn manager with current iteration
+            if (spawnManager)
+                spawnManager.SetRoomIteration(currentRoomIteration);
+
             // Step 1: Spawn corridor with its entrance (Point B) connected to room's exit (Point B)
             Corridor newCorridor = SpawnCorridor(roomExitPoint);
-            
+
             if (newCorridor == null)
             {
                 Debug.LogError("[ProceduralLevelGenerator] Failed to spawn corridor!");
@@ -146,7 +166,7 @@ namespace ProceduralGeneration
 
             // Step 2: Spawn room with its entrance (Point A) connected to corridor's exit (Point A)
             Room newRoom = SpawnRoom(newCorridor.PointA);
-            
+
             if (newRoom == null)
             {
                 Debug.LogError("[ProceduralLevelGenerator] Failed to spawn room!");
@@ -162,7 +182,7 @@ namespace ProceduralGeneration
             currentRoom = newRoom;
 
             if (enableDebugLogs)
-                Debug.Log($"[ProceduralLevelGenerator] Generated: {newCorridor.CorridorName} -> {newRoom.RoomName}");
+                Debug.Log($"[ProceduralLevelGenerator] Generated: {newCorridor.CorridorName} -> {newRoom.RoomName} (Iteration {currentRoomIteration})");
 
             isGenerating = false;
         }
@@ -187,6 +207,9 @@ namespace ProceduralGeneration
             // Corridor flows: B (entrance) -----> A (exit)
             AlignConnectionPoints(corridorObj.transform, corridor.PointB, roomExitPoint, true);
 
+            // Trigger spawning for corridor
+            corridor.OnSpawned(currentRoomIteration);
+
             return corridor;
         }
 
@@ -209,6 +232,9 @@ namespace ProceduralGeneration
             // FIXED: Align room's entrance (Point A) with corridor's exit (Point A)
             AlignConnectionPoints(roomObj.transform, room.PointA, corridorExitPoint, true);
 
+            // Trigger spawning for room
+            room.OnSpawned(currentRoomIteration);
+
             return room;
         }
 
@@ -223,7 +249,7 @@ namespace ProceduralGeneration
             // Step 1: Calculate rotation first (before moving)
             Quaternion targetRotation = targetPoint.transform.rotation;
             Quaternion sourceRotation = sourcePoint.transform.rotation;
-            
+
             // Calculate the rotation needed to align source to target
             // If faceOpposite is true, add 180 degrees so they face each other
             Quaternion rotationDifference = targetRotation * Quaternion.Inverse(sourceRotation);
@@ -231,19 +257,19 @@ namespace ProceduralGeneration
             {
                 rotationDifference *= Quaternion.Euler(0, 180, 0);
             }
-            
+
             // Apply rotation to the object
             objectTransform.rotation = rotationDifference * objectTransform.rotation;
-            
+
             // Step 2: Calculate position offset AFTER rotation
             // Now that the object is rotated, calculate where the source point is
             Vector3 sourceWorldPos = sourcePoint.transform.position;
             Vector3 targetWorldPos = targetPoint.transform.position;
-            
+
             // Move the object so source point matches target point
             Vector3 offset = targetWorldPos - sourceWorldPos;
             objectTransform.position += offset;
-            
+
             if (enableDebugLogs)
             {
                 Debug.Log($"[ProceduralLevelGenerator] Aligned {objectTransform.name} - " +
@@ -266,7 +292,7 @@ namespace ProceduralGeneration
             {
                 if (enableDebugLogs)
                     Debug.Log($"[ProceduralLevelGenerator] Destroying previous room: {previousRoom.RoomName}");
-                
+
                 Destroy(previousRoom.gameObject);
                 previousRoom = null;
             }
@@ -275,7 +301,7 @@ namespace ProceduralGeneration
             {
                 if (enableDebugLogs)
                     Debug.Log($"[ProceduralLevelGenerator] Destroying previous corridor: {previousCorridor.CorridorName}");
-                
+
                 Destroy(previousCorridor.gameObject);
                 previousCorridor = null;
             }

@@ -73,10 +73,10 @@ public class ParasiteController : MonoBehaviour
 
     private void Awake()
     {
+        ServiceLocator.Instance.RegisterService(this, true);
         controller = GetComponent<CharacterController>();
-
-        // Get shared settings from FirstPersonZoneController
         zoneController = GetComponent<FirstPersonZoneController>();
+
         if (zoneController != null)
         {
             cameraPivot = zoneController.CameraPivot;

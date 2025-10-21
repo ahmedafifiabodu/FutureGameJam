@@ -3,14 +3,14 @@ using UnityEngine;
 namespace ProceduralGeneration
 {
     /// <summary>
-    /// Detects when player enters a new room and triggers cleanup
-    /// Attach this to each room's entrance collider
+    /// Detects when player enters a new room/corridor and triggers cleanup
+    /// Attach this to each room/corridor's entrance collider
     /// </summary>
     [RequireComponent(typeof(Collider))]
     public class RoomEntranceTrigger : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private Room parentRoom;
+        [SerializeField] private LevelPiece parentLevelPiece;
         [SerializeField] private bool debugLogs = true;
 
         private ProceduralLevelGenerator levelGenerator;
@@ -18,9 +18,9 @@ namespace ProceduralGeneration
 
         private void Awake()
         {
-            // Auto-find parent room if not assigned
-            if (parentRoom == null)
-                parentRoom = GetComponentInParent<Room>();
+            // Auto-find parent level piece (Room or Corridor) if not assigned
+            if (parentLevelPiece == null)
+                parentLevelPiece = GetComponentInParent<LevelPiece>();
 
             // Ensure this is a trigger
             Collider col = GetComponent<Collider>();
@@ -51,8 +51,20 @@ namespace ProceduralGeneration
             {
                 hasTriggered = true;
                 
+                string levelPieceName = "Unknown";
+                if (parentLevelPiece is Room room)
+                    levelPieceName = room.RoomName;
+                else if (parentLevelPiece is Corridor corridor)
+                    levelPieceName = corridor.CorridorName;
+                
                 if (debugLogs)
-                    Debug.Log($"[RoomEntranceTrigger] Player entered room: {parentRoom?.RoomName ?? "Unknown"}");
+                    Debug.Log($"[RoomEntranceTrigger] Player entered: {levelPieceName}");
+
+                // Notify parent level piece that player has entered
+                if (parentLevelPiece != null)
+                {
+                    parentLevelPiece.OnPlayerEntered();
+                }
 
                 if (levelGenerator != null)
                     levelGenerator.OnPlayerEnteredNewRoom();

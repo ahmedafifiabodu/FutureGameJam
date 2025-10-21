@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Assets/Music.meta
 guid: fbe9240ac9a354b259222569ffd78aee
+========
+guid: 663c062b8a32143aab7b9f4eb5c99e2f
+>>>>>>>> Dev/EnemyAI:Assets/Assets/Materials/Assasin wAnim.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
