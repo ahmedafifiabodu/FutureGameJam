@@ -5,6 +5,10 @@ public class ParasiteController : MonoBehaviour
 {
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
+    [SerializeField] private float jumpHeight = 1.2f;
+    [SerializeField] private float airControl = 2.5f;
+    [SerializeField] private float slideControl = 2f;
+    [SerializeField] private float slideTime = 2f;
 
     [Header("Launch Attack")]
     [SerializeField] private float launchForce = 15f;
@@ -13,6 +17,13 @@ public class ParasiteController : MonoBehaviour
     [SerializeField] private float maxLaunchDistance = 10f;
     [SerializeField] private float minLaunchDistance = 1.5f;
     [SerializeField] private float launchDuration = 2f;
+    [SerializeField] private float startGravityMultiplier = 0.5f;
+    [SerializeField] private float endGravityMultiplier = 2f;
+    [SerializeField] private float aimFov = 110f;
+    [SerializeField] private float idleFov = 90f;
+    [SerializeField] private float fovTimeChange = 100f;
+    [SerializeField] private float cameraTilt = 5f;
+    [SerializeField] private float tiltTimeChange = 50f;
 
     [Header("Host Detection")]
     [SerializeField] private LayerMask hostHeadLayerMask;
@@ -27,9 +38,15 @@ public class ParasiteController : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
-
     [SerializeField] private Color aimColor = Color.red;
     [SerializeField] private Color tooCloseColor = Color.yellow;
+
+    [Header("Bobbing")]
+    [SerializeField] private Vector3 restPosition;
+    [SerializeField] private float bobSpeed = 4.8f;
+    [SerializeField] private float bobAmount = 0.05f;
+    [SerializeField] private float bobTimer = Mathf.PI / 2;
+
 
     private CharacterController controller;
     private InputManager inputManager;
@@ -41,13 +58,16 @@ public class ParasiteController : MonoBehaviour
     private float mouseSensitivity;
     private bool lookInputIsDelta;
     private float gravity;
+    private bool launchTimedOut = false;
 
-    private float yaw, pitch;
+    private float yaw, pitch, roll;
+    private Vector3 move;
     private float yVel;
     private bool isLaunching;
     private bool isAiming; // Track if player is holding aim button
     private float lastLaunchTime;
     private float launchStartTime;
+    private float lastLandTime;
     private Vector3 launchVelocity;
     private bool canLaunch; // Track if target is far enough to launch
 
@@ -82,6 +102,7 @@ public class ParasiteController : MonoBehaviour
                 showTrajectory = false;
             }
         }
+        lastLandTime = -slideTime;
     }
 
     private void OnEnable()
@@ -144,6 +165,8 @@ public class ParasiteController : MonoBehaviour
             HandleLaunchMovement();
             CheckForLaunchTimeout();
         }
+        Camera camera = gameObject.GetComponentInChildren<Camera>();
+        camera.fieldOfView = Mathf.MoveTowards(camera.fieldOfView, isAiming ? aimFov : idleFov, fovTimeChange * Time.deltaTime);
     }
 
     private void Look()
@@ -155,10 +178,12 @@ public class ParasiteController : MonoBehaviour
         float my = look.y * mouseSensitivity * (lookInputIsDelta ? 1f : Time.deltaTime);
 
         yaw += mx;
-        pitch = Mathf.Clamp(pitch - my, -60f, 60f);
+        pitch = Mathf.Clamp(pitch - my, -85f, 85f);
 
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-        cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        Vector2 moveInput = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
+        roll = Mathf.MoveTowards(roll, moveInput.x != 0f ? Mathf.Sign(moveInput.x) * cameraTilt : 0f, tiltTimeChange * Time.deltaTime);
+        cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, roll);
     }
 
     private void HandleCrawling()
@@ -171,17 +196,44 @@ public class ParasiteController : MonoBehaviour
         Vector3 moveDir = (transform.right * moveInput.x + transform.forward * moveInput.y);
         moveDir.y = 0f;
 
-        Vector3 move = moveDir * crawlSpeed;
+        float moveControl = 1f;
+        if (!controller.isGrounded)
+            moveControl = airControl * Time.deltaTime;
+        else if (Time.time < lastLandTime + slideTime)
+            moveControl = slideControl * Time.deltaTime;
+
+        move = Vector3.Lerp(move, moveDir * crawlSpeed, moveControl);
 
         if (controller.isGrounded && yVel < 0f)
         {
             yVel = -2f;
         }
 
+        if (controller.isGrounded && inputManager.ParasiteActions.Jump.IsPressed())
+        {
+            yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
         yVel += gravity * Time.deltaTime;
         move.y = yVel;
 
         controller.Move(move * Time.deltaTime);
+        if (!cameraPivot) return;
+        if (moveDir != Vector3.zero && controller.isGrounded)
+        {
+            bobTimer += bobSpeed * Time.deltaTime;
+
+        }
+        else
+        {
+            bobTimer = Mathf.MoveTowards(bobTimer, bobTimer > Mathf.PI / 2 ? Mathf.PI : Mathf.PI / 2, 10f * Time.deltaTime);
+        }
+
+        if (bobTimer > Mathf.PI * 2)
+        {
+            bobTimer -= Mathf.PI * 2;    
+        }
+        cameraPivot.localPosition = new Vector3(restPosition.x + (Mathf.Sin(bobTimer) * bobAmount) * 0.1f,
+            restPosition.y + (Mathf.Sin(bobTimer * 2f) * bobAmount), restPosition.z);
     }
 
     private void HandleAimingAndLaunch()
@@ -246,16 +298,11 @@ public class ParasiteController : MonoBehaviour
     private void LaunchAtTarget()
     {
         Vector3 launchDir = cameraPivot ? cameraPivot.forward : transform.forward;
-
-        if (Physics.Raycast(transform.position, launchDir, out RaycastHit hit, maxLaunchDistance, hostHeadLayerMask))
-        {
-            launchDir = (hit.point - transform.position).normalized;
-        }
-
         launchVelocity = launchDir * launchForce;
         isLaunching = true;
         lastLaunchTime = Time.time;
         launchStartTime = Time.time;
+        gravity *= startGravityMultiplier;
 
         if (showDebug)
             Debug.Log($"[Parasite] Launched! Direction: {launchDir}");
@@ -280,11 +327,13 @@ public class ParasiteController : MonoBehaviour
 
     private void CheckForLaunchTimeout()
     {
-        if (Time.time - launchStartTime > launchDuration)
+        if (isLaunching && !launchTimedOut && Time.time - launchStartTime > launchDuration)
         {
+            launchTimedOut = true;
             if (showDebug)
                 Debug.Log("[Parasite] Launch timeout - returning to ground");
-            ResetToGroundedState();
+            gravity /= startGravityMultiplier;
+            gravity *= endGravityMultiplier;
         }
     }
 
@@ -324,8 +373,14 @@ public class ParasiteController : MonoBehaviour
 
     private void ResetToGroundedState()
     {
+        lastLandTime = Time.time;
+        launchTimedOut = false;
         isLaunching = false;
+        move += launchVelocity;
+        move.y = 0;
         launchVelocity = Vector3.zero;
+        if(zoneController != null)
+            gravity = zoneController.Gravity;
 
         if (showDebug)
             Debug.Log("[Parasite] Returned to crawling state");
@@ -466,8 +521,8 @@ public class ParasiteController : MonoBehaviour
         Vector2 mv = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
         GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
 
-        GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1}");
-        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
+        GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1} | Gravity: {gravity:F1}");
+        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}ï¿½ | Pitch: {pitch:F1}ï¿½");
 
         if (isAiming)
         {
