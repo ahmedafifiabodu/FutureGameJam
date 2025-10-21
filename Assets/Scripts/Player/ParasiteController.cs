@@ -6,6 +6,9 @@ public class ParasiteController : MonoBehaviour
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
     [SerializeField] private float jumpHeight = 1.2f;
+    [SerializeField] private float airControl = 2.5f;
+    [SerializeField] private float slideControl = 2f;
+    [SerializeField] private float slideTime = 2f;
 
     [Header("Launch Attack")]
     [SerializeField] private float launchForce = 15f;
@@ -58,11 +61,13 @@ public class ParasiteController : MonoBehaviour
     private bool launchTimedOut = false;
 
     private float yaw, pitch, roll;
+    private Vector3 move;
     private float yVel;
     private bool isLaunching;
     private bool isAiming; // Track if player is holding aim button
     private float lastLaunchTime;
     private float launchStartTime;
+    private float lastLandTime;
     private Vector3 launchVelocity;
     private bool canLaunch; // Track if target is far enough to launch
 
@@ -97,6 +102,7 @@ public class ParasiteController : MonoBehaviour
                 showTrajectory = false;
             }
         }
+        lastLandTime = -slideTime;
     }
 
     private void OnEnable()
@@ -190,7 +196,13 @@ public class ParasiteController : MonoBehaviour
         Vector3 moveDir = (transform.right * moveInput.x + transform.forward * moveInput.y);
         moveDir.y = 0f;
 
-        Vector3 move = moveDir * crawlSpeed;
+        float moveControl = 1f;
+        if (!controller.isGrounded)
+            moveControl = airControl * Time.deltaTime;
+        else if (Time.time < lastLandTime + slideTime)
+            moveControl = slideControl * Time.deltaTime;
+
+        move = Vector3.Lerp(move, moveDir * crawlSpeed, moveControl);
 
         if (controller.isGrounded && yVel < 0f)
         {
@@ -361,8 +373,11 @@ public class ParasiteController : MonoBehaviour
 
     private void ResetToGroundedState()
     {
+        lastLandTime = Time.time;
         launchTimedOut = false;
         isLaunching = false;
+        move += launchVelocity;
+        move.y = 0;
         launchVelocity = Vector3.zero;
         if(zoneController != null)
             gravity = zoneController.Gravity;

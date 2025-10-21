@@ -1516,9 +1516,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b419f5af2889bb469f9dff12be1acc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParasiteController
-  crawlSpeed: 6
-  jumpHeight: 10
-  launchForce: 12
+  crawlSpeed: 5
+  jumpHeight: 0.5
+  airControl: 5
+  slideControl: 4
+  slideTime: 1
+  launchForce: 10
   launchCooldown: 1
   maxLaunchDistance: 50
   minLaunchDistance: 0.01
