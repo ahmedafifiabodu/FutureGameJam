@@ -150,7 +150,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b67e04e6b6a3d524193fd171a1bdf97b, type: 2}
+  - {fileID: 2100000, guid: 62a9dd14fe0854043b085b88bdc330d3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -261,7 +261,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b67e04e6b6a3d524193fd171a1bdf97b, type: 2}
+  - {fileID: 2100000, guid: 62a9dd14fe0854043b085b88bdc330d3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -372,7 +372,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b6dc50ea5ce98284a985a79a0f519af4, type: 2}
+  - {fileID: 2100000, guid: 262f4b878ab47fd43909b46cb77460d9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -449,8 +449,11 @@ MonoBehaviour:
   pointA: {fileID: 0}
   pointB: {fileID: 6513165428378293083}
   doors: []
+  spawnPoints: []
+  playerHasEntered: 0
   roomName: Room
   startingRoom: 0
+  enemySpawnDelay: 0.5
 --- !u!1 &6236963223855168568
 GameObject:
   m_ObjectHideFlags: 0
@@ -539,7 +542,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b67e04e6b6a3d524193fd171a1bdf97b, type: 2}
+  - {fileID: 2100000, guid: 62a9dd14fe0854043b085b88bdc330d3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -697,7 +700,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b67e04e6b6a3d524193fd171a1bdf97b, type: 2}
+  - {fileID: 2100000, guid: 62a9dd14fe0854043b085b88bdc330d3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
