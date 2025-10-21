@@ -704,6 +704,7 @@ MonoBehaviour:
   parasiteController: {fileID: 541752861679184650}
   currentHost: {fileID: 705167255}
   currentHostController: {fileID: 0}
+  volume: {fileID: 832575518}
   parasiteSpawnPoint: {fileID: 835765377}
   parasitePrefab: {fileID: 5475289690071473842}
   hostsConsumed: 0
