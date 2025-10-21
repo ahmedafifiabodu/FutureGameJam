@@ -5,6 +5,7 @@ public class ParasiteController : MonoBehaviour
 {
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
+    [SerializeField] private float jumpHeight = 1.2f;
 
     [Header("Launch Attack")]
     [SerializeField] private float launchForce = 15f;
@@ -15,6 +16,11 @@ public class ParasiteController : MonoBehaviour
     [SerializeField] private float launchDuration = 2f;
     [SerializeField] private float startGravityMultiplier = 0.5f;
     [SerializeField] private float endGravityMultiplier = 2f;
+    [SerializeField] private float aimFov = 110f;
+    [SerializeField] private float idleFov = 90f;
+    [SerializeField] private float fovTimeChange = 100f;
+    [SerializeField] private float cameraTilt = 5f;
+    [SerializeField] private float tiltTimeChange = 50f;
 
     [Header("Host Detection")]
     [SerializeField] private LayerMask hostHeadLayerMask;
@@ -51,14 +57,13 @@ public class ParasiteController : MonoBehaviour
     private float gravity;
     private bool launchTimedOut = false;
 
-    private float yaw, pitch;
+    private float yaw, pitch, roll;
     private float yVel;
     private bool isLaunching;
     private bool isAiming; // Track if player is holding aim button
     private float lastLaunchTime;
     private float launchStartTime;
     private Vector3 launchVelocity;
-    private Vector3 slideVelocity;
     private bool canLaunch; // Track if target is far enough to launch
 
     private void Awake()
@@ -154,6 +159,8 @@ public class ParasiteController : MonoBehaviour
             HandleLaunchMovement();
             CheckForLaunchTimeout();
         }
+        Camera camera = gameObject.GetComponentInChildren<Camera>();
+        camera.fieldOfView = Mathf.MoveTowards(camera.fieldOfView, isAiming ? aimFov : idleFov, fovTimeChange * Time.deltaTime);
     }
 
     private void Look()
@@ -168,7 +175,9 @@ public class ParasiteController : MonoBehaviour
         pitch = Mathf.Clamp(pitch - my, -85f, 85f);
 
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-        cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        Vector2 moveInput = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
+        roll = Mathf.MoveTowards(roll, moveInput.x != 0f ? Mathf.Sign(moveInput.x) * cameraTilt : 0f, tiltTimeChange * Time.deltaTime);
+        cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, roll);
     }
 
     private void HandleCrawling()
@@ -188,12 +197,16 @@ public class ParasiteController : MonoBehaviour
             yVel = -2f;
         }
 
+        if (controller.isGrounded && inputManager.ParasiteActions.Jump.IsPressed())
+        {
+            yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
         yVel += gravity * Time.deltaTime;
         move.y = yVel;
 
         controller.Move(move * Time.deltaTime);
         if (!cameraPivot) return;
-        if (moveDir != Vector3.zero)
+        if (moveDir != Vector3.zero && controller.isGrounded)
         {
             bobTimer += bobSpeed * Time.deltaTime;
 

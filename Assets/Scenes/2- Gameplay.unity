@@ -709,7 +709,7 @@ Transform:
   m_GameObject: {fileID: 705167255}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.51, y: 2.4, z: 0}
+  m_LocalPosition: {x: -2.51, y: 0.76, z: 0}
   m_LocalScale: {x: 0.32773, y: 1, z: 0.37919}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1364,7 +1364,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2022804919}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &2022804923
 Camera:
   m_ObjectHideFlags: 0
@@ -1517,12 +1517,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParasiteController
   crawlSpeed: 6
-  launchForce: 10
+  jumpHeight: 10
+  launchForce: 12
   launchCooldown: 1
   maxLaunchDistance: 50
   minLaunchDistance: 0.01
-  launchDuration: 0.3
-  gravityMultiplier: 0.1
+  launchDuration: 0.5
+  startGravityMultiplier: 0.5
+  endGravityMultiplier: 1.5
+  aimFov: 115
+  idleFov: 90
+  fovTimeChange: 100
+  cameraTilt: 2.5
+  tiltTimeChange: 50
   hostHeadLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
