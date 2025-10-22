@@ -90,9 +90,7 @@ public class GameStateManager : MonoBehaviour
     private void Update()
     {
         if (currentMode == GameMode.Host)
-        {
             totalSurvivalTime += Time.deltaTime;
-        }
     }
 
     public void SwitchToHostMode(GameObject host)
@@ -104,17 +102,15 @@ public class GameStateManager : MonoBehaviour
         // Get host controller
         currentHostController = host.GetComponent<HostController>();
 
-        volume.profile.TryGet(out LensDistortion fisheye);
-        {
+        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
             fisheye.active = false;
-        }
 
         // Disable parasite
         if (parasitePlayer)
             parasitePlayer.SetActive(false);
 
         // NOTE: HostController.OnParasiteAttached() already enables the host's movement controller
-        // We don't need to enable it here to avoid enabling the wrong controller
+        // DO NOT enable it here to avoid enabling the wrong controller
 
         // Switch input to Player actions
         inputManager.EnablePlayerActions();
@@ -296,10 +292,8 @@ public class GameStateManager : MonoBehaviour
         currentHost = null;
         currentHostController = null;
 
-        volume.profile.TryGet(out LensDistortion fisheye);
-        {
+        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
             fisheye.active = true;
-        }
 
         // Enable parasite
         if (parasitePlayer)
