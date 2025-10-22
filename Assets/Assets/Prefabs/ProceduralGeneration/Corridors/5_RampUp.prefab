@@ -39,53 +39,6 @@ Transform:
   - {fileID: 5896089353159645900}
   m_Father: {fileID: 9065347011631452553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &270858843945106955
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7861691100313532187}
-  - component: {fileID: 657256768816009730}
-  m_Layer: 0
-  m_Name: EntrancePoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7861691100313532187
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 270858843945106955}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -1, z: -0, w: -0.0000025629995}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 9065347011631452553}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &657256768816009730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 270858843945106955}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f560c8a5b5f35244b0b25b017bbc5a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ConnectionPoint
-  pointType: 0
-  detectionRadius: 2
-  showGizmos: 1
 --- !u!1 &1487873719829132762
 GameObject:
   m_ObjectHideFlags: 0
@@ -1506,7 +1459,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!1 &4100815416485334157
+--- !u!1 &5117876826977897841
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1514,37 +1467,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2035620210721539980}
-  - component: {fileID: 1558026636420839266}
+  - component: {fileID: 6112687581215206063}
+  - component: {fileID: 611218913449487142}
+  - component: {fileID: 8758060694707220224}
   m_Layer: 0
-  m_Name: ExitPoint
+  m_Name: EntrancePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2035620210721539980
+--- !u!4 &6112687581215206063
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4100815416485334157}
+  m_GameObject: {fileID: 5117876826977897841}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.0000025033949, z: -0, w: -1}
-  m_LocalPosition: {x: 0, y: -1, z: 10}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: 1, z: -10.09}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9065347011631452553}
-  m_LocalEulerAnglesHint: {x: 0, y: 360, z: 0}
---- !u!114 &1558026636420839266
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &611218913449487142
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4100815416485334157}
+  m_GameObject: {fileID: 5117876826977897841}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f560c8a5b5f35244b0b25b017bbc5a1, type: 3}
@@ -1553,6 +1507,33 @@ MonoBehaviour:
   pointType: 0
   detectionRadius: 2
   showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 2097152
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &8758060694707220224
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5117876826977897841}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6006998934587905634
 GameObject:
   m_ObjectHideFlags: 0
@@ -1716,45 +1697,45 @@ MonoBehaviour:
   - m_Vertices: 0b0000000e00000012000000
   m_SharedTextures: []
   m_Positions:
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
   m_Textures0:
-  - {x: 20, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 20, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 20, y: 1}
   - {x: 0, y: 1}
-  - {x: 4.5, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 4.5, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 4.5, y: 1}
   - {x: 0, y: 1}
-  - {x: 20, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 20, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 20, y: 1}
   - {x: 0, y: 1}
-  - {x: 4.5, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 4.5, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 4.5, y: 1}
   - {x: 0, y: 1}
   - {x: 0, y: 1}
@@ -1801,7 +1782,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 268
+  m_VersionIndex: 304
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1821,8 +1802,8 @@ MonoBehaviour:
   m_Shape:
     rid: 2517108002086978345
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_UnmodifiedMeshVersion: 268
-  m_Size: {x: 20, y: 0.5, z: 4.5}
+  m_UnmodifiedMeshVersion: 304
+  m_Size: {x: 20, y: 0.55, z: 4.5}
   m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
@@ -1908,6 +1889,81 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1 &7358798654232580765
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 111976686965772458}
+  - component: {fileID: 188943731309533862}
+  - component: {fileID: 8957279808302646436}
+  m_Layer: 0
+  m_Name: ExitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &111976686965772458
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7358798654232580765}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.02, y: -1, z: 9.909}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9065347011631452553}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &188943731309533862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7358798654232580765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f560c8a5b5f35244b0b25b017bbc5a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ConnectionPoint
+  pointType: 1
+  detectionRadius: 2
+  showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 2097152
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &8957279808302646436
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7358798654232580765}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7647134066835127503
 GameObject:
   m_ObjectHideFlags: 0
@@ -1919,7 +1975,7 @@ GameObject:
   - component: {fileID: 9065347011631452553}
   - component: {fileID: 4838264711053638705}
   m_Layer: 0
-  m_Name: 4_RampUp
+  m_Name: 5_RampUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1938,9 +1994,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6112687581215206063}
+  - {fileID: 111976686965772458}
   - {fileID: 1901526625048080604}
-  - {fileID: 7861691100313532187}
-  - {fileID: 2035620210721539980}
   - {fileID: 9160394335807426443}
   - {fileID: 2586089939536448689}
   - {fileID: 1530147703487104754}
@@ -1967,13 +2023,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fadfcfa9c2d6e7c43bd0f6f37a06c396, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.Corridor
-  pointA: {fileID: 657256768816009730}
-  pointB: {fileID: 1558026636420839266}
-  doors: []
+  pointA: {fileID: 0}
+  pointB: {fileID: 0}
+  entranceDoor: {fileID: 0}
+  exitDoor: {fileID: 0}
   spawnPoints: []
   playerHasEntered: 0
+  showEnemyDebug: 0
   corridorName: Corridor
   enemySpawnDelay: 0.5
+  showDebugLogs: 1
 --- !u!1 &8398516815322323547
 GameObject:
   m_ObjectHideFlags: 0

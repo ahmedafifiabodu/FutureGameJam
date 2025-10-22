@@ -41,7 +41,7 @@ Transform:
   - {fileID: 2300697733384241703}
   m_Father: {fileID: 9065347011631452553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &270858843945106955
+--- !u!1 &889290574170330815
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,37 +49,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7861691100313532187}
-  - component: {fileID: 657256768816009730}
+  - component: {fileID: 2561126760816099838}
+  - component: {fileID: 358138895108935715}
+  - component: {fileID: 242981966747873387}
   m_Layer: 0
-  m_Name: EntrancePoint
+  m_Name: EntrancePoint (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7861691100313532187
+--- !u!4 &2561126760816099838
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 270858843945106955}
+  m_GameObject: {fileID: 889290574170330815}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.70710963, z: -0, w: 0.707104}
-  m_LocalPosition: {x: -17.75, y: 1, z: 12.249963}
+  m_LocalRotation: {x: -0, y: 0.7071078, z: -0, w: -0.70710576}
+  m_LocalPosition: {x: -17.5, y: 1, z: 12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9065347011631452553}
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
---- !u!114 &657256768816009730
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+--- !u!114 &358138895108935715
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 270858843945106955}
+  m_GameObject: {fileID: 889290574170330815}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f560c8a5b5f35244b0b25b017bbc5a1, type: 3}
@@ -88,6 +89,33 @@ MonoBehaviour:
   pointType: 0
   detectionRadius: 2
   showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 2097152
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &242981966747873387
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 889290574170330815}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1487873719829132762
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,53 +826,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!1 &4100815416485334157
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2035620210721539980}
-  - component: {fileID: 1558026636420839266}
-  m_Layer: 0
-  m_Name: ExitPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2035620210721539980
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4100815416485334157}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000035762784}
-  m_LocalPosition: {x: -0.000006973743, y: 1, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 9065347011631452553}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &1558026636420839266
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4100815416485334157}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f560c8a5b5f35244b0b25b017bbc5a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ConnectionPoint
-  pointType: 0
-  detectionRadius: 2
-  showGizmos: 1
 --- !u!1 &6006998934587905634
 GameObject:
   m_ObjectHideFlags: 0
@@ -1008,45 +989,45 @@ MonoBehaviour:
   - m_Vertices: 0b0000000e00000012000000
   m_SharedTextures: []
   m_Positions:
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
   m_Textures0:
-  - {x: 20, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 20, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 20, y: 1}
   - {x: 0, y: 1}
-  - {x: 4.5, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 4.5, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 4.5, y: 1}
   - {x: 0, y: 1}
-  - {x: 20, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 20, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 20, y: 1}
   - {x: 0, y: 1}
-  - {x: 4.5, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 4.5, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 4.5, y: 1}
   - {x: 0, y: 1}
   - {x: 0, y: 1}
@@ -1093,7 +1074,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 268
+  m_VersionIndex: 304
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1113,8 +1094,8 @@ MonoBehaviour:
   m_Shape:
     rid: 2517108002086978345
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_UnmodifiedMeshVersion: 268
-  m_Size: {x: 20, y: 0.5, z: 4.5}
+  m_UnmodifiedMeshVersion: 304
+  m_Size: {x: 20, y: 0.55, z: 4.5}
   m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
@@ -1585,8 +1566,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7861691100313532187}
-  - {fileID: 2035620210721539980}
+  - {fileID: 2561126760816099838}
+  - {fileID: 4457799103875932434}
   - {fileID: 9160394335807426443}
   - {fileID: 6566932358736886149}
   - {fileID: 2586089939536448689}
@@ -1620,13 +1601,91 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fadfcfa9c2d6e7c43bd0f6f37a06c396, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.Corridor
-  pointA: {fileID: 657256768816009730}
-  pointB: {fileID: 1558026636420839266}
-  doors: []
+  pointA: {fileID: 358138895108935715}
+  pointB: {fileID: 5972823007966625616}
+  entranceDoor: {fileID: 0}
+  exitDoor: {fileID: 0}
   spawnPoints: []
   playerHasEntered: 0
+  showEnemyDebug: 0
   corridorName: Corridor
   enemySpawnDelay: 0.5
+  showDebugLogs: 1
+--- !u!1 &8106480331194806226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4457799103875932434}
+  - component: {fileID: 5972823007966625616}
+  - component: {fileID: 4030426886624745720}
+  m_Layer: 0
+  m_Name: ExitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4457799103875932434
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8106480331194806226}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0.0000029504295}
+  m_LocalPosition: {x: 0.25, y: 1, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9065347011631452553}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &5972823007966625616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8106480331194806226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f560c8a5b5f35244b0b25b017bbc5a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ConnectionPoint
+  pointType: 1
+  detectionRadius: 2
+  showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 2097152
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &4030426886624745720
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8106480331194806226}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8437078265182017467
 GameObject:
   m_ObjectHideFlags: 0
@@ -1790,45 +1849,45 @@ MonoBehaviour:
   - m_Vertices: 0b0000000e00000012000000
   m_SharedTextures: []
   m_Positions:
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: 2.25}
-  - {x: 10, y: 0.25, z: 2.25}
-  - {x: -10, y: 0.25, z: -2.25}
-  - {x: 10, y: 0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: -2.25}
-  - {x: 10, y: -0.25, z: -2.25}
-  - {x: -10, y: -0.25, z: 2.25}
-  - {x: 10, y: -0.25, z: 2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: 2.25}
+  - {x: 10, y: 0.275, z: 2.25}
+  - {x: -10, y: 0.275, z: -2.25}
+  - {x: 10, y: 0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: -2.25}
+  - {x: 10, y: -0.275, z: -2.25}
+  - {x: -10, y: -0.275, z: 2.25}
+  - {x: 10, y: -0.275, z: 2.25}
   m_Textures0:
-  - {x: 20, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 20, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 20, y: 1}
   - {x: 0, y: 1}
-  - {x: 4.5, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 4.5, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 4.5, y: 1}
   - {x: 0, y: 1}
-  - {x: 20, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 20, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 20, y: 1}
   - {x: 0, y: 1}
-  - {x: 4.5, y: 0.5}
-  - {x: 0, y: 0.5}
+  - {x: 4.5, y: 0.45000002}
+  - {x: 0, y: 0.45000002}
   - {x: 4.5, y: 1}
   - {x: 0, y: 1}
   - {x: 0, y: 1}
@@ -1875,7 +1934,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 268
+  m_VersionIndex: 304
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1895,8 +1954,8 @@ MonoBehaviour:
   m_Shape:
     rid: 2517108002086978345
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_UnmodifiedMeshVersion: 268
-  m_Size: {x: 20, y: 0.5, z: 4.5}
+  m_UnmodifiedMeshVersion: 304
+  m_Size: {x: 20, y: 0.55, z: 4.5}
   m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2

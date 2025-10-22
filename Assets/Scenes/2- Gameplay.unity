@@ -729,15 +729,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ProceduralLevelGenerator
   roomPrefabs:
   - roomPrefab: {fileID: 7604991661879118048, guid: 323586b191138b0408447fc144fb0bab, type: 3}
-    weight: 68
+    weight: 60
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: 3f56394dd54458d4d902ac877cd0b70c, type: 3}
+    weight: 60
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: e84ed08b4e61df34a940441a4fd934f4, type: 3}
+    weight: 60
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: ca6e381f6ef9a9541837b87030fea73e, type: 3}
+    weight: 60
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: bbdaa7e5720fec64dacb44ac6f146aa3, type: 3}
+    weight: 60
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: d73e13a5f70ba30479151bf66bcddd1f, type: 3}
+    weight: 50
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: d281201311b5d624492d6dbf10961dbe, type: 3}
+    weight: 50
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: c928e9baa66391446be724fa3a34e5c9, type: 3}
+    weight: 50
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: eac10a1497c8da94d83cf6119ccdab9f, type: 3}
+    weight: 40
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: eac10a1497c8da94d83cf6119ccdab9f, type: 3}
+    weight: 40
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: 2037e11b095191a46abf7cfcb30b434e, type: 3}
+    weight: 4
     description: 
   corridorPrefabs:
-  - corridorPrefab: {fileID: 7647134066835127503, guid: 383f5df5871456947a73b9faeb81c816, type: 3}
-    weight: 53
+  - corridorPrefab: {fileID: 7647134066835127503, guid: 9e0c9eef0c43f3a4a94d2feeda663403, type: 3}
+    weight: 0
+    description: 
+  - corridorPrefab: {fileID: 7647134066835127503, guid: da06504dfa43a55478e32e03ccdf9361, type: 3}
+    weight: 0
+    description: 
+  - corridorPrefab: {fileID: 7647134066835127503, guid: 6eb931d2753ffe34cb1fd0502b93f414, type: 3}
+    weight: 0
     description: 
   startingRoomPrefab: {fileID: 6181002203944844611, guid: d43cd428a75bb52409652b04650abad5, type: 3}
   player: {fileID: 705167261}
-  currentRoomIteration: 0
+  currentRoomIteration: 3
   enableDebugLogs: 1
 --- !u!4 &681777859
 Transform:
@@ -1074,6 +1110,7 @@ MonoBehaviour:
   parasiteController: {fileID: 541752861679184650}
   currentHost: {fileID: 705167255}
   currentHostController: {fileID: 0}
+  volume: {fileID: 0}
   parasiteSpawnPoint: {fileID: 835765377}
   parasitePrefab: {fileID: 5475289690071473842}
   hostsConsumed: 0
@@ -2022,6 +2059,12 @@ MonoBehaviour:
   fovTimeChange: 100
   cameraTilt: 2.5
   tiltTimeChange: 50
+  enableBounce: 1
+  bounciness: 0.6
+  enableFriction: 1
+  airFriction: 0.5
+  wallFriction: 2
+  minVelocityThreshold: 0.5
   hostHeadLayerMask:
     serializedVersion: 2
     m_Bits: 2097152
