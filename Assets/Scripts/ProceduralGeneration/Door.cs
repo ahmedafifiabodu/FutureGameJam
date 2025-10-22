@@ -155,7 +155,14 @@ namespace ProceduralGeneration
 
             if (doorAnimator != null)
             {
-                doorAnimator.SetTrigger(GameConstant.AnimationParameters.Door.Open);
+                // Randomly choose between normal open and jammed open animations
+                string animationTrigger = Random.Range(0, 2) == 0
+                    ? GameConstant.AnimationParameters.Door.Open
+                    : GameConstant.AnimationParameters.Door.OpenJammed;
+
+                doorAnimator.SetTrigger(animationTrigger);
+
+                Debug.Log($"[Door] {gameObject.name} playing animation: {animationTrigger}");
             }
 
             if (doorCollider != null)
