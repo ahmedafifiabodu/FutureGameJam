@@ -25,17 +25,17 @@ public class PossessionTransitionEffect : MonoBehaviour
     [Header("Organic Effect Settings")]
     [SerializeField] private bool useOrganicEffect = true;
 
-    [SerializeField] private Color parasiteColor1 = new(0.2f, 0.8f, 0.3f, 1f); // Green slime
-    [SerializeField] private Color parasiteColor2 = new(0.1f, 0.5f, 0.2f, 1f); // Dark green
+    [SerializeField] private Color parasiteColor1 = new(0.8f, 0.1f, 0.5f, 1f); // vurple
+    [SerializeField] private Color parasiteColor2 = new(0.2f, 0f, 0f, 1f); //red
     [SerializeField] private Color bloodTint = new(0.8f, 0.1f, 0.1f, 0.3f); // Reddish tint
     [SerializeField] private float pulseSpeed = 8f;
     [SerializeField] private float vignetteIntensity = 0.7f;
     [SerializeField] private int pulseCount = 3; // Number of pulsing waves during transition
 
     [Header("Exit Effect Colors")]
-    [SerializeField] private Color deathColor = new(0.6f, 0.05f, 0.05f, 1f); // Dark blood red
+    [SerializeField] private Color deathColor = new(0.2f, 0f, 0f, 1f); // Dark blood red
 
-    [SerializeField] private Color escapeColor = new(0.15f, 0.6f, 0.2f, 1f); // Escape green
+    [SerializeField] private Color escapeColor = new(0.8f, 0.1f, 0.5f, 1f); // Escape green
     [SerializeField] private int exitPulseCount = 4; // More frantic pulsing when escaping
 
     [Header("Vignette Effect")]
@@ -218,7 +218,7 @@ public class PossessionTransitionEffect : MonoBehaviour
     private IEnumerator OrganicTransitionWithCameraTransfer(Camera camera, Transform targetPivot, System.Action onTransitionMidpoint)
     {
         // Phase 1: Parasite invasion
-        yield return OrganicFadeIn(fadeInDuration);
+        yield return OrganicFadeIn(fadeInDuration, camera);
 
         // Phase 2: Hold
         yield return new WaitForSeconds(holdDuration);
@@ -232,7 +232,7 @@ public class PossessionTransitionEffect : MonoBehaviour
         onTransitionMidpoint?.Invoke();
 
         // Phase 3: Host vision clearing
-        yield return OrganicFadeOut(fadeOutDuration);
+        yield return OrganicFadeOut(fadeOutDuration, camera);
     }
 
     private IEnumerator OrganicExitTransitionCoroutine(System.Action onTransitionMidpoint)
@@ -253,7 +253,7 @@ public class PossessionTransitionEffect : MonoBehaviour
     private IEnumerator OrganicExitTransitionWithCameraTransfer(Camera camera, Transform parasitePivot, System.Action onTransitionMidpoint)
     {
         // Phase 1: Host dying
-        yield return OrganicExitFadeIn(exitFadeInDuration);
+        yield return OrganicExitFadeIn(exitFadeInDuration, camera);
 
         // Phase 2: Hold at ejection moment
         yield return new WaitForSeconds(exitHoldDuration);
@@ -267,10 +267,10 @@ public class PossessionTransitionEffect : MonoBehaviour
         onTransitionMidpoint?.Invoke();
 
         // Phase 3: Parasite vision restoring
-        yield return OrganicExitFadeOut(exitFadeOutDuration);
+        yield return OrganicExitFadeOut(exitFadeOutDuration, camera);
     }
 
-    private IEnumerator OrganicExitFadeIn(float duration)
+    private IEnumerator OrganicExitFadeIn(float duration, Camera camera = null)
     {
         float elapsed = 0f;
         while (elapsed < duration)
@@ -288,6 +288,11 @@ public class PossessionTransitionEffect : MonoBehaviour
 
             fadeImage.color = currentColor;
 
+            if (camera != null)
+            {
+                camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 175f, t);
+            }
+
             // Vignette pulsing with death colors
             if (vignetteImage != null)
             {
@@ -300,12 +305,12 @@ public class PossessionTransitionEffect : MonoBehaviour
         }
 
         // Full darkness at peak (moment of death/ejection)
-        fadeImage.color = new Color(0, 0, 0, 1);
+        fadeImage.color = new Color(1, 1, 1, 1);
         if (vignetteImage != null)
             vignetteImage.color = new Color(0, 0, 0, vignetteIntensity);
     }
 
-    private IEnumerator OrganicExitFadeOut(float duration)
+    private IEnumerator OrganicExitFadeOut(float duration, Camera camera = null)
     {
         float elapsed = 0f;
         while (elapsed < duration)
@@ -321,6 +326,11 @@ public class PossessionTransitionEffect : MonoBehaviour
             currentColor.a = alpha;
 
             fadeImage.color = currentColor;
+
+            if (camera != null)
+            {
+                camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 90f, t);
+            }
 
             // Vignette fading with parasite colors
             if (vignetteImage != null)
@@ -338,7 +348,7 @@ public class PossessionTransitionEffect : MonoBehaviour
             vignetteImage.color = new Color(vignetteImage.color.r, vignetteImage.color.g, vignetteImage.color.b, 0);
     }
 
-    private IEnumerator OrganicFadeIn(float duration)
+    private IEnumerator OrganicFadeIn(float duration, Camera camera = null)
     {
         float elapsed = 0f;
         while (elapsed < duration)
@@ -356,6 +366,11 @@ public class PossessionTransitionEffect : MonoBehaviour
 
             fadeImage.color = currentColor;
 
+            if (camera != null)
+            {
+                camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 175f, t);
+            }
+
             // Vignette effect creeping inward
             if (vignetteImage != null)
             {
@@ -368,13 +383,17 @@ public class PossessionTransitionEffect : MonoBehaviour
         }
 
         // Full darkness at peak
-        fadeImage.color = new Color(0, 0, 0, 1);
+        fadeImage.color = new Color(1, 1, 1, 1);
         if (vignetteImage != null)
             vignetteImage.color = new Color(0, 0, 0, vignetteIntensity);
     }
 
-    private IEnumerator OrganicFadeOut(float duration)
+    private IEnumerator OrganicFadeOut(float duration, Camera camera = null)
     {
+        if (camera != null)
+        {
+            camera.fieldOfView = 180f;
+        }
         float elapsed = 0f;
         while (elapsed < duration)
         {
@@ -389,6 +408,11 @@ public class PossessionTransitionEffect : MonoBehaviour
             currentColor.a = alpha;
 
             fadeImage.color = currentColor;
+
+            if (camera != null)
+            {
+                camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 90f, t);
+            }
 
             // Vignette fading out
             if (vignetteImage != null)

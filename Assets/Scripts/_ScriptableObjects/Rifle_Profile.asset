@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RangedWeaponProfile
   weaponName: Assault Rifle
   description: Automatic rifle with medium damage
-  fireRate: 0.1
+  fireRate: 0.2
   damage: 20
   range: 100
   hitLayers:
@@ -24,15 +24,17 @@ MonoBehaviour:
   startingAmmo: 30
   reserveAmmo: 120
   reloadTime: 2
-  recoilAmount: 2
-  recoilSpeed: 10
+  recoilAmount: 1
+  recoilSpeed: 1
   recoilReturnSpeed: 5
-  recoilRotation: {x: -2, y: 0, z: 0}
-  recoilKickback: {x: 0, y: 0, z: -0.05}
-  swayAmount: 0.02
+  recoilRotation: {x: 30, y: 270, z: 0}
+  recoilKickback: {x: -0.03, y: -0.05, z: 0}
+  swayAmount: 0.001
   swaySpeed: 2
   swayResetSpeed: 2
-  enableADS: 1
+  bobSpeed: 1
+  bobAmount: 0.001
+  enableADS: 0
   aimFOV: 45
   aimSpeed: 8
   aimPositionOffset: {x: 0, y: -0.08, z: 0.2}
@@ -40,7 +42,7 @@ MonoBehaviour:
   aimRecoilMultiplier: 0.7
   muzzleFlashPrefab: {fileID: 0}
   impactEffectPrefab: {fileID: 0}
-  bulletTrailPrefab: {fileID: 0}
+  bulletTrailPrefab: {fileID: 3636516122908459889, guid: c357917c68ac95d42998d392f3398b04, type: 3}
   shootSound: {fileID: 0}
   reloadSound: {fileID: 0}
   emptySound: {fileID: 0}

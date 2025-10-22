@@ -265,10 +265,6 @@ public class HostController : MonoBehaviour
             trajectorySystem.HideTrajectory();
         }
 
-        // Get camera to disable it
-        Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
-        if (transferredCamera != null)
-            transferredCamera.enabled = false;
 
         // Disable movement
         if (hostMovementController)
@@ -341,8 +337,8 @@ public class HostController : MonoBehaviour
         if (allowVoluntaryExit)
         {
             string exitHint = isShowingExitTrajectory ?
- "Release J to Exit" :
-       "Hold J to Show Exit Trajectory";
+ "Release RMB to Exit" :
+       "Hold RMB to Show Exit Trajectory";
 
             Color hintColor = isShowingExitTrajectory ? Color.green : Color.yellow;
 

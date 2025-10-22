@@ -293,9 +293,6 @@ public class GameStateManager : MonoBehaviour
     {
         currentMode = GameMode.Parasite;
 
-        currentHost = null;
-        currentHostController = null;
-
         volume.profile.TryGet(out LensDistortion fisheye);
         {
             fisheye.active = true;
@@ -310,6 +307,7 @@ public class GameStateManager : MonoBehaviour
             if (parasiteController)
             {
                 parasiteController.enabled = true;
+                parasiteController.SetRotation(currentHostController.transform.rotation);
                 // Trigger a launch with the exit trajectory
                 parasiteController.ExitLaunch(launchDirection * launchForce);
             }
@@ -319,6 +317,9 @@ public class GameStateManager : MonoBehaviour
         // Just ensure it's enabled
         if (parasiteCameraPivot != null)
         {
+            Transform hostCameraPivot = currentHostController.GetCameraPivot();
+            if (hostCameraPivot != null)
+                parasiteCameraPivot.rotation = hostCameraPivot.rotation;
             Camera camera = parasiteCameraPivot.GetComponentInChildren<Camera>();
             if (camera != null)
             {
@@ -326,6 +327,9 @@ public class GameStateManager : MonoBehaviour
                 Debug.Log("[GameState] Parasite camera enabled");
             }
         }
+
+        currentHost = null;
+        currentHostController = null;
 
         // Switch input to Parasite actions
         inputManager.EnableParasiteActions();

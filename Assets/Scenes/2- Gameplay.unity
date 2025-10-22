@@ -191,6 +191,8 @@ MonoBehaviour:
   gravity: -30
   sprintAlwaysOn: 0
   sprintMultiplier: 1.6
+  cameraTilt: 5
+  tiltTimeChange: 50
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -198,6 +200,9 @@ MonoBehaviour:
   showDebug: 1
   debugOverlaps: 1
   overlapDebugFrames: 90
+  bobSpeed: 4.8
+  bobAmount: 0.05
+  bobTimer: 1.5707964
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -796,6 +801,8 @@ MonoBehaviour:
   gravity: -30
   sprintAlwaysOn: 0
   sprintMultiplier: 1.6
+  cameraTilt: 5
+  tiltTimeChange: 50
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -803,6 +810,9 @@ MonoBehaviour:
   showDebug: 1
   debugOverlaps: 1
   overlapDebugFrames: 90
+  bobSpeed: 4.8
+  bobAmount: 0.05
+  bobTimer: 1.5707964
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -1926,6 +1936,8 @@ MonoBehaviour:
   gravity: -30
   sprintAlwaysOn: 0
   sprintMultiplier: 1.6
+  cameraTilt: 5
+  tiltTimeChange: 50
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -1933,6 +1945,9 @@ MonoBehaviour:
   showDebug: 1
   debugOverlaps: 1
   overlapDebugFrames: 90
+  bobSpeed: 4.8
+  bobAmount: 0.05
+  bobTimer: 1.5707964
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -2023,9 +2038,9 @@ MonoBehaviour:
   fovTimeChange: 100
   cameraTilt: 2.5
   tiltTimeChange: 50
-  enableBounce: 1
+  enableBounce: 0
   bounciness: 0.6
-  enableFriction: 1
+  enableFriction: 0
   airFriction: 0.5
   wallFriction: 2
   minVelocityThreshold: 0.5
@@ -2045,14 +2060,7 @@ MonoBehaviour:
   bobAmount: 1.5
   bobTimer: 1.5707964
   usePossessionTransition: 1
---- !u!33 &1667444199430107346
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5475289690071473842}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  controller: {fileID: 0}
 --- !u!1 &1797715871303986676
 GameObject:
   m_ObjectHideFlags: 0
@@ -2072,54 +2080,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!23 &2844161752470046266
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5475289690071473842}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!20 &3074205646608133747
 Camera:
   m_ObjectHideFlags: 0
@@ -2280,8 +2240,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3366760321929721171}
-  - component: {fileID: 1667444199430107346}
-  - component: {fileID: 2844161752470046266}
   - component: {fileID: 499462819237113414}
   - component: {fileID: 4479589600648303307}
   - component: {fileID: 487222673177253200}

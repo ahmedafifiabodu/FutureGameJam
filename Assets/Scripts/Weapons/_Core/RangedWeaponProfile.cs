@@ -50,6 +50,8 @@ public class RangedWeaponProfile : ScriptableObject
 
     public float swaySpeed = 2f;
     public float swayResetSpeed = 2f;
+    public float bobSpeed = 5f;
+    public float bobAmount = 0.05f;
 
     [Header("Aim Down Sights (ADS)")]
     [Tooltip("Enable ADS zoom feature")]
@@ -77,7 +79,7 @@ public class RangedWeaponProfile : ScriptableObject
     public ParticleSystem muzzleFlashPrefab;
 
     public GameObject impactEffectPrefab;
-    public TrailRenderer bulletTrailPrefab;
+    public GameObject bulletTrailPrefab;
 
     [Header("Audio")]
     public AudioClip shootSound;

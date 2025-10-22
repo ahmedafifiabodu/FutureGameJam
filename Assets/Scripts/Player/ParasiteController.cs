@@ -70,7 +70,7 @@ public class ParasiteController : MonoBehaviour
     [Header("Visual Effects")]
     [SerializeField] private bool usePossessionTransition = true;
 
-    private CharacterController controller;
+    public CharacterController controller;
     private InputManager inputManager;
     private FirstPersonZoneController zoneController;
 
@@ -235,7 +235,7 @@ public class ParasiteController : MonoBehaviour
             yVel = -2f;
         }
 
-        if (controller.isGrounded && inputManager.ParasiteActions.Jump.IsPressed())
+        if (controller.isGrounded && inputManager.ParasiteActions.Jump.triggered)
         {
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
@@ -628,6 +628,12 @@ public class ParasiteController : MonoBehaviour
         }
     }
 
+    public void SetRotation(Quaternion rotation)
+    {
+        yaw = rotation.eulerAngles.y;
+        transform.rotation = rotation;
+    }
+
     private void OnGUI()
     {
         if (!showDebug || inputManager == null) return;
@@ -662,7 +668,7 @@ public class ParasiteController : MonoBehaviour
         GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
 
         GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1} | Gravity: {gravity:F1}");
-        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
+        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}ï¿½ | Pitch: {pitch:F1}ï¿½");
 
         if (isAiming)
         {

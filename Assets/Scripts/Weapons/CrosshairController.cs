@@ -49,7 +49,7 @@ public class CrosshairController : MonoBehaviour
         // Increase spread when moving
         Vector2 moveInput = inputManager.PlayerActions.Move.ReadValue<Vector2>();
         bool isMoving = moveInput.magnitude > 0.1f;
-        bool isSprinting = inputManager.PlayerActions.Sprint.IsPressed();
+        bool isSprinting = false;
 
         float targetSpread = 0f;
 
