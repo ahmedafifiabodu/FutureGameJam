@@ -18522,8 +18522,9 @@ MonoBehaviour:
   playerHasEntered: 0
   showEnemyDebug: 0
   roomName: Room
-  startingRoom: 0
   enemySpawnDelay: 0.5
+  startingRoom: 0
+  startingRoomDoorDelay: 1.5
   showDebugLogs: 1
 --- !u!1 &7998966816874250461
 GameObject:

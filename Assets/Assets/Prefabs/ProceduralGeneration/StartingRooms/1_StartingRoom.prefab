@@ -1362,7 +1362,6 @@ MonoBehaviour:
   roomName: Room
   enemySpawnDelay: 0.5
   startingRoom: 1
-  startingRoomProximityDistance: 3
   startingRoomDoorDelay: 1.5
   showDebugLogs: 0
 --- !u!1 &6504511087953952156
