@@ -3,6 +3,7 @@ using AI.Enemy.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace AI.Spawning
 {
@@ -32,6 +33,13 @@ namespace AI.Spawning
         [Range(0f, 1f)]
         [SerializeField] private float baseCorridorSpawnChance = 0.3f;
 
+        [Header("NavMesh Settings")]
+        [Tooltip("Maximum distance to search for valid NavMesh position")]
+        [SerializeField] private float navMeshSearchRadius = 5f;
+
+        [Tooltip("Maximum attempts to find a valid spawn position")]
+        [SerializeField] private int maxSpawnAttempts = 5;
+
         [Header("Prop Settings")]
         [SerializeField] private GameObject[] propPrefabs;
 
@@ -42,9 +50,11 @@ namespace AI.Spawning
         [Header("Pooling")]
         [SerializeField] private Transform enemyPoolParent;
 
+        [Header("Debug")]
+        [SerializeField] private bool showSpawnDebug = true;
+
         // Runtime data
         private int currentRoomIteration = 0;
-
         private Dictionary<EnemyConfigSO, Queue<EnemyController>> enemyPools = new Dictionary<EnemyConfigSO, Queue<EnemyController>>();
 
         private void Awake()
@@ -106,10 +116,16 @@ namespace AI.Spawning
 
         /// <summary>
         /// Spawn enemies at the given spawn points
+        /// Returns the number of enemies successfully spawned
         /// </summary>
-        public void SpawnEnemiesAtPoints(SpawnPoint[] spawnPoints, bool isRoom, int roomIteration)
+        public int SpawnEnemiesAtPoints(SpawnPoint[] spawnPoints, bool isRoom, int roomIteration)
         {
-            if (spawnPoints == null || spawnPoints.Length == 0) return;
+            if (spawnPoints == null || spawnPoints.Length == 0)
+            {
+                if (showSpawnDebug)
+                    Debug.LogWarning("[EnemySpawnManager] No spawn points provided");
+                return 0;
+            }
 
             currentRoomIteration = roomIteration;
 
@@ -125,19 +141,29 @@ namespace AI.Spawning
 
             // Get valid enemy spawn points
             var validPoints = spawnPoints.Where(sp =>
-             sp != null &&
-                   sp.isActive &&
-            !sp.hasSpawned &&
-            (sp.spawnType == SpawnPoint.SpawnType.Enemy || sp.spawnType == SpawnPoint.SpawnType.Both)
-             ).ToList();
+                sp != null &&
+                sp.isActive &&
+                !sp.hasSpawned &&
+                (sp.spawnType == SpawnPoint.SpawnType.Enemy || sp.spawnType == SpawnPoint.SpawnType.Both)
+            ).ToList();
 
-            if (validPoints.Count == 0) return;
+            if (validPoints.Count == 0)
+            {
+                if (showSpawnDebug)
+                    Debug.LogWarning("[EnemySpawnManager] No valid enemy spawn points found");
+                return 0;
+            }
 
             // Shuffle spawn points
             ShuffleList(validPoints);
 
             // Spawn enemies
             int spawned = 0;
+            int attempts = 0;
+
+            if (showSpawnDebug)
+                Debug.Log($"[EnemySpawnManager] Attempting to spawn {enemiesToSpawn} enemies at {validPoints.Count} points");
+
             foreach (var point in validPoints)
             {
                 if (spawned >= enemiesToSpawn) break;
@@ -149,11 +175,35 @@ namespace AI.Spawning
                 EnemyConfigSO config = SelectEnemyConfig(roomIteration);
                 if (config == null) continue;
 
-                // Spawn enemy
-                SpawnEnemy(config, point.transform.position, point.transform.rotation);
-                point.hasSpawned = true;
-                spawned++;
+                // Try to spawn enemy with NavMesh validation
+                if (TrySpawnEnemyAtPoint(config, point))
+                {
+                    point.hasSpawned = true;
+                    spawned++;
+
+                    if (showSpawnDebug)
+                        Debug.Log($"[EnemySpawnManager] Successfully spawned {config.enemyName} at {point.name}");
+                }
+                else
+                {
+                    if (showSpawnDebug)
+                        Debug.LogWarning($"[EnemySpawnManager] Failed to spawn {config.enemyName} at {point.name} - NavMesh issue");
+                }
+
+                attempts++;
             }
+
+            if (showSpawnDebug)
+            {
+                Debug.Log($"[EnemySpawnManager] Spawn complete: {spawned}/{enemiesToSpawn} enemies spawned, {attempts} attempts made");
+
+                if (spawned == 0 && enemiesToSpawn > 0)
+                {
+                    Debug.LogError($"[EnemySpawnManager] CRITICAL: Failed to spawn any enemies! Check NavMesh and spawn point positions.");
+                }
+            }
+
+            return spawned;
         }
 
         /// <summary>
@@ -165,11 +215,11 @@ namespace AI.Spawning
                 return;
 
             var validPoints = spawnPoints.Where(sp =>
-                       sp != null &&
+                sp != null &&
                 sp.isActive &&
-                   !sp.hasSpawned &&
-                  (sp.spawnType == SpawnPoint.SpawnType.Prop || sp.spawnType == SpawnPoint.SpawnType.Both)
-              ).ToList();
+                !sp.hasSpawned &&
+                (sp.spawnType == SpawnPoint.SpawnType.Prop || sp.spawnType == SpawnPoint.SpawnType.Both)
+            ).ToList();
 
             foreach (var point in validPoints)
             {
@@ -198,12 +248,17 @@ namespace AI.Spawning
         {
             // Filter configs based on minimum iteration
             var availableConfigs = enemyConfigs.Where(c =>
-              c != null &&
-                 c.enemyPrefab != null &&
-              c.minRoomIteration <= roomIteration
-                     ).ToList();
+                c != null &&
+                c.enemyPrefab != null &&
+                c.minRoomIteration <= roomIteration
+            ).ToList();
 
-            if (availableConfigs.Count == 0) return null;
+            if (availableConfigs.Count == 0)
+            {
+                if (showSpawnDebug)
+                    Debug.LogWarning($"[EnemySpawnManager] No enemy configs available for iteration {roomIteration}");
+                return null;
+            }
 
             // Calculate total weight
             int totalWeight = availableConfigs.Sum(c => c.spawnWeight);
@@ -225,14 +280,95 @@ namespace AI.Spawning
             return availableConfigs[0];
         }
 
-        private EnemyController SpawnEnemy(EnemyConfigSO config, Vector3 position, Quaternion rotation)
+        /// <summary>
+        /// Try to spawn an enemy at a specific point with NavMesh validation
+        /// </summary>
+        private bool TrySpawnEnemyAtPoint(EnemyConfigSO config, SpawnPoint spawnPoint)
         {
-            EnemyController enemy = GetEnemyFromPool(config);
+            Vector3 originalPosition = spawnPoint.transform.position;
+            Vector3 validPosition;
 
-            enemy.transform.SetPositionAndRotation(position, rotation);
-            enemy.gameObject.SetActive(true);
+            // Try to find a valid NavMesh position
+            if (FindValidNavMeshPosition(originalPosition, out validPosition))
+            {
+                EnemyController enemy = SpawnEnemyAtPosition(config, validPosition, spawnPoint.transform.rotation);
 
-            return enemy;
+                if (enemy != null)
+                {
+                    // Set the parent to the same parent as the spawn point (usually the room/corridor)
+                    if (spawnPoint.transform.parent != null)
+                    {
+                        enemy.transform.SetParent(spawnPoint.transform.parent);
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Find a valid position on the NavMesh near the target position
+        /// </summary>
+        private bool FindValidNavMeshPosition(Vector3 targetPosition, out Vector3 validPosition)
+        {
+            validPosition = targetPosition;
+
+            // First, try the exact position
+            if (IsPositionOnNavMesh(targetPosition))
+            {
+                validPosition = targetPosition;
+                return true;
+            }
+
+            // Try to find a nearby valid position
+            for (int i = 0; i < maxSpawnAttempts; i++)
+            {
+                // Generate random position within search radius
+                Vector2 randomCircle = Random.insideUnitCircle * navMeshSearchRadius;
+                Vector3 testPosition = targetPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
+
+                if (NavMesh.SamplePosition(testPosition, out NavMeshHit hit, navMeshSearchRadius, NavMesh.AllAreas))
+                {
+                    validPosition = hit.position;
+
+                    if (showSpawnDebug)
+                        Debug.Log($"[EnemySpawnManager] Found valid NavMesh position after {i + 1} attempts. Distance from original: {Vector3.Distance(targetPosition, validPosition):F2}");
+
+                    return true;
+                }
+            }
+
+            if (showSpawnDebug)
+                Debug.LogError($"[EnemySpawnManager] Failed to find valid NavMesh position near {targetPosition} after {maxSpawnAttempts} attempts");
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if a position is on the NavMesh
+        /// </summary>
+        private bool IsPositionOnNavMesh(Vector3 position)
+        {
+            return NavMesh.SamplePosition(position, out NavMeshHit hit, 0.1f, NavMesh.AllAreas);
+        }
+
+        private EnemyController SpawnEnemyAtPosition(EnemyConfigSO config, Vector3 position, Quaternion rotation)
+        {
+            try
+            {
+                EnemyController enemy = GetEnemyFromPool(config);
+                enemy.transform.SetPositionAndRotation(position, rotation);
+                enemy.gameObject.SetActive(true);
+                return enemy;
+            }
+            catch (System.Exception e)
+            {
+                if (showSpawnDebug)
+                    Debug.LogError($"[EnemySpawnManager] Failed to spawn enemy: {e.Message}");
+                return null;
+            }
         }
 
         private EnemyController GetEnemyFromPool(EnemyConfigSO config)

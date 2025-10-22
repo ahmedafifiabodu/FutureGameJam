@@ -10,6 +10,7 @@ namespace ProceduralGeneration
     {
         [Header("Debug Display")]
         [SerializeField] private bool showDebugUI = true;
+
         [SerializeField] private bool showConnectionLines = true;
         [SerializeField] private Color activeRoomColor = Color.green;
         [SerializeField] private Color previousRoomColor = Color.yellow;
@@ -21,7 +22,7 @@ namespace ProceduralGeneration
         private void Start()
         {
             generator = GetComponent<ProceduralLevelGenerator>();
-            
+
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
                 player = playerObj.transform;
@@ -32,14 +33,14 @@ namespace ProceduralGeneration
             if (!Application.isPlaying || !showConnectionLines) return;
 
             // Draw connection points in scene
-            ConnectionPoint[] allPoints = FindObjectsOfType<ConnectionPoint>();
-            
+            ConnectionPoint[] allPoints = FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
+
             foreach (var point in allPoints)
             {
                 if (point == null) continue;
 
                 // Color code by type
-                Gizmos.color = point.Type == ConnectionPoint.PointType.A 
+                Gizmos.color = point.Type == ConnectionPoint.PointType.A
                     ? new Color(0, 1, 0, 0.5f) // Green for entrance
                     : new Color(1, 0, 0, 0.5f); // Red for exit
 
@@ -52,14 +53,14 @@ namespace ProceduralGeneration
             }
 
             // Draw lines between connected pieces
-            Room[] rooms = FindObjectsOfType<Room>();
-            Corridor[] corridors = FindObjectsOfType<Corridor>();
+            Room[] rooms = FindObjectsByType<Room>(FindObjectsSortMode.None);
+            Corridor[] corridors = FindObjectsByType<Corridor>(FindObjectsSortMode.None);
 
             // Draw room boundaries
             foreach (var room in rooms)
             {
                 if (room == null) continue;
-                
+
                 Gizmos.color = activeRoomColor;
                 Bounds bounds = CalculateBounds(room.gameObject);
                 Gizmos.DrawWireCube(bounds.center, bounds.size);
@@ -69,11 +70,11 @@ namespace ProceduralGeneration
             Gizmos.color = connectionLineColor;
             foreach (var corridor in corridors)
             {
-                if (corridor == null || corridor.PointA == null || corridor.PointB == null) 
+                if (corridor == null || corridor.PointA == null || corridor.PointB == null)
                     continue;
 
                 Gizmos.DrawLine(
-                    corridor.PointA.transform.position, 
+                    corridor.PointA.transform.position,
                     corridor.PointB.transform.position
                 );
             }
@@ -92,24 +93,24 @@ namespace ProceduralGeneration
             // Player position
             if (player != null)
             {
-                GUI.Label(new Rect(20, y, 330, 20), $"Player: {player.position.ToString("F1")}");
+                GUI.Label(new Rect(20, y, 330, 20), $"Player: {player.position:F1}");
                 y += lineHeight;
             }
 
             // Room/Corridor count
-            Room[] rooms = FindObjectsOfType<Room>();
-            Corridor[] corridors = FindObjectsOfType<Corridor>();
-            
+            Room[] rooms = FindObjectsByType<Room>(FindObjectsSortMode.None);
+            Corridor[] corridors = FindObjectsByType<Corridor>(FindObjectsSortMode.None);
+
             GUI.Label(new Rect(20, y, 330, 20), $"Active Rooms: {rooms.Length}");
             y += lineHeight;
-            
+
             GUI.Label(new Rect(20, y, 330, 20), $"Active Corridors: {corridors.Length}");
             y += lineHeight;
 
             // Connection points
-            ConnectionPoint[] points = FindObjectsOfType<ConnectionPoint>();
+            ConnectionPoint[] points = FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
             int entrances = 0, exits = 0;
-            
+
             foreach (var point in points)
             {
                 if (point.Type == ConnectionPoint.PointType.A) entrances++;
@@ -120,20 +121,20 @@ namespace ProceduralGeneration
             y += lineHeight;
 
             // Memory stats
-            GUI.Label(new Rect(20, y, 330, 20), 
+            GUI.Label(new Rect(20, y, 330, 20),
                 $"Memory: {(System.GC.GetTotalMemory(false) / 1024f / 1024f):F2} MB");
         }
 
         private Bounds CalculateBounds(GameObject obj)
         {
-            Bounds bounds = new Bounds(obj.transform.position, Vector3.zero);
+            Bounds bounds = new(obj.transform.position, Vector3.zero);
             Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
-            
+
             foreach (Renderer renderer in renderers)
             {
                 bounds.Encapsulate(renderer.bounds);
             }
-            
+
             return bounds;
         }
 
@@ -150,7 +151,7 @@ namespace ProceduralGeneration
         {
             Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
             Color originalColor = Color.white;
-            
+
             // Store original colors
             Material[] originalMaterials = new Material[renderers.Length];
             for (int i = 0; i < renderers.Length; i++)
@@ -165,7 +166,7 @@ namespace ProceduralGeneration
             {
                 float alpha = Mathf.PingPong(elapsed * 2f, 1f);
                 Color highlight = Color.Lerp(originalColor, Color.yellow, alpha);
-                
+
                 foreach (var renderer in renderers)
                 {
                     if (renderer.material != null)

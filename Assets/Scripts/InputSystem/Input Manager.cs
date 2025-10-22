@@ -31,7 +31,9 @@ public class InputManager : MonoBehaviour
     public void EnablePlayerActions()
     {
         PlayerActions.Enable();
-        ParasiteActions.Disable();
+        // Keep Parasite actions enabled for the Exit For Host action
+        // This allows checking the exit button while controlling a host
+        ParasiteActions.Enable();
     }
 
     public void EnableParasiteActions()

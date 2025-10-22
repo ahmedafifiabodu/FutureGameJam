@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using System.Linq; // Added for Any() extension method
 
 namespace ProceduralGeneration.Editor
 {
@@ -10,8 +11,8 @@ namespace ProceduralGeneration.Editor
         private SerializedProperty corridorPrefabsProp;
         private SerializedProperty startingRoomProp;
         private SerializedProperty playerProp;
-        private SerializedProperty proximityProp;
         private SerializedProperty debugLogsProp;
+        private SerializedProperty currentRoomIterationProp;
 
         private void OnEnable()
         {
@@ -19,8 +20,8 @@ namespace ProceduralGeneration.Editor
             corridorPrefabsProp = serializedObject.FindProperty("corridorPrefabs");
             startingRoomProp = serializedObject.FindProperty("startingRoomPrefab");
             playerProp = serializedObject.FindProperty("player");
-            proximityProp = serializedObject.FindProperty("proximityCheckDistance");
             debugLogsProp = serializedObject.FindProperty("enableDebugLogs");
+            currentRoomIterationProp = serializedObject.FindProperty("currentRoomIteration");
         }
 
         public override void OnInspectorGUI()
@@ -33,24 +34,33 @@ namespace ProceduralGeneration.Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Procedural Level Generator", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("Configure room and corridor prefabs with weighted randomness. " +
-                "Higher weights = more likely to spawn.", MessageType.Info);
+                "Higher weights = more likely to spawn. Generation is now triggered by Door opening instead of proximity.", MessageType.Info);
             EditorGUILayout.Space();
 
             // Starting Room
             EditorGUILayout.LabelField("Starting Room", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(startingRoomProp, new GUIContent("Starting Room Prefab"));
-            
+
             if (startingRoomProp.objectReferenceValue == null)
             {
-                EditorGUILayout.HelpBox("Assign a starting room prefab!", MessageType.Warning);
+                EditorGUILayout.HelpBox("Assign a starting room prefab with Room component!", MessageType.Warning);
             }
-            
+            else
+            {
+                // Validate starting room has Room component
+                GameObject startingRoom = startingRoomProp.objectReferenceValue as GameObject;
+                if (startingRoom != null && startingRoom.GetComponent<Room>() == null)
+                {
+                    EditorGUILayout.HelpBox("Starting room prefab is missing Room component!", MessageType.Error);
+                }
+            }
+
             EditorGUILayout.Space();
 
             // Room Prefabs
             EditorGUILayout.LabelField("Room Prefabs (Weighted)", EditorStyles.boldLabel);
             DrawWeightedPrefabArray(roomPrefabsProp, "Room");
-            
+
             if (GUILayout.Button("+ Add Room Prefab"))
             {
                 roomPrefabsProp.arraySize++;
@@ -62,7 +72,7 @@ namespace ProceduralGeneration.Editor
             // Corridor Prefabs
             EditorGUILayout.LabelField("Corridor Prefabs (Weighted)", EditorStyles.boldLabel);
             DrawWeightedPrefabArray(corridorPrefabsProp, "Corridor");
-            
+
             if (GUILayout.Button("+ Add Corridor Prefab"))
             {
                 corridorPrefabsProp.arraySize++;
@@ -74,12 +84,18 @@ namespace ProceduralGeneration.Editor
             // Player Settings
             EditorGUILayout.LabelField("Player Settings", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(playerProp, new GUIContent("Player Transform"));
-            EditorGUILayout.PropertyField(proximityProp, new GUIContent("Proximity Distance"));
-            
+
             if (playerProp.objectReferenceValue == null)
             {
                 EditorGUILayout.HelpBox("Player will be auto-detected by 'Player' tag if not assigned.", MessageType.Info);
             }
+
+            EditorGUILayout.Space();
+
+            // Difficulty Scaling
+            EditorGUILayout.LabelField("Difficulty Scaling", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(currentRoomIterationProp, new GUIContent("Current Room Iteration"));
+            EditorGUILayout.HelpBox("This tracks the current difficulty level. Higher iterations spawn more enemies.", MessageType.Info);
 
             EditorGUILayout.Space();
 
@@ -89,10 +105,26 @@ namespace ProceduralGeneration.Editor
 
             EditorGUILayout.Space();
 
+            // Generation Info
+            EditorGUILayout.LabelField("Generation System", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("• Next areas are now generated when exit doors open (not by proximity)\n" +
+                "• This prevents skybox visibility when doors open\n" +
+                "• Door system handles timing and generation triggers", MessageType.Info);
+
             // Statistics
             if (Application.isPlaying)
             {
+                EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Runtime Statistics", EditorStyles.boldLabel);
+
+                // Show generation status
+                bool isGenerating = generator.IsGenerating;
+                EditorGUILayout.LabelField("Generation Status:", isGenerating ? "Generating..." : "Idle");
+
+                // Show current room info
+                var currentExit = generator.GetCurrentRoomExitPoint();
+                EditorGUILayout.LabelField("Current Room Exit:", currentExit != null ? "Available" : "None");
+
                 EditorGUILayout.HelpBox("Check console for generation logs when 'Enable Debug Logs' is on.", MessageType.Info);
             }
 
@@ -109,10 +141,10 @@ namespace ProceduralGeneration.Editor
                 SerializedProperty descProp = element.FindPropertyRelative("description");
 
                 EditorGUILayout.BeginVertical("box");
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField($"{prefabType} #{i + 1}", EditorStyles.boldLabel, GUILayout.Width(80));
-                
+
                 if (GUILayout.Button("Remove", GUILayout.Width(70)))
                 {
                     arrayProp.DeleteArrayElementAtIndex(i);
@@ -133,13 +165,33 @@ namespace ProceduralGeneration.Editor
                 else
                 {
                     GameObject prefab = prefabProp.objectReferenceValue as GameObject;
-                    bool hasComponent = prefabType == "Room" 
-                        ? prefab.GetComponent<Room>() != null 
+                    bool hasComponent = prefabType == "Room"
+                        ? prefab.GetComponent<Room>() != null
                         : prefab.GetComponent<Corridor>() != null;
 
                     if (!hasComponent)
                     {
                         EditorGUILayout.HelpBox($"Prefab is missing {prefabType} component!", MessageType.Error);
+                    }
+                    else
+                    {
+                        // Additional validation for connection points
+                        if (prefab.TryGetComponent<LevelPiece>(out var levelPiece))
+                        {
+                            // Check for connection points
+                            var connectionPoints = prefab.GetComponentsInChildren<ConnectionPoint>();
+                            bool hasPointA = connectionPoints.Any(cp => cp.Type == ConnectionPoint.PointType.A);
+                            bool hasPointB = connectionPoints.Any(cp => cp.Type == ConnectionPoint.PointType.B);
+
+                            if (prefabType == "Room" && (!hasPointA || !hasPointB))
+                            {
+                                EditorGUILayout.HelpBox("Room should have both Point A (entrance) and Point B (exit)!", MessageType.Warning);
+                            }
+                            else if (prefabType == "Corridor" && (!hasPointA || !hasPointB))
+                            {
+                                EditorGUILayout.HelpBox("Corridor should have both Point A and Point B!", MessageType.Warning);
+                            }
+                        }
                     }
                 }
 

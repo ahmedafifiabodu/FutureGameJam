@@ -11,6 +11,7 @@ namespace ProceduralGeneration
     {
         [Header("Settings")]
         [SerializeField] private LevelPiece parentLevelPiece;
+
         [SerializeField] private bool debugLogs = true;
 
         private ProceduralLevelGenerator levelGenerator;
@@ -34,8 +35,8 @@ namespace ProceduralGeneration
 
         private void Start()
         {
-            levelGenerator = FindObjectOfType<ProceduralLevelGenerator>();
-            
+            levelGenerator = FindFirstObjectByType<ProceduralLevelGenerator>();
+
             if (levelGenerator == null)
             {
                 Debug.LogError("[RoomEntranceTrigger] ProceduralLevelGenerator not found in scene!");
@@ -47,16 +48,16 @@ namespace ProceduralGeneration
             if (hasTriggered) return;
 
             // Check if it's the player
-            if (other.CompareTag("Player") || other.GetComponent<FirstPersonZoneController>() != null)
+            if (other.GetComponent<FirstPersonZoneController>() != null)
             {
                 hasTriggered = true;
-                
+
                 string levelPieceName = "Unknown";
                 if (parentLevelPiece is Room room)
                     levelPieceName = room.RoomName;
                 else if (parentLevelPiece is Corridor corridor)
                     levelPieceName = corridor.CorridorName;
-                
+
                 if (debugLogs)
                     Debug.Log($"[RoomEntranceTrigger] Player entered: {levelPieceName}");
 
@@ -78,7 +79,7 @@ namespace ProceduralGeneration
             {
                 Gizmos.color = new Color(0, 1, 0, 0.3f);
                 Gizmos.matrix = transform.localToWorldMatrix;
-                
+
                 if (col is BoxCollider box)
                     Gizmos.DrawCube(box.center, box.size);
                 else if (col is SphereCollider sphere)

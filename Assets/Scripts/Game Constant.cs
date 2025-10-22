@@ -52,7 +52,15 @@ public static class GameConstant
 
         // Enemy specific
         public const string AnimationProjectileName = "ProjectileAttack";
+
         public const string IsDead = "IsDead";
         public const string IsStaggered = "IsStaggered";
+
+        public static class Door
+        {
+            public const string Open = "Open";
+            public const string Close = "Close";
+            public const string OpenJammed = "OpenJammed";
+        }
     }
 }

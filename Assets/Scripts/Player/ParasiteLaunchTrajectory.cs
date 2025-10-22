@@ -11,11 +11,8 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     [SerializeField] private LineRenderer line;
 
     [SerializeField] private int maxPhysicsFrameIterations = 50;
-    [SerializeField] private int lineSegmentResolution = 25;
 
     [Header("Simulation Settings")]
-    [SerializeField] private float simulationRadius = 0.2f;
-
     [SerializeField] private LayerMask simulationLayers;
 
     [Header("Visual Settings - FPS Optimized")]
@@ -83,7 +80,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
                 // Keep offset in reasonable range to prevent floating point precision issues
                 if (Mathf.Abs(animatedTextureOffset) > 100f)
                 {
-                    animatedTextureOffset = animatedTextureOffset % 1f;
+                    animatedTextureOffset %= 1f;
                 }
 
                 // Apply the texture offset to the material
@@ -139,8 +136,8 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
 
             if (lineShader != null)
             {
-                Material newLineMaterial = new Material(lineShader);
-                
+                Material newLineMaterial = new(lineShader);
+
                 // Enable transparency
                 if (newLineMaterial.HasProperty("_Surface"))
                 {
@@ -400,7 +397,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             return;
         }
 
-        System.Collections.Generic.List<Vector3> dottedPoints = new System.Collections.Generic.List<Vector3>();
+        System.Collections.Generic.List<Vector3> dottedPoints = new();
 
         // Calculate the offset for the start point only
         Vector3 startOffset = visualStartPosition - points[0];

@@ -9,31 +9,36 @@ public class CameraShakeManager : MonoBehaviour
 {
     [Header("Shake Settings")]
     [SerializeField] private Transform cameraTransform;
+
     [SerializeField] private float maxShakeDuration = 0.5f;
     [SerializeField] private float shakeMultiplier = 1f;
 
     [Header("Noise Settings")]
     [SerializeField] private float noiseFrequency = 25f;
+
     [SerializeField] private float traumaPower = 2f; // Exponential falloff
     [SerializeField] private float traumaDecayRate = 1f; // How fast trauma decays per second
 
     [Header("Limits")]
     [SerializeField] private float maxTrauma = 1f; // Cap trauma to prevent excessive shake
+
     [SerializeField] private float traumaPerShot = 0.15f; // Default trauma added per shot
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = false;
 
     private float trauma = 0f; // 0 to 1
-    private float shakeTimer = 0f;
     private bool isShaking = false;
+    private float shakeTimer = 0f; // Timer to track current shake duration
 
     // Store shake offset instead of accumulating
     private Vector3 currentShakeOffset = Vector3.zero;
+
     private Quaternion currentShakeRotation = Quaternion.identity;
-    
+
     // Store base transform to apply shake as offset
     private Vector3 baseLocalPosition;
+
     private Quaternion baseLocalRotation;
     private bool hasStoredBase = false;
 
@@ -54,6 +59,19 @@ public class CameraShakeManager : MonoBehaviour
         if (!cameraTransform)
             return;
 
+        // Update shake timer
+        if (isShaking)
+        {
+            shakeTimer += Time.deltaTime;
+
+            // Stop shake if it exceeds max duration
+            if (shakeTimer >= maxShakeDuration)
+            {
+                StopShake();
+                return;
+            }
+        }
+
         // Decay trauma over time
         if (trauma > 0f)
         {
@@ -69,6 +87,7 @@ public class CameraShakeManager : MonoBehaviour
                 currentShakeRotation = Quaternion.identity;
                 ApplyShakeOffset();
                 isShaking = false;
+                shakeTimer = 0f;
             }
         }
     }
@@ -85,7 +104,11 @@ public class CameraShakeManager : MonoBehaviour
 
     private void ApplyShake()
     {
-        isShaking = true;
+        if (!isShaking)
+        {
+            isShaking = true;
+            shakeTimer = 0f;
+        }
 
         // Calculate shake intensity using trauma power curve
         float shake = Mathf.Pow(trauma, traumaPower) * shakeMultiplier;
@@ -113,8 +136,7 @@ public class CameraShakeManager : MonoBehaviour
     private void ApplyShakeOffset()
     {
         // Apply shake as OFFSET from base transform (NOT accumulative)
-        cameraTransform.localPosition = baseLocalPosition + currentShakeOffset;
-        cameraTransform.localRotation = baseLocalRotation * currentShakeRotation;
+        cameraTransform.SetLocalPositionAndRotation(baseLocalPosition + currentShakeOffset, baseLocalRotation * currentShakeRotation);
     }
 
     /// <summary>
@@ -129,6 +151,14 @@ public class CameraShakeManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Add default weapon shot trauma.
+    /// </summary>
+    public void AddShotTrauma()
+    {
+        AddTrauma(traumaPerShot);
+    }
+
+    /// <summary>
     /// Quick shake with preset intensity.
     /// </summary>
     public void Shake(ShakeIntensity intensity)
@@ -138,12 +168,15 @@ public class CameraShakeManager : MonoBehaviour
             case ShakeIntensity.Light:
                 AddTrauma(0.1f);
                 break;
+
             case ShakeIntensity.Medium:
                 AddTrauma(0.3f);
                 break;
+
             case ShakeIntensity.Heavy:
                 AddTrauma(0.6f);
                 break;
+
             case ShakeIntensity.Extreme:
                 AddTrauma(1f);
                 break;
@@ -161,13 +194,13 @@ public class CameraShakeManager : MonoBehaviour
     private IEnumerator CustomShakeCoroutine(float intensity, float duration)
     {
         float elapsed = 0f;
-        
+
         while (elapsed < duration)
         {
             float t = elapsed / duration;
             float currentIntensity = intensity * (1f - t); // Fade out
             AddTrauma(currentIntensity * Time.deltaTime * 2f);
-            
+
             elapsed += Time.deltaTime;
             yield return null;
         }
@@ -182,11 +215,11 @@ public class CameraShakeManager : MonoBehaviour
         currentShakeOffset = Vector3.zero;
         currentShakeRotation = Quaternion.identity;
         isShaking = false;
-        
+        shakeTimer = 0f;
+
         if (hasStoredBase && cameraTransform)
         {
-            cameraTransform.localPosition = baseLocalPosition;
-            cameraTransform.localRotation = baseLocalRotation;
+            cameraTransform.SetLocalPositionAndRotation(baseLocalPosition, baseLocalRotation);
         }
     }
 
@@ -200,15 +233,24 @@ public class CameraShakeManager : MonoBehaviour
 
     // Public getters
     public float GetTrauma() => trauma;
+
     public bool IsShaking() => isShaking;
+
+    public float GetShakeTimer() => shakeTimer;
+
+    public float GetTraumaPerShot() => traumaPerShot;
 
     private void OnGUI()
     {
         if (!showDebug) return;
 
-        GUI.Label(new Rect(10, 100, 200, 20), 
+        GUI.Label(new Rect(10, 100, 200, 20),
             $"Camera Trauma: {trauma:F2}",
             new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.cyan } });
+
+        GUI.Label(new Rect(10, 120, 200, 20),
+            $"Shake Timer: {shakeTimer:F2}s",
+            new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
     }
 }
 

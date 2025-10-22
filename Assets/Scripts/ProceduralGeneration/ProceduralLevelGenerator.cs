@@ -20,8 +20,6 @@ namespace ProceduralGeneration
         [Header("Player Reference")]
         [SerializeField] private Transform player;
 
-        [SerializeField] private float proximityCheckDistance = 3f;
-
         [Header("Difficulty Scaling")]
         [SerializeField] private int currentRoomIteration = 0; // Track progression
 
@@ -38,7 +36,7 @@ namespace ProceduralGeneration
         // Track if we're generating to prevent multiple generations
         private bool isGenerating = false;
 
-        private HashSet<ConnectionPoint> processedPoints = new HashSet<ConnectionPoint>();
+        private readonly HashSet<ConnectionPoint> processedPoints = new();
 
         // Reference to spawn manager
         private AI.Spawning.EnemySpawnManager spawnManager;
@@ -46,18 +44,10 @@ namespace ProceduralGeneration
         private void Start()
         {
             // Find or create spawn manager
-            spawnManager = FindObjectOfType<AI.Spawning.EnemySpawnManager>();
+            spawnManager = FindFirstObjectByType<AI.Spawning.EnemySpawnManager>();
 
             ValidatePrefabs();
             SpawnStartingRoom();
-        }
-
-        private void Update()
-        {
-            if (currentRoom != null && currentRoom.PointB != null)
-            {
-                CheckPlayerProximityToExit(currentRoom.PointB);
-            }
         }
 
         private void ValidatePrefabs()
@@ -113,24 +103,43 @@ namespace ProceduralGeneration
             }
         }
 
-        private void CheckPlayerProximityToExit(ConnectionPoint exitPoint)
+        /// <summary>
+        /// Public method to trigger next area generation from external sources (like Door class)
+        /// </summary>
+        public void TriggerNextAreaGeneration(ConnectionPoint exitPoint)
         {
-            if (player == null || exitPoint == null || isGenerating) return;
-
-            // Check if already processed
-            if (processedPoints.Contains(exitPoint)) return;
-
-            float distance = Vector3.Distance(player.position, exitPoint.transform.position);
-
-            if (distance <= proximityCheckDistance)
+            if (exitPoint == null)
             {
-                if (enableDebugLogs)
-                    Debug.Log($"[ProceduralLevelGenerator] Player in proximity to exit. Generating next section...");
-
-                processedPoints.Add(exitPoint);
-                GenerateNextSection(exitPoint);
+                Debug.LogWarning("[ProceduralLevelGenerator] TriggerNextAreaGeneration called with null exitPoint");
+                return;
             }
+
+            if (isGenerating)
+            {
+                Debug.Log("[ProceduralLevelGenerator] Already generating, ignoring trigger");
+                return;
+            }
+
+            if (processedPoints.Contains(exitPoint))
+            {
+                Debug.Log("[ProceduralLevelGenerator] Exit point already processed, ignoring trigger");
+                return;
+            }
+
+            Debug.Log($"[ProceduralLevelGenerator] Next area generation triggered externally for exit point");
+            processedPoints.Add(exitPoint);
+            GenerateNextSection(exitPoint);
         }
+
+        /// <summary>
+        /// Get the current room's exit point (Point B) for external access
+        /// </summary>
+        public ConnectionPoint GetCurrentRoomExitPoint() => currentRoom.PointB;
+
+        /// <summary>
+        /// Check if next area generation is currently in progress
+        /// </summary>
+        public bool IsGenerating => isGenerating;
 
         private void GenerateNextSection(ConnectionPoint roomExitPoint)
         {
@@ -203,11 +212,7 @@ namespace ProceduralGeneration
                 return null;
             }
 
-            // FIXED: Align corridor's entrance (Point B) with room's exit (Point B)
-            // Corridor flows: B (entrance) -----> A (exit)
             AlignConnectionPoints(corridorObj.transform, corridor.PointB, roomExitPoint, true);
-
-            // Trigger spawning for corridor
             corridor.OnSpawned(currentRoomIteration);
 
             return corridor;
@@ -229,10 +234,7 @@ namespace ProceduralGeneration
                 return null;
             }
 
-            // FIXED: Align room's entrance (Point A) with corridor's exit (Point A)
             AlignConnectionPoints(roomObj.transform, room.PointA, corridorExitPoint, true);
-
-            // Trigger spawning for room
             room.OnSpawned(currentRoomIteration);
 
             return room;
@@ -282,10 +284,6 @@ namespace ProceduralGeneration
         {
             if (enableDebugLogs)
                 Debug.Log("[ProceduralLevelGenerator] Player entered new room. Closing doors and cleaning up...");
-
-            // Close doors in current room
-            if (currentRoom != null)
-                currentRoom.CloseDoors();
 
             // Delete previous room and corridor
             if (previousRoom != null)
@@ -347,15 +345,30 @@ namespace ProceduralGeneration
             return weightedPrefabs[0].prefab;
         }
 
+        // Optional: Add a new debug method for current room/corridor state
         private void OnDrawGizmos()
         {
-            if (!Application.isPlaying || player == null) return;
+            if (!Application.isPlaying) return;
 
-            // Draw proximity check radius around current exit point
-            if (currentRoom != null && currentRoom.PointB != null)
+            // Draw current room boundaries
+            if (currentRoom != null)
+            {
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireCube(currentRoom.transform.position, Vector3.one * 5f);
+
+                // Draw current room's exit point
+                if (currentRoom.PointB != null)
+                {
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawWireSphere(currentRoom.PointB.transform.position, 1f);
+                }
+            }
+
+            // Draw current corridor
+            if (currentCorridor != null)
             {
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(currentRoom.PointB.transform.position, proximityCheckDistance);
+                Gizmos.DrawWireCube(currentCorridor.transform.position, Vector3.one * 3f);
             }
         }
     }

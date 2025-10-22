@@ -26,6 +26,9 @@ namespace AI.Enemy
         [Header("Patrol Points")]
         [SerializeField] private Transform[] patrolPoints;
 
+        [Header("Debug")]
+        [SerializeField] private bool showDebugTargeting = true;
+
         // State management
         private States.IEnemyState currentState;
 
@@ -53,6 +56,13 @@ namespace AI.Enemy
 
         // Room tracking
         private Transform currentRoom;
+
+        // Player targeting system
+        private GameStateManager gameStateManager;
+        private ParasiteController parasiteController;
+        private Transform parasiteTransform;
+        private Transform hostTransform;
+        private GameStateManager.GameMode lastKnownGameMode;
 
         public EnemyConfigSO Config => config;
         public NavMeshAgent Agent => agent;
@@ -85,6 +95,7 @@ namespace AI.Enemy
         {
             if (isDead) return;
 
+            UpdatePlayerTarget(); // Update player target based on game mode
             UpdateStagger();
             UpdateVision();
             UpdateAttackCooldown();
@@ -119,8 +130,21 @@ namespace AI.Enemy
             agent.autoBraking = true;
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.HighQualityObstacleAvoidance;
 
-            // Find player
-            player = ServiceLocator.Instance.GetService<ParasiteController>().transform;
+            // Get game state manager for player targeting
+            gameStateManager = GameStateManager.Instance;
+
+            // Find parasite controller
+            parasiteController = ServiceLocator.Instance.GetService<ParasiteController>();
+            if (parasiteController != null)
+            {
+                parasiteTransform = parasiteController.transform;
+            }
+
+            // Initialize tracking variables
+            lastKnownGameMode = GameStateManager.GameMode.Parasite;
+
+            // Initialize player target
+            UpdatePlayerTarget();
 
             // Auto-find patrol points if not assigned
             if (patrolPoints == null || patrolPoints.Length == 0)
@@ -163,6 +187,142 @@ namespace AI.Enemy
         }
 
         #endregion Initialization
+
+        #region Player Targeting System
+
+        /// <summary>
+        /// Updates the player target based on current game mode
+        /// In Parasite mode: target the parasite
+        /// In Host mode: target the possessed host
+        /// </summary>
+        private void UpdatePlayerTarget()
+        {
+            if (gameStateManager == null) return;
+
+            GameStateManager.GameMode currentMode = gameStateManager.GetCurrentMode();
+
+            // Only update if game mode has changed
+            if (currentMode != lastKnownGameMode)
+            {
+                OnGameModeChanged(currentMode);
+                lastKnownGameMode = currentMode;
+            }
+
+            // Ensure player reference is valid
+            if (player == null)
+            {
+                SetPlayerTarget(currentMode);
+            }
+        }
+
+        /// <summary>
+        /// Called when game mode changes
+        /// </summary>
+        private void OnGameModeChanged(GameStateManager.GameMode newMode)
+        {
+            if (showDebugTargeting)
+            {
+                Debug.Log($"[EnemyController] {config.enemyName} switching target due to mode change: {lastKnownGameMode} -> {newMode}");
+            }
+
+            SetPlayerTarget(newMode);
+
+            // If we had spotted the player before, we should re-evaluate
+            if (hasSeenPlayer)
+            {
+                // Reset vision state to allow re-acquisition of new target
+                hasSeenPlayer = false;
+                timeSinceLastSaw = 0f;
+
+                // Return to patrol to start fresh target acquisition
+                agent.speed = config.patrolSpeed;
+                ChangeState(patrolState);
+
+                if (showDebugTargeting)
+                {
+                    Debug.Log($"[EnemyController] {config.enemyName} reset vision state for new target");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the player target based on game mode
+        /// </summary>
+        private void SetPlayerTarget(GameStateManager.GameMode mode)
+        {
+            Transform previousTarget = player;
+
+            switch (mode)
+            {
+                case GameStateManager.GameMode.Parasite:
+                    // Target the parasite
+                    if (parasiteTransform != null && parasiteTransform.gameObject.activeInHierarchy)
+                    {
+                        player = parasiteTransform;
+                        if (showDebugTargeting)
+                        {
+                            Debug.Log($"[EnemyController] {config.enemyName} now targeting parasite: {player.name}");
+                        }
+                    }
+                    else
+                    {
+                        // Try to find parasite if reference is lost
+                        if (parasiteController == null)
+                        {
+                            parasiteController = ServiceLocator.Instance.GetService<ParasiteController>();
+                        }
+
+                        if (parasiteController != null)
+                        {
+                            parasiteTransform = parasiteController.transform;
+                            player = parasiteTransform;
+                            if (showDebugTargeting)
+                            {
+                                Debug.Log($"[EnemyController] {config.enemyName} found and targeting parasite: {player.name}");
+                            }
+                        }
+                        else
+                        {
+                            player = null;
+                            if (showDebugTargeting)
+                            {
+                                Debug.LogWarning($"[EnemyController] {config.enemyName} could not find parasite to target!");
+                            }
+                        }
+                    }
+                    break;
+
+                case GameStateManager.GameMode.Host:
+                    // Target the possessed host
+                    // Use GameStateManager's CurrentHost property for more efficient access
+                    if (gameStateManager != null && gameStateManager.CurrentHost != null)
+                    {
+                        hostTransform = gameStateManager.CurrentHost.transform;
+                        player = hostTransform;
+                        if (showDebugTargeting)
+                        {
+                            Debug.Log($"[EnemyController] {config.enemyName} now targeting host: {player.name}");
+                        }
+                    }
+                    else
+                    {
+                        player = null;
+                        if (showDebugTargeting)
+                        {
+                            Debug.LogWarning($"[EnemyController] {config.enemyName} could not find active host to target!");
+                        }
+                    }
+                    break;
+            }
+
+            // If target changed, update last known position
+            if (player != previousTarget && player != null)
+            {
+                lastKnownPlayerPosition = player.position;
+            }
+        }
+
+        #endregion Player Targeting System
 
         #region State Management
 
@@ -230,7 +390,11 @@ namespace AI.Enemy
             agent.speed = config.chaseSpeed;
             ChangeState(chaseState);
 
-            Debug.Log($"[EnemyController] {config.enemyName} spotted player!");
+            if (showDebugTargeting)
+            {
+                string targetName = player != null ? player.name : "unknown";
+                Debug.Log($"[EnemyController] {config.enemyName} spotted target: {targetName}!");
+            }
         }
 
         public void UpdateLastKnownPosition()
@@ -439,6 +603,103 @@ namespace AI.Enemy
 
         #endregion Combat System
 
+        #region Inspector Debug Functions
+
+        /// <summary>
+        /// Take damage function that can be called from inspector for testing
+        /// </summary>
+        [ContextMenu("Take 10 Damage")]
+        public void TakeDamageFromInspector()
+        {
+            TakeDamageFromInspector(10);
+        }
+
+        /// <summary>
+        /// Take custom damage amount - can be called from inspector or code
+        /// </summary>
+        [ContextMenu("Take 25 Damage")]
+        public void TakeDamage25FromInspector()
+        {
+            TakeDamageFromInspector(25);
+        }
+
+        /// <summary>
+        /// Take half health damage - can be called from inspector
+        /// </summary>
+        [ContextMenu("Take Half Health Damage")]
+        public void TakeHalfHealthDamage()
+        {
+            int halfHealth = Mathf.Max(1, currentHealth / 2);
+            TakeDamageFromInspector(halfHealth);
+        }
+
+        /// <summary>
+        /// Kill enemy instantly - can be called from inspector
+        /// </summary>
+        [ContextMenu("Kill Enemy")]
+        public void KillEnemyFromInspector()
+        {
+            TakeDamageFromInspector(currentHealth);
+        }
+
+        /// <summary>
+        /// Internal function to handle inspector damage calls
+        /// </summary>
+        private void TakeDamageFromInspector(int damage)
+        {
+            if (isDead)
+            {
+                Debug.LogWarning($"[EnemyController] {config?.enemyName ?? gameObject.name} is already dead!");
+                return;
+            }
+
+            Debug.Log($"[EnemyController] {config?.enemyName ?? gameObject.name} taking {damage} damage from inspector. Health: {currentHealth} -> {currentHealth - damage}");
+
+            // Use the existing TakeDamage function with enemy's current position as hit point
+            TakeDamage(damage, transform.position);
+        }
+
+        /// <summary>
+        /// Get current health - useful for inspector debugging
+        /// </summary>
+        [ContextMenu("Show Current Health")]
+        public void ShowCurrentHealth()
+        {
+            if (config != null)
+            {
+                Debug.Log($"[EnemyController] {config.enemyName} Health: {currentHealth}/{config.maxHealth} ({(float)currentHealth/config.maxHealth*100:F1}%)");
+            }
+            else
+            {
+                Debug.Log($"[EnemyController] {gameObject.name} Health: {currentHealth} (no config found)");
+            }
+        }
+
+        /// <summary>
+        /// Reset enemy to full health - useful for testing
+        /// </summary>
+        [ContextMenu("Reset to Full Health")]
+        public void ResetToFullHealth()
+        {
+            if (config != null)
+            {
+                currentHealth = config.maxHealth;
+                isDead = false;
+                isStaggered = false;
+
+                // Re-enable components if they were disabled
+                if (agent != null) agent.enabled = true;
+
+                Debug.Log($"[EnemyController] {config.enemyName} health reset to {currentHealth}");
+            }
+            else
+            {
+                Debug.LogWarning($"[EnemyController] Cannot reset health - no config found!");
+            }
+        }
+
+        #endregion Inspector Debug Functions
+
         #region Room Management
 
         public void SetCurrentRoom(Transform room)
@@ -485,6 +746,13 @@ namespace AI.Enemy
                         }
                     }
                 }
+            }
+
+            // Draw line to current target
+            if (player != null && showDebugTargeting)
+            {
+                Gizmos.color = hasSeenPlayer ? Color.red : Color.gray;
+                Gizmos.DrawLine(transform.position, player.position);
             }
         }
 

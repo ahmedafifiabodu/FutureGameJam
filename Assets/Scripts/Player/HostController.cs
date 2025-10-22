@@ -24,12 +24,25 @@ public class HostController : MonoBehaviour
 
     [SerializeField] private float ragdollDuration = 3f;
 
+    [Header("Voluntary Exit")]
+    [SerializeField] private bool allowVoluntaryExit = true;
+
+    [SerializeField] private float exitLaunchForce = 15f;
+    [SerializeField] private float exitCooldown = 1f;
+    [SerializeField] private ParasiteLaunchTrajectory trajectorySystem;
+    [SerializeField] private bool showExitTrajectory = true;
+    [SerializeField] private float maxExitDistance = 10f;
+    [SerializeField] private LayerMask exitSimulationLayers = -1;
+
     private bool isControlled = false;
     private float remainingLifetime;
     private float timeSinceAttached;
     private ParasiteController attachedParasite;
-    private Camera hostCamera;
     private InputManager inputManager;
+    private float lastExitAttemptTime = -10f;
+    private bool isShowingExitTrajectory = false;
+    private FirstPersonZoneController zoneController;
+    private float gravity;
 
     private static int hostCount = 0; // Track number of hosts used
 
@@ -44,15 +57,26 @@ public class HostController : MonoBehaviour
         if (!cameraPivot)
             Debug.LogWarning($"[Host] CameraPivot not assigned on {gameObject.name}");
 
-        // Get the camera in the CameraPivot (host's camera)
-        if (cameraPivot)
+        // Get zone controller for gravity settings
+        zoneController = GetComponent<FirstPersonZoneController>();
+        if (zoneController != null)
         {
-            hostCamera = cameraPivot.GetComponentInChildren<Camera>();
-            if (hostCamera)
+            gravity = zoneController.Gravity;
+        }
+
+        // Setup trajectory system if not assigned
+        if (trajectorySystem == null && showExitTrajectory)
+        {
+            trajectorySystem = GetComponent<ParasiteLaunchTrajectory>();
+            if (trajectorySystem == null)
             {
-                // Disable host camera by default (parasite isn't attached yet)
-                Debug.Log($"[Host] Found and disabled host camera: {hostCamera.name}");
-                hostCamera.enabled = false;
+                trajectorySystem = GetComponentInChildren<ParasiteLaunchTrajectory>();
+            }
+
+            if (trajectorySystem == null)
+            {
+                Debug.LogWarning("[Host] ParasiteLaunchTrajectory component not found. Exit trajectory visualization will be disabled.");
+                showExitTrajectory = false;
             }
         }
     }
@@ -93,6 +117,69 @@ public class HostController : MonoBehaviour
         {
             Die();
         }
+
+        // Check for voluntary exit input
+        if (allowVoluntaryExit && inputManager != null && Time.time - lastExitAttemptTime >= exitCooldown)
+        {
+            // Check if exit button is being held
+            bool exitButtonHeld = inputManager.ParasiteActions.ExitForHost.IsPressed();
+
+            if (exitButtonHeld)
+            {
+                // Show trajectory while button is held
+                if (!isShowingExitTrajectory)
+                {
+                    isShowingExitTrajectory = true;
+                    Debug.Log("[Host] Showing exit trajectory preview");
+                }
+
+                if (showExitTrajectory && trajectorySystem != null)
+                {
+                    UpdateExitTrajectoryVisualization();
+                }
+            }
+            else if (isShowingExitTrajectory)
+            {
+                // Button released - exit the host
+                isShowingExitTrajectory = false;
+                lastExitAttemptTime = Time.time;
+
+                if (trajectorySystem != null)
+                {
+                    trajectorySystem.HideTrajectory();
+                }
+
+                ExitHost();
+            }
+        }
+        else if (isShowingExitTrajectory)
+        {
+            // Hide trajectory if cooldown active
+            isShowingExitTrajectory = false;
+            if (trajectorySystem != null)
+            {
+                trajectorySystem.HideTrajectory();
+            }
+        }
+    }
+
+    private void UpdateExitTrajectoryVisualization()
+    {
+        Vector3 exitDirection = cameraPivot ? cameraPivot.forward : transform.forward;
+        Vector3 exitVelocity = exitDirection * exitLaunchForce;
+
+        // Calculate exit spawn position (above the host)
+        Vector3 exitStartPosition = transform.position + Vector3.up * 1.5f;
+
+        // Show trajectory with exit parameters
+        trajectorySystem.SimulateTrajectory(
+            exitStartPosition,
+            exitVelocity,
+            gravity,
+            maxExitDistance,
+            exitSimulationLayers, // Use simulation layers instead of host head mask
+            true // Always valid since it's voluntary
+        );
     }
 
     public void OnParasiteAttached(ParasiteController parasite)
@@ -109,11 +196,15 @@ public class HostController : MonoBehaviour
         if (weaponManager)
             weaponManager.Enable();
 
-        // Enable host camera
-        if (hostCamera)
+        Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
+        if (transferredCamera != null)
         {
-            hostCamera.enabled = true;
-            Debug.Log($"[Host] Enabled host camera for control");
+            transferredCamera.enabled = true;
+            Debug.Log($"[Host] Using transferred camera for control");
+        }
+        else
+        {
+            Debug.LogWarning("[Host] No camera found in camera pivot after transfer!");
         }
 
         // Disable the parasite object visually
@@ -126,12 +217,20 @@ public class HostController : MonoBehaviour
     public void OnParasiteDetached()
     {
         isControlled = false;
+        isShowingExitTrajectory = false;
 
-        // Disable host camera when parasite leaves
-        if (hostCamera)
+        // Hide trajectory
+        if (trajectorySystem != null)
         {
-            hostCamera.enabled = false;
-            Debug.Log($"[Host] Disabled host camera - parasite detached");
+            trajectorySystem.HideTrajectory();
+        }
+
+        // Get camera before detaching (will be moved back to parasite)
+        Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
+        if (transferredCamera != null)
+        {
+            // Camera will be moved back to parasite by GameStateManager
+            Debug.Log($"[Host] Camera will be transferred back to parasite");
         }
 
         // Disable host movement controller
@@ -145,13 +244,31 @@ public class HostController : MonoBehaviour
         Debug.Log($"[Host] Parasite detached");
     }
 
+    /// <summary>
+    /// Called when player voluntarily exits the host (by pressing exit button)
+    /// </summary>
+    private void ExitHost()
+    {
+        Debug.Log($"[Host] Player initiated voluntary exit from host");
+
+        // Notify game manager to handle the voluntary exit
+        GameStateManager.Instance.OnVoluntaryHostExit(attachedParasite, cameraPivot.forward, exitLaunchForce);
+    }
+
     private void Die()
     {
         Debug.Log($"[Host] Host died! Survived: {timeSinceAttached:F1}s");
 
-        // Disable camera
-        if (hostCamera)
-            hostCamera.enabled = false;
+        // Hide trajectory if showing
+        if (trajectorySystem != null)
+        {
+            trajectorySystem.HideTrajectory();
+        }
+
+        // Get camera to disable it
+        Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
+        if (transferredCamera != null)
+            transferredCamera.enabled = false;
 
         // Disable movement
         if (hostMovementController)
@@ -205,11 +322,10 @@ public class HostController : MonoBehaviour
 
         // Display lifetime warning
         float screenWidth = Screen.width;
-        float screenHeight = Screen.height;
 
         GUI.Label(new Rect(screenWidth - 220, 8, 200, 30),
-            $"Host Time: {remainingLifetime:F1}s",
-            new GUIStyle(GUI.skin.label) { fontSize = 18, normal = { textColor = remainingLifetime < 10f ? Color.red : Color.white } });
+   $"Host Time: {remainingLifetime:F1}s",
+     new GUIStyle(GUI.skin.label) { fontSize = 18, normal = { textColor = remainingLifetime < 10f ? Color.red : Color.white } });
 
         // Lifetime bar
         float barWidth = 200f;
@@ -219,7 +335,21 @@ public class HostController : MonoBehaviour
 
         GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
         GUI.Box(new Rect(barX, barY, barWidth * GetLifetimePercentage(), barHeight), "",
-            new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
+    new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
+
+        // Exit hint
+        if (allowVoluntaryExit)
+        {
+            string exitHint = isShowingExitTrajectory ?
+ "Release J to Exit" :
+       "Hold J to Show Exit Trajectory";
+
+            Color hintColor = isShowingExitTrajectory ? Color.green : Color.yellow;
+
+            GUI.Label(new Rect(screenWidth - 220, 70, 200, 20),
+          exitHint,
+    new GUIStyle(GUI.skin.label) { fontSize = 12, normal = { textColor = hintColor } });
+        }
     }
 
     public static void ResetHostCount()

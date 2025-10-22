@@ -15,7 +15,7 @@ namespace AI.Enemy.Editor
     {
         private Vector2 scrollPosition;
         private int currentTab = 0;
-        private string[] tabs = { "Scene Setup", "Enemy Prefab Setup", "Config Management", "Validation" };
+        private readonly string[] tabs = { "Scene Setup", "Enemy Prefab Setup", "Config Management", "Validation" };
 
         // Scene Setup
         private EnemySpawnManager spawnManager;
@@ -31,9 +31,9 @@ namespace AI.Enemy.Editor
         private bool createAttackCollider = true;
 
         // Validation
-        private List<string> validationErrors = new List<string>();
+        private readonly List<string> validationErrors = new();
 
-        private List<string> validationWarnings = new List<string>();
+        private readonly List<string> validationWarnings = new();
         private bool validationComplete = false;
 
         [MenuItem("Tools/AI/Enemy AI Setup Wizard")]
@@ -46,7 +46,7 @@ namespace AI.Enemy.Editor
         private void OnEnable()
         {
             // Try to find existing spawn manager
-            spawnManager = FindObjectOfType<EnemySpawnManager>();
+            spawnManager = FindFirstObjectByType<EnemySpawnManager>();
         }
 
         private void OnGUI()
@@ -291,7 +291,7 @@ namespace AI.Enemy.Editor
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(label, GUILayout.Width(150));
 
-            GUIStyle style = new GUIStyle(EditorStyles.label);
+            GUIStyle style = new(EditorStyles.label);
             style.normal.textColor = status ? Color.green : Color.red;
             EditorGUILayout.LabelField(status ? "? Present" : "? Missing", style);
 
@@ -415,7 +415,7 @@ namespace AI.Enemy.Editor
 
                 DrawSubSection("Validation Details");
                 EditorGUILayout.LabelField($"Total Configs: {FindAllConfigs().Length}");
-                EditorGUILayout.LabelField($"Scene has Spawn Manager: {FindObjectOfType<EnemySpawnManager>() != null}");
+                EditorGUILayout.LabelField($"Scene has Spawn Manager: {FindFirstObjectByType<EnemySpawnManager>() != null}");
                 EditorGUILayout.LabelField($"Player Tag Exists: {GameObject.FindGameObjectWithTag("Player") != null}");
             }
 
@@ -456,11 +456,11 @@ namespace AI.Enemy.Editor
 
         private void CreateSpawnManager()
         {
-            GameObject managerObj = new GameObject("EnemySpawnManager");
+            GameObject managerObj = new("EnemySpawnManager");
             spawnManager = managerObj.AddComponent<EnemySpawnManager>();
 
             // Create pool parent
-            GameObject poolParent = new GameObject("Enemy Pool");
+            GameObject poolParent = new("Enemy Pool");
             poolParent.transform.SetParent(managerObj.transform);
 
             Undo.RegisterCreatedObjectUndo(managerObj, "Create Spawn Manager");
@@ -480,7 +480,7 @@ namespace AI.Enemy.Editor
             Transform spawnContainer = prefabRoot.transform.Find("SpawnPoints");
             if (spawnContainer == null)
             {
-                GameObject container = new GameObject("SpawnPoints");
+                GameObject container = new("SpawnPoints");
                 container.transform.SetParent(prefabRoot.transform);
                 container.transform.localPosition = Vector3.zero;
                 spawnContainer = container.transform;
@@ -492,14 +492,13 @@ namespace AI.Enemy.Editor
 
             for (int i = 0; i < count; i++)
             {
-                GameObject spawnPoint = new GameObject($"SpawnPoint_{i + 1:00}");
+                GameObject spawnPoint = new($"SpawnPoint_{i + 1:00}");
                 spawnPoint.transform.SetParent(spawnContainer);
 
                 // Position in grid
                 int row = i / cols;
                 int col = i % cols;
-                spawnPoint.transform.localPosition = new Vector3(col * spacing, 0, row * spacing);
-                spawnPoint.transform.localRotation = Quaternion.identity;
+                spawnPoint.transform.SetLocalPositionAndRotation(new Vector3(col * spacing, 0, row * spacing), Quaternion.identity);
 
                 // Add component
                 var sp = spawnPoint.AddComponent<SpawnPoint>();
@@ -560,7 +559,7 @@ namespace AI.Enemy.Editor
                 Transform attackTrans = prefabRoot.transform.Find("AttackCollider");
                 if (attackTrans == null)
                 {
-                    GameObject attackObj = new GameObject("AttackCollider");
+                    GameObject attackObj = new("AttackCollider");
                     attackObj.transform.SetParent(prefabRoot.transform);
                     attackObj.transform.localPosition = new Vector3(0, 1, 0.8f);
 
@@ -572,7 +571,7 @@ namespace AI.Enemy.Editor
                     // Assign to controller
                     if (controller != null)
                     {
-                        SerializedObject so = new SerializedObject(controller);
+                        SerializedObject so = new(controller);
                         so.FindProperty("attackCollider").objectReferenceValue = attackCollider;
                         so.ApplyModifiedPropertiesWithoutUndo();
                     }
@@ -582,7 +581,7 @@ namespace AI.Enemy.Editor
             // Assign config if provided
             if (controller != null && config != null)
             {
-                SerializedObject so = new SerializedObject(controller);
+                SerializedObject so = new(controller);
                 so.FindProperty("config").objectReferenceValue = config;
                 so.FindProperty("agent").objectReferenceValue = agent;
                 so.FindProperty("animator").objectReferenceValue = animator;
@@ -615,7 +614,7 @@ namespace AI.Enemy.Editor
         private void FindAndSelectRooms()
         {
             var guids = AssetDatabase.FindAssets("t:GameObject", new[] { "Assets" });
-            List<GameObject> rooms = new List<GameObject>();
+            List<GameObject> rooms = new();
 
             foreach (var guid in guids)
             {
@@ -625,11 +624,8 @@ namespace AI.Enemy.Editor
                 if (obj != null)
                 {
                     // Check if it's a room/corridor
-                    if (obj.GetComponent<ProceduralGeneration.Room>() != null ||
-                 obj.GetComponent<ProceduralGeneration.Corridor>() != null)
-                    {
+                    if (obj.GetComponent<ProceduralGeneration.Room>() != null || obj.GetComponent<ProceduralGeneration.Corridor>() != null)
                         rooms.Add(obj);
-                    }
                 }
             }
 
@@ -647,16 +643,14 @@ namespace AI.Enemy.Editor
         private EnemyConfigSO[] FindAllConfigs()
         {
             var guids = AssetDatabase.FindAssets("t:EnemyConfigSO");
-            List<EnemyConfigSO> configs = new List<EnemyConfigSO>();
+            List<EnemyConfigSO> configs = new();
 
             foreach (var guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 var config = AssetDatabase.LoadAssetAtPath<EnemyConfigSO>(path);
                 if (config != null)
-                {
                     configs.Add(config);
-                }
             }
 
             return configs.ToArray();
@@ -672,7 +666,7 @@ namespace AI.Enemy.Editor
 
             var configs = FindAllConfigs();
 
-            SerializedObject so = new SerializedObject(spawnManager);
+            SerializedObject so = new(spawnManager);
             SerializedProperty configsProp = so.FindProperty("enemyConfigs");
 
             configsProp.ClearArray();
@@ -694,14 +688,14 @@ namespace AI.Enemy.Editor
             validationComplete = false;
 
             // Check spawn manager
-            var sm = FindObjectOfType<EnemySpawnManager>();
+            var sm = FindFirstObjectByType<EnemySpawnManager>();
             if (sm == null)
             {
                 validationErrors.Add("No EnemySpawnManager found in scene");
             }
             else
             {
-                SerializedObject so = new SerializedObject(sm);
+                SerializedObject so = new(sm);
                 var configsProp = so.FindProperty("enemyConfigs");
                 if (configsProp.arraySize == 0)
                 {

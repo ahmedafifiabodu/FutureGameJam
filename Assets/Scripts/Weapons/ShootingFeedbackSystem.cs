@@ -11,47 +11,47 @@ public class ShootingFeedbackSystem : MonoBehaviour
 {
     [Header("Feedback Profile")]
     [SerializeField] private ShootingFeedbackProfile feedbackProfile;
-    
+
     [Header("References")]
     [SerializeField] private CameraShakeManager cameraShake;
+
     [SerializeField] private AudioSource feedbackAudioSource;
-    
+
     [Header("URP Post-Processing")]
     [SerializeField] private Volume postProcessVolume; // Assign in Inspector
+
     [Tooltip("If true, system will try to find Volume automatically")]
     [SerializeField] private bool autoFindVolume = true;
 
     // Runtime state only (not in profile)
     private float screenFlashTimer = 0f;
+
     private float chromaticTimer = 0f;
     private float vignetteTimer = 0f;
     private float hitMarkerTimer = 0f;
     private int currentDecalCount = 0;
     private Texture2D flashTexture;
-    
+
     // URP Post-Processing effects
     private ChromaticAberration chromaticAberration;
+
     private Vignette vignette;
     private bool hasPostProcessing = false;
 
     private void Awake()
     {
         if (!cameraShake)
-            cameraShake = FindObjectOfType<CameraShakeManager>();
+            cameraShake = FindFirstObjectByType<CameraShakeManager>();
 
         if (!feedbackAudioSource)
             feedbackAudioSource = GetComponent<AudioSource>();
-        
+
         // Try to find Volume if not assigned
         if (autoFindVolume && !postProcessVolume)
         {
-            postProcessVolume = FindObjectOfType<Volume>();
-            if (postProcessVolume)
-            {
-                Debug.Log("[ShootingFeedbackSystem] Auto-found Volume component");
-            }
+            postProcessVolume = FindFirstObjectByType<Volume>();
         }
-        
+
         // Get post-processing effects from Volume
         SetupPostProcessing();
 
@@ -65,7 +65,7 @@ public class ShootingFeedbackSystem : MonoBehaviour
             Debug.LogWarning("[ShootingFeedbackSystem] No feedback profile assigned! Feedback will not work.");
         }
     }
-    
+
     private void SetupPostProcessing()
     {
         if (!postProcessVolume)
@@ -74,40 +74,40 @@ public class ShootingFeedbackSystem : MonoBehaviour
                            "Add a Volume component to your scene or assign it in the Inspector.");
             return;
         }
-        
+
         VolumeProfile profile = postProcessVolume.profile;
         if (!profile)
         {
             Debug.LogWarning("[ShootingFeedbackSystem] Volume has no profile assigned!");
             return;
         }
-        
+
         // Try to get existing effects
         if (!profile.TryGet(out chromaticAberration))
         {
             chromaticAberration = profile.Add<ChromaticAberration>(false);
             Debug.Log("[ShootingFeedbackSystem] Added ChromaticAberration to Volume profile");
         }
-        
+
         if (!profile.TryGet(out vignette))
         {
             vignette = profile.Add<Vignette>(false);
             Debug.Log("[ShootingFeedbackSystem] Added Vignette to Volume profile");
         }
-        
+
         // Initialize to zero
         if (chromaticAberration)
         {
             chromaticAberration.intensity.value = 0f;
             chromaticAberration.active = false;
         }
-        
+
         if (vignette)
         {
             vignette.intensity.value = 0f;
             vignette.active = false;
         }
-        
+
         hasPostProcessing = true;
         Debug.Log("[ShootingFeedbackSystem] Post-processing setup complete!");
     }
@@ -122,25 +122,25 @@ public class ShootingFeedbackSystem : MonoBehaviour
         UpdateVignette();
         UpdateHitMarker();
     }
-    
+
     private void UpdateScreenFlash()
     {
         if (screenFlashTimer > 0f)
             screenFlashTimer -= Time.deltaTime;
     }
-    
+
     private void UpdateChromaticAberration()
     {
         if (chromaticTimer > 0f)
         {
             chromaticTimer -= Time.deltaTime;
-            
+
             if (hasPostProcessing && chromaticAberration)
             {
                 // Calculate intensity based on timer (fade out)
                 float t = chromaticTimer / feedbackProfile.chromaticDuration;
                 float intensity = feedbackProfile.chromaticIntensity * t;
-                
+
                 chromaticAberration.intensity.value = intensity;
                 chromaticAberration.active = true;
             }
@@ -152,19 +152,19 @@ public class ShootingFeedbackSystem : MonoBehaviour
             chromaticAberration.active = false;
         }
     }
-    
+
     private void UpdateVignette()
     {
         if (vignetteTimer > 0f)
         {
             vignetteTimer -= Time.deltaTime;
-            
+
             if (hasPostProcessing && vignette)
             {
                 // Calculate intensity based on timer (fade out)
                 float t = vignetteTimer / feedbackProfile.vignetteDuration;
                 float intensity = feedbackProfile.vignetteIntensity * t;
-                
+
                 vignette.intensity.value = intensity;
                 vignette.active = true;
             }
@@ -176,7 +176,7 @@ public class ShootingFeedbackSystem : MonoBehaviour
             vignette.active = false;
         }
     }
-    
+
     private void UpdateHitMarker()
     {
         if (hitMarkerTimer > 0f)
@@ -281,7 +281,7 @@ public class ShootingFeedbackSystem : MonoBehaviour
         {
             vignetteTimer = feedbackProfile.vignetteDuration * intensity;
         }
-        
+
         if (feedbackProfile.enableChromaticAberration)
         {
             chromaticTimer = feedbackProfile.chromaticDuration * intensity;
@@ -301,10 +301,10 @@ public class ShootingFeedbackSystem : MonoBehaviour
         if (screenFlashTimer > 0f)
         {
             float alpha = (screenFlashTimer / feedbackProfile.flashDuration) * feedbackProfile.flashColor.a;
-            Color color = new Color(
-                feedbackProfile.flashColor.r, 
-                feedbackProfile.flashColor.g, 
-                feedbackProfile.flashColor.b, 
+            Color color = new(
+                feedbackProfile.flashColor.r,
+                feedbackProfile.flashColor.g,
+                feedbackProfile.flashColor.b,
                 alpha
             );
             GUI.color = color;
@@ -316,10 +316,10 @@ public class ShootingFeedbackSystem : MonoBehaviour
         if (hitMarkerTimer > 0f)
         {
             float alpha = hitMarkerTimer / feedbackProfile.hitMarkerDuration;
-            Color color = new Color(
-                feedbackProfile.hitMarkerColor.r, 
-                feedbackProfile.hitMarkerColor.g, 
-                feedbackProfile.hitMarkerColor.b, 
+            Color color = new(
+                feedbackProfile.hitMarkerColor.r,
+                feedbackProfile.hitMarkerColor.g,
+                feedbackProfile.hitMarkerColor.b,
                 alpha
             );
 
@@ -340,7 +340,10 @@ public class ShootingFeedbackSystem : MonoBehaviour
 
     // Public getters
     public bool IsFlashing() => screenFlashTimer > 0f;
+
     public float GetFlashProgress() => feedbackProfile ? screenFlashTimer / feedbackProfile.flashDuration : 0f;
+
     public ShootingFeedbackProfile GetCurrentProfile() => feedbackProfile;
+
     public bool HasPostProcessing() => hasPostProcessing;
 }

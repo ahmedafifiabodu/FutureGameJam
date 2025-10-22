@@ -666,6 +666,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Exit For Host"",
+                    ""type"": ""Button"",
+                    ""id"": ""09c3d873-6cc8-47de-9820-25534cd03cb4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1051,6 +1060,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c36a8d1-51a9-49c0-867a-5580244bcee1"",
+                    ""path"": ""<Keyboard>/j"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Exit For Host"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1659,6 +1679,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Parasite_Previous = m_Parasite.FindAction("Previous", throwIfNotFound: true);
         m_Parasite_Next = m_Parasite.FindAction("Next", throwIfNotFound: true);
         m_Parasite_Sprint = m_Parasite.FindAction("Sprint", throwIfNotFound: true);
+        m_Parasite_ExitForHost = m_Parasite.FindAction("Exit For Host", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1957,6 +1978,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Parasite_Previous;
     private readonly InputAction m_Parasite_Next;
     private readonly InputAction m_Parasite_Sprint;
+    private readonly InputAction m_Parasite_ExitForHost;
     /// <summary>
     /// Provides access to input actions defined in input action map "Parasite".
     /// </summary>
@@ -2004,6 +2026,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Parasite/Sprint".
         /// </summary>
         public InputAction @Sprint => m_Wrapper.m_Parasite_Sprint;
+        /// <summary>
+        /// Provides access to the underlying input action "Parasite/ExitForHost".
+        /// </summary>
+        public InputAction @ExitForHost => m_Wrapper.m_Parasite_ExitForHost;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -2057,6 +2083,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
+            @ExitForHost.started += instance.OnExitForHost;
+            @ExitForHost.performed += instance.OnExitForHost;
+            @ExitForHost.canceled += instance.OnExitForHost;
         }
 
         /// <summary>
@@ -2095,6 +2124,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
+            @ExitForHost.started -= instance.OnExitForHost;
+            @ExitForHost.performed -= instance.OnExitForHost;
+            @ExitForHost.canceled -= instance.OnExitForHost;
         }
 
         /// <summary>
@@ -2536,6 +2568,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSprint(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Exit For Host" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnExitForHost(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

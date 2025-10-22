@@ -12,27 +12,32 @@ public class RangedWeapon : WeaponBase
 
     [Header("Visual Effects (Instance References)")]
     [SerializeField] private ParticleSystem muzzleFlash;
+
     [SerializeField] private Transform muzzlePoint; // Where bullets spawn from
 
     [Header("Shooting Feedback")]
     [SerializeField] private ShootingFeedbackSystem feedbackSystem;
+
     [SerializeField] private ShellEjector shellEjector;
     [SerializeField] private bool useFeedbackSystem = true;
 
     [Header("References")]
     [SerializeField] private Transform weaponHolder; // Parent of the weapon for recoil
+
     [SerializeField] private Camera playerCamera;
     [SerializeField] private AudioSource audioSource;
 
     [Header("Optional Components")]
     [SerializeField] private WeaponRecoilController weaponRecoilController; // Optional, disable bob if used
-    
+
     [Header("ADS Movement Settings")]
     [SerializeField] private bool disableSprintWhileAiming = true; // Prevent sprint exploit
+
     [SerializeField] private float aimingMoveSpeedMultiplier = 0.5f; // Slow movement when aiming
 
     // Runtime state only (not serialized)
     private int currentAmmo;
+
     private int reserveAmmo;
     private float nextFireTime;
     private bool isReloading;
@@ -40,6 +45,7 @@ public class RangedWeapon : WeaponBase
 
     // Recoil tracking
     private Vector3 currentRecoilRotation;
+
     private Vector3 currentRecoilPosition;
     private Vector3 targetRecoilRotation;
     private Vector3 targetRecoilPosition;
@@ -49,11 +55,13 @@ public class RangedWeapon : WeaponBase
 
     // Store base positions (set from prefab)
     private Vector3 weaponHolderBasePosition;
+
     private Quaternion weaponHolderBaseRotation;
     private bool hasStoredBaseTransform = false;
 
     // ADS (Aim Down Sights) tracking
     private bool isAiming = false;
+
     private float defaultFOV;
     private float currentFOV;
     private Vector3 defaultWeaponPosition;
@@ -62,8 +70,9 @@ public class RangedWeapon : WeaponBase
 
     // Animation parameter hashes (cached for performance)
     private int reloadingHash;
+
     private int aimingHash;
-    
+
     // Reference to player controller for movement restrictions
     private FirstPersonZoneController playerController;
 
@@ -86,7 +95,7 @@ public class RangedWeapon : WeaponBase
             playerCamera = Camera.main;
 
         if (!feedbackSystem)
-            feedbackSystem = FindObjectOfType<ShootingFeedbackSystem>();
+            feedbackSystem = FindFirstObjectByType<ShootingFeedbackSystem>();
 
         // Auto-find WeaponRecoilController if not assigned
         if (!weaponRecoilController)
@@ -146,7 +155,7 @@ public class RangedWeapon : WeaponBase
         {
             // Toggle bob based on aiming state (disable when aiming for stability)
             bool shouldEnableBob = !isAiming;
-            
+
             if (weaponRecoilController.enabled != shouldEnableBob)
             {
                 weaponRecoilController.enabled = shouldEnableBob;
@@ -227,7 +236,7 @@ public class RangedWeapon : WeaponBase
             // Update base position for aim offset
             Vector3 targetPosition = isAiming ? aimWeaponPosition : defaultWeaponPosition;
             weaponHolderBasePosition = Vector3.Lerp(weaponHolderBasePosition, targetPosition, Time.deltaTime * weaponProfile.aimSpeed);
-            
+
             // Sync with WeaponRecoilController if active
             if (weaponRecoilController && weaponRecoilController.enabled)
             {
@@ -383,7 +392,7 @@ public class RangedWeapon : WeaponBase
     {
         // Apply recoil with ADS modifier if aiming
         float recoilMultiplier = isAiming ? weaponProfile.aimRecoilMultiplier : 1f;
-        
+
         targetRecoilRotation += weaponProfile.recoilRotation * recoilMultiplier;
         targetRecoilPosition += weaponProfile.recoilKickback * recoilMultiplier;
     }
@@ -445,7 +454,7 @@ public class RangedWeapon : WeaponBase
         float swayX = -look.x * weaponProfile.swayAmount * swayMultiplier;
         float swayY = -look.y * weaponProfile.swayAmount * swayMultiplier;
 
-        Vector3 targetSwayPosition = new Vector3(swayX, swayY, 0);
+        Vector3 targetSwayPosition = new(swayX, swayY, 0);
         swayPosition = Vector3.Lerp(swayPosition, targetSwayPosition, weaponProfile.swaySpeed * Time.deltaTime);
 
         // Reset sway when not moving mouse
@@ -507,44 +516,51 @@ public class RangedWeapon : WeaponBase
     public override void Equip()
     {
         base.Equip();
-        
+
         // Reset FOV when equipping
         if (playerCamera && hasStoredDefaultFOV)
         {
             currentFOV = defaultFOV;
             playerCamera.fieldOfView = defaultFOV;
         }
-        
+
         isAiming = false;
     }
 
     public override void Unequip()
     {
         base.Unequip();
-        
+
         // Reset FOV when unequipping
         if (playerCamera && hasStoredDefaultFOV)
         {
             playerCamera.fieldOfView = defaultFOV;
         }
-        
+
         // Re-enable WeaponRecoilController if it was disabled
         if (weaponRecoilController)
         {
             weaponRecoilController.enabled = true;
         }
-        
+
         isAiming = false;
     }
 
     // Public getters for UI
     public int GetCurrentAmmo() => currentAmmo;
+
     public int GetMagazineSize() => weaponProfile ? weaponProfile.magazineSize : 0;
+
     public int GetReserveAmmo() => reserveAmmo;
+
     public bool IsReloading() => isReloading;
+
     public bool IsAiming() => isAiming;
+
     public float GetAimingMoveSpeedMultiplier() => isAiming ? aimingMoveSpeedMultiplier : 1f;
+
     public float GetReloadProgress() => isReloading && weaponProfile ? 1f - (reloadTimer / weaponProfile.reloadTime) : 1f;
+
     public RangedWeaponProfile GetCurrentProfile() => weaponProfile;
 
     // Debug UI

@@ -5,6 +5,7 @@ public class ParasiteController : MonoBehaviour
 {
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
+
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float airControl = 2.5f;
     [SerializeField] private float slideControl = 2f;
@@ -25,6 +26,23 @@ public class ParasiteController : MonoBehaviour
     [SerializeField] private float cameraTilt = 5f;
     [SerializeField] private float tiltTimeChange = 50f;
 
+    [Header("Launch Physics")]
+    [SerializeField] private bool enableBounce = true;
+
+    [Tooltip("Percentage of velocity retained after bouncing (0 = no bounce, 1 = perfect bounce)")]
+    [SerializeField][Range(0f, 1f)] private float bounciness = 0.6f;
+
+    [SerializeField] private bool enableFriction = true;
+
+    [Tooltip("Friction applied to velocity per second while in air (higher = more friction)")]
+    [SerializeField][Range(0f, 5f)] private float airFriction = 0.5f;
+
+    [Tooltip("Friction applied to velocity per second when sliding on walls")]
+    [SerializeField][Range(0f, 10f)] private float wallFriction = 2f;
+
+    [Tooltip("Minimum velocity magnitude before stopping due to friction")]
+    [SerializeField] private float minVelocityThreshold = 0.5f;
+
     [Header("Host Detection")]
     [SerializeField] private LayerMask hostHeadLayerMask;
 
@@ -38,15 +56,19 @@ public class ParasiteController : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebug = true;
+
     [SerializeField] private Color aimColor = Color.red;
     [SerializeField] private Color tooCloseColor = Color.yellow;
 
     [Header("Bobbing")]
     [SerializeField] private Vector3 restPosition;
+
     [SerializeField] private float bobSpeed = 4.8f;
     [SerializeField] private float bobAmount = 0.05f;
     [SerializeField] private float bobTimer = Mathf.PI / 2;
 
+    [Header("Visual Effects")]
+    [SerializeField] private bool usePossessionTransition = true;
 
     private CharacterController controller;
     private InputManager inputManager;
@@ -70,6 +92,7 @@ public class ParasiteController : MonoBehaviour
     private float lastLandTime;
     private Vector3 launchVelocity;
     private bool canLaunch; // Track if target is far enough to launch
+    private bool isAttachingToHost = false; // Prevent multiple host attachments
 
     private void Awake()
     {
@@ -114,6 +137,9 @@ public class ParasiteController : MonoBehaviour
             if (showDebug)
                 Debug.Log("[Parasite] Disabled FirstPersonZoneController to avoid camera conflict");
         }
+
+        // Reset attachment flag when enabled
+        isAttachingToHost = false;
     }
 
     private void OnDisable()
@@ -221,7 +247,6 @@ public class ParasiteController : MonoBehaviour
         if (moveDir != Vector3.zero && controller.isGrounded)
         {
             bobTimer += bobSpeed * Time.deltaTime;
-
         }
         else
         {
@@ -230,7 +255,7 @@ public class ParasiteController : MonoBehaviour
 
         if (bobTimer > Mathf.PI * 2)
         {
-            bobTimer -= Mathf.PI * 2;    
+            bobTimer -= Mathf.PI * 2;
         }
         cameraPivot.localPosition = new Vector3(restPosition.x + (Mathf.Sin(bobTimer) * bobAmount) * 0.1f,
             restPosition.y + (Mathf.Sin(bobTimer * 2f) * bobAmount), restPosition.z);
@@ -312,16 +337,54 @@ public class ParasiteController : MonoBehaviour
     {
         launchVelocity.y += gravity * Time.deltaTime;
 
-        CollisionFlags flags = controller.Move(launchVelocity * Time.deltaTime);
-
-        if ((flags & CollisionFlags.Sides) != 0 || (flags & CollisionFlags.Above) != 0)
+        // Apply air friction if enabled
+        if (enableFriction && airFriction > 0f)
         {
-            CheckForHostCollision();
+            float frictionMultiplier = Mathf.Max(0f, 1f - (airFriction * Time.deltaTime));
+            Vector3 horizontalVelocity = new Vector3(launchVelocity.x, 0f, launchVelocity.z);
+            horizontalVelocity *= frictionMultiplier;
+            launchVelocity.x = horizontalVelocity.x;
+            launchVelocity.z = horizontalVelocity.z;
+
+            // Stop if velocity is too low
+            if (launchVelocity.magnitude < minVelocityThreshold)
+            {
+                if (showDebug)
+                    Debug.Log("[Parasite] Velocity too low, stopping launch");
+                ResetToGroundedState();
+                return;
+            }
         }
+
+        CollisionFlags flags = controller.Move(launchVelocity * Time.deltaTime);
 
         if ((flags & CollisionFlags.Below) != 0 && launchVelocity.y < 0)
         {
             ResetToGroundedState();
+        }
+
+        // Apply bounce effect if enabled and hitting the ground or a valid surface
+        if (enableBounce && (flags & CollisionFlags.Below) != 0 && launchVelocity.y < 0)
+        {
+            launchVelocity.y = Mathf.Abs(launchVelocity.y) * bounciness;
+            // Reduce horizontal velocity based on bounce angle (flattening the bounce)
+            launchVelocity.x *= 1f - bounciness;
+            launchVelocity.z *= 1f - bounciness;
+
+            if (showDebug)
+                Debug.Log($"[Parasite] Bounced! New Velocity: {launchVelocity}");
+        }
+
+        // Apply air friction
+        if (!controller.isGrounded && enableFriction)
+        {
+            float friction = airFriction * Time.deltaTime;
+            launchVelocity.x = Mathf.MoveTowards(launchVelocity.x, 0, friction);
+            launchVelocity.z = Mathf.MoveTowards(launchVelocity.z, 0, friction);
+
+            // Slow down vertical velocity as well, preventing infinite ascent
+            if (Mathf.Abs(launchVelocity.y) > minVelocityThreshold)
+                launchVelocity.y = Mathf.MoveTowards(launchVelocity.y, 0, friction);
         }
     }
 
@@ -339,20 +402,50 @@ public class ParasiteController : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (!isLaunching) return;
+        if (!isLaunching || isAttachingToHost) return;
 
         if (IsHostHead(hit.gameObject))
+        {
+            // Set flag immediately to prevent other hosts from being processed
+            isAttachingToHost = true;
             AttachToHost(hit.gameObject);
-    }
-
-    private void CheckForHostCollision()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, 0.5f, hostHeadLayerMask);
-
-        if (hits.Length > 0)
-            AttachToHost(hits[0].gameObject);
+        }
         else
-            Invoke(nameof(ResetToGroundedState), 0.3f);
+        {
+            // Hit something that's not a host - apply bounce and friction physics
+            if (enableBounce && bounciness > 0f)
+            {
+                // Calculate bounce direction
+                Vector3 normal = hit.normal;
+                Vector3 reflectedVelocity = Vector3.Reflect(launchVelocity, normal);
+
+                // Apply bounciness factor
+                launchVelocity = reflectedVelocity * bounciness;
+
+                // Apply wall friction if enabled and hitting a wall (not ground)
+                if (enableFriction && wallFriction > 0f && Mathf.Abs(normal.y) < 0.7f) // Not a floor/ceiling
+                {
+                    float frictionMultiplier = Mathf.Max(0f, 1f - (wallFriction * Time.deltaTime));
+                    launchVelocity *= frictionMultiplier;
+                }
+
+                if (showDebug)
+                    Debug.Log($"[Parasite] Bounced off {hit.gameObject.name} with velocity {launchVelocity.magnitude:F1}");
+
+                // Check if velocity is too low after bounce
+                if (launchVelocity.magnitude < minVelocityThreshold)
+                {
+                    if (showDebug)
+                        Debug.Log("[Parasite] Velocity too low after bounce, stopping");
+                    ResetToGroundedState();
+                }
+            }
+            else if (showDebug)
+            {
+                // Hit something that's not a host - will timeout and return to ground
+                Debug.Log($"[Parasite] Hit non-host object: {hit.gameObject.name}");
+            }
+        }
     }
 
     private bool IsHostHead(GameObject obj) => ((1 << obj.layer) & hostHeadLayerMask) != 0;
@@ -360,15 +453,61 @@ public class ParasiteController : MonoBehaviour
     private void AttachToHost(GameObject hostHead)
     {
         if (showDebug)
-            Debug.Log($"[Parasite] Attached to host: {hostHead.name}");
+            Debug.Log($"[Parasite] Attempting to attach to host: {hostHead.name}");
 
         var hostController = hostHead.GetComponentInParent<HostController>();
-        if (hostController != null)
-            hostController.OnParasiteAttached(this);
 
-        GameStateManager.Instance.SwitchToHostMode(hostHead.transform.root.gameObject);
+        if (hostController == null)
+        {
+            Debug.LogError($"[Parasite] No HostController found in parent of {hostHead.name}!");
+            // Reset flag if attachment fails
+            isAttachingToHost = false;
+            return;
+        }
 
-        this.enabled = false;
+        // Get the actual host GameObject (the one with HostController)
+        GameObject hostGameObject = hostController.gameObject;
+
+        if (showDebug)
+            Debug.Log($"[Parasite] Successfully attaching to host: {hostGameObject.name}");
+
+        // Get the parasite camera
+        Camera parasiteCamera = cameraPivot.GetComponentInChildren<Camera>();
+        Transform hostCameraPivot = hostController.GetCameraPivot();
+
+        // Play transition effect with camera transfer
+        var transitionEffect = PossessionTransitionEffect.Instance != null ? PossessionTransitionEffect.Instance : PossessionTransitionEffect.CreateInstance();
+
+        if (parasiteCamera != null && hostCameraPivot != null)
+        {
+            // Transfer camera during transition
+            transitionEffect.PlayPossessionTransition(parasiteCamera, hostCameraPivot, () =>
+            {
+                // This callback happens at the midpoint (after camera transfer)
+                if (hostController != null)
+                    hostController.OnParasiteAttached(this);
+
+                // Pass the actual host GameObject, not the head
+                GameStateManager.Instance.SwitchToHostMode(hostGameObject);
+
+                this.enabled = false;
+            });
+        }
+        else
+        {
+            // Fallback to original behavior if camera or pivot not found
+            Debug.LogWarning("[Parasite] Camera or host pivot not found. Using fallback possession.");
+            transitionEffect.PlayPossessionTransition(() =>
+            {
+                if (hostController != null)
+                    hostController.OnParasiteAttached(this);
+
+                // Pass the actual host GameObject, not the head
+                GameStateManager.Instance.SwitchToHostMode(hostGameObject);
+
+                this.enabled = false;
+            });
+        }
     }
 
     private void ResetToGroundedState()
@@ -376,10 +515,11 @@ public class ParasiteController : MonoBehaviour
         lastLandTime = Time.time;
         launchTimedOut = false;
         isLaunching = false;
+        isAttachingToHost = false; // Reset attachment flag
         move += launchVelocity;
         move.y = 0;
         launchVelocity = Vector3.zero;
-        if(zoneController != null)
+        if (zoneController != null)
             gravity = zoneController.Gravity;
 
         if (showDebug)
@@ -410,13 +550,13 @@ public class ParasiteController : MonoBehaviour
 
         // Show trajectory only when both conditions are met
         trajectorySystem.SimulateTrajectory(
-            transform.position,
-            launchVel,
-            gravity,
-            maxLaunchDistance,
-            hostHeadLayerMask,
-            isValidDistance
-        );
+                transform.position,
+     launchVel,
+     gravity,
+             maxLaunchDistance,
+          hostHeadLayerMask,
+                isValidDistance
+            );
     }
 
     private float CalculateDistanceToTarget(Vector3 direction)
@@ -522,12 +662,28 @@ public class ParasiteController : MonoBehaviour
         GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
 
         GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1} | Gravity: {gravity:F1}");
-        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}ï¿½ | Pitch: {pitch:F1}ï¿½");
+        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
 
         if (isAiming)
         {
             float distance = CalculateDistanceToTarget(cameraPivot ? cameraPivot.forward : transform.forward);
             GUI.Label(new Rect(8, 88, 400, 20), $"Target Distance: {distance:F1}m (Min: {minLaunchDistance:F1}m)");
         }
+    }
+
+    /// <summary>
+    /// Called when voluntarily exiting a host - launches the parasite with given velocity
+    /// </summary>
+    public void ExitLaunch(Vector3 velocity)
+    {
+        launchVelocity = velocity;
+        isLaunching = true;
+        isAttachingToHost = false; // Reset attachment flag for new launch
+        lastLaunchTime = Time.time;
+        launchStartTime = Time.time;
+        gravity *= startGravityMultiplier;
+
+        if (showDebug)
+            Debug.Log($"[Parasite] Exit launched from host! Velocity: {velocity}");
     }
 }
