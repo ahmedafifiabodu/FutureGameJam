@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Manages game state transitions between Parasite mode and Host mode
@@ -16,6 +18,7 @@ public class GameStateManager : MonoBehaviour
     [SerializeField] private ParasiteController parasiteController;
     [SerializeField] private GameObject currentHost;
     [SerializeField] private HostController currentHostController;
+    [SerializeField] private Volume volume;
 
     [Header("Spawning")]
     [SerializeField] private Transform parasiteSpawnPoint;
@@ -100,6 +103,18 @@ public class GameStateManager : MonoBehaviour
 
         // Get host controller
         currentHostController = host.GetComponent<HostController>();
+
+        volume.profile.TryGet(out LensDistortion fisheye);
+        {
+            fisheye.active = false;
+        }
+
+        // Disable parasite camera
+        if (parasiteCamera)
+        {
+            parasiteCamera.enabled = false;
+            Debug.Log("[GameState] Disabled parasite camera");
+        }
 
         // Disable parasite
         if (parasitePlayer)
@@ -287,6 +302,11 @@ public class GameStateManager : MonoBehaviour
 
         currentHost = null;
         currentHostController = null;
+
+        volume.profile.TryGet(out LensDistortion fisheye);
+        {
+            fisheye.active = true;
+        }
 
         // Enable parasite
         if (parasitePlayer)
