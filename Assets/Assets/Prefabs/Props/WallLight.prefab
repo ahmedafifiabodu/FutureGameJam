@@ -89,6 +89,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Point Light
       objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Intensity
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_BounceIntensity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8096181586021228862, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
