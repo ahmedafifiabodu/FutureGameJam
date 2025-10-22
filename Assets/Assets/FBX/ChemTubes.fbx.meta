@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 133dfc66d78f499438df52e087d04232
+guid: 7a2d260fd6458c64897d90bbb5182490
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,8 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Ceiling pattern
-    second: {fileID: 2100000, guid: f773a9b290dbf31408cb27ab2f8abf09, type: 2}
+      name: ChemTube
+    second: {fileID: 2100000, guid: 41c1c492fe0dfb84aa19a0adeaf648a6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -38,7 +38,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 2000
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -96,7 +96,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 20
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
