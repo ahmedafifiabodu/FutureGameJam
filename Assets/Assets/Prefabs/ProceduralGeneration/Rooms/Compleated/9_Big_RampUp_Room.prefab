@@ -12301,6 +12301,7 @@ GameObject:
   m_Component:
   - component: {fileID: 279616211813508395}
   - component: {fileID: 221347178080350814}
+  - component: {fileID: 9170586047103854582}
   m_Layer: 0
   m_Name: EntrancePoint
   m_TagString: Untagged
@@ -12338,6 +12339,33 @@ MonoBehaviour:
   pointType: 0
   detectionRadius: 2
   showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &9170586047103854582
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5533722927607800730}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5844767834068369129
 GameObject:
   m_ObjectHideFlags: 0
@@ -13125,12 +13153,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.Room
   pointA: {fileID: 221347178080350814}
   pointB: {fileID: 5622453456217092263}
-  doors: []
+  entranceDoor: {fileID: 0}
+  exitDoor: {fileID: 0}
   spawnPoints: []
   playerHasEntered: 0
+  showEnemyDebug: 0
   roomName: Room
-  startingRoom: 0
   enemySpawnDelay: 0.5
+  startingRoom: 0
+  startingRoomDoorDelay: 1.5
+  showDebugLogs: 1
 --- !u!1 &7998966816874250461
 GameObject:
   m_ObjectHideFlags: 0
@@ -13882,6 +13914,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6255567176941270258}
   - component: {fileID: 5622453456217092263}
+  - component: {fileID: 6477929352105244544}
   m_Layer: 0
   m_Name: ExitPoint
   m_TagString: Untagged
@@ -13919,6 +13952,33 @@ MonoBehaviour:
   pointType: 0
   detectionRadius: 2
   showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &6477929352105244544
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8773491243322899747}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &119227104285734241
 PrefabInstance:
   m_ObjectHideFlags: 0
