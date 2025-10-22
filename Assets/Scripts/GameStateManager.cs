@@ -109,13 +109,6 @@ public class GameStateManager : MonoBehaviour
             fisheye.active = false;
         }
 
-        // Disable parasite camera
-        if (parasiteCamera)
-        {
-            parasiteCamera.enabled = false;
-            Debug.Log("[GameState] Disabled parasite camera");
-        }
-
         // Disable parasite
         if (parasitePlayer)
             parasitePlayer.SetActive(false);
