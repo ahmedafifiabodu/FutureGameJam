@@ -228,6 +228,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Range
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_Color.b
       value: 0.3177287
       objectReference: {fileID: 0}
@@ -241,7 +245,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_Intensity
-      value: 0.5
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_SpotAngle
