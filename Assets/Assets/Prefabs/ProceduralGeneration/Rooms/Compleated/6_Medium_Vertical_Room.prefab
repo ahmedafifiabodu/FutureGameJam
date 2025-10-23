@@ -7388,6 +7388,7 @@ GameObject:
   m_Component:
   - component: {fileID: 646676971553826823}
   - component: {fileID: 4506358885198219646}
+  - component: {fileID: 8753450033824894452}
   m_Layer: 0
   m_Name: 6_Medium_Vertical_Room
   m_TagString: Untagged
@@ -7587,6 +7588,13 @@ MonoBehaviour:
   - {fileID: 1191494585106450674}
   - {fileID: 8579951329828067583}
   - {fileID: 4704336422568418394}
+  baseEnemiesPerPiece: 3
+  enemiesPerIteration: 0.5
+  maxEnemiesPerPiece: 10
+  spawnChance: 0.8
+  minIteration: 0
+  maxIteration: 0
+  useCustomSpawnSettings: 0
   playerHasEntered: 0
   showEnemyDebug: 0
   roomName: Room
@@ -7594,6 +7602,38 @@ MonoBehaviour:
   startingRoom: 0
   startingRoomDoorDelay: 1.5
   showDebugLogs: 1
+--- !u!114 &8753450033824894452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7604991661879118048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 90701bc2d73f45e41972116504dad235, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &7696982988191019446
 GameObject:
   m_ObjectHideFlags: 0
