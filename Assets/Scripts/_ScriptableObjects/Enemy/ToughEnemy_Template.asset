@@ -14,15 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AI.Enemy.Configuration.EnemyConfigSO
   enemyName: Tough Shotgunner
   enemyType: 1
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 8679664440752320603, guid: 864d480d1a8ad25438c376e9f1232c29, type: 3}
   maxHealth: 100
   attackDamage: 25
   moveSpeed: 2.5
-  instantAggroRadius: 6
-  delayedAggroRadius: 18
-  aggroDelay: 1.5
+  patrolSpeed: 2
+  patrolWaitTime: 2
+  usePatrolPoints: 1
+  sightRange: 15
+  fieldOfViewAngle: 90
+  visionCheckInterval: 0.5
+  visionObstacleMask:
+    serializedVersion: 2
+    m_Bits: 2097153
   attackRange: 8
   attackCooldown: 3
+  chaseSpeed: 5
+  chaseLostSightTime: 3
   staggerChance: 0.2
   staggerDuration: 0.3
   spawnWeight: 30
@@ -35,13 +43,15 @@ MonoBehaviour:
   jumpCooldown: 3
   mediumRangeMin: 5
   mediumRangeMax: 12
-  isRanged: 0
-  projectilePrefab: {fileID: 0}
+  isRanged: 1
+  projectilePrefab: {fileID: 3627899498136515975, guid: e25d2ed9f08a26644a9f789ea99f2b2b, type: 3}
   projectileSpeed: 20
-  hasCustomAnimations: 0
+  hasCustomAnimations: 1
   idleAnimation: Idle
+  patrolAnimation: Patrol
   chaseAnimation: Chase
-  attackAnimation: Attack
+  meleeAttackAnimation: meeleAttack
+  projectileAttackAnimation: ProjectileAttack
   staggerAnimation: Stagger
   deathAnimation: Death
   jumpAnimation: Jump

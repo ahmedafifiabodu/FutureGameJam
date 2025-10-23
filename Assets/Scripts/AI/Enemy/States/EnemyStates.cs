@@ -11,10 +11,12 @@ namespace AI.Enemy.States
         {
             enemy.Agent.isStopped = true;
 
-            if (enemy.Animator != null)
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsChasing, false);
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsMoving, false);
+                // Set IsChasing to false
+                enemy.Animator.SetBool(enemy.Config.chaseAnimation, false);
+                // Set IsMoving to false for idle
+                enemy.Animator.SetBool(enemy.Config.patrolAnimation, false);
             }
         }
 
@@ -41,6 +43,7 @@ namespace AI.Enemy.States
         private const float LOG_INTERVAL = 1f;
         private float stateEntryTimer = 0f;
         private const float ATTACK_CHECK_DELAY = 0.5f; // Wait 0.5s before checking attack range
+        private float parasiteModeTimer = 0f;
 
         public void EnterState(EnemyController enemy)
         {
@@ -52,16 +55,19 @@ namespace AI.Enemy.States
 
             Debug.Log($"[CHASE] Agent speed: {enemy.Agent.speed}, stopping distance: {enemy.Agent.stoppingDistance}, attack range: {enemy.Config.attackRange}");
 
-            if (enemy.Animator != null)
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsChasing, true);
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsMoving, true);
+                // IsChasing (boolean) - set to true
+                enemy.Animator.SetBool(enemy.Config.chaseAnimation, true);
+                // IsMoving (boolean) - set to true
+                enemy.Animator.SetBool(enemy.Config.patrolAnimation, true);
             }
 
             lastKnownPlayerPosition = enemy.LastKnownPlayerPosition;
             pathUpdateTimer = 0f;
             logTimer = 0f;
             stateEntryTimer = 0f; // Reset entry timer
+            parasiteModeTimer = 0f; // Reset parasite mode timer
 
             Debug.Log($"[CHASE] Initial target position: {lastKnownPlayerPosition}");
         }
@@ -90,15 +96,23 @@ namespace AI.Enemy.States
                 logTimer = 0f;
             }
 
-            // CRITICAL: Wait before checking attack range to prevent instant loop
-            if (stateEntryTimer < ATTACK_CHECK_DELAY)
+            // Check if we're in Parasite mode and should give up chasing
+            if (!enemy.CanTransitionToAttackState()) // In Parasite mode
             {
-                // Just chase, don't check attack yet
+                Debug.Log($"[CHASE] {enemy.Config.enemyName} giving up chase - been in Parasite mode for {parasiteModeTimer:F1}s, returning to Patrol");
+
+                // Reset vision state
+                enemy.Agent.speed = enemy.Config.patrolSpeed;
+                enemy.ChangeState(new EnemyPatrolState());
+                return;
             }
-            else
+
+            // CRITICAL: Check if game mode allows attack state transition
+            // Wait before checking attack range to prevent instant loop
+            if (stateEntryTimer >= ATTACK_CHECK_DELAY)
             {
-                // Check if can attack
-                if (enemy.IsPlayerInAttackRange() && enemy.CanAttack())
+                // Check if can attack AND game mode allows attack state
+                if (enemy.IsPlayerInAttackRange() && enemy.CanAttack() && enemy.CanTransitionToAttackState())
                 {
                     Debug.Log($"[CHASE] Switching to ATTACK - Player in range ({distanceToPlayer:F2} <= {enemy.Config.attackRange})");
                     enemy.ChangeState(new EnemyAttackState());
@@ -128,6 +142,7 @@ namespace AI.Enemy.States
             Debug.Log($"[CHASE] {enemy.Config.enemyName} EXITING Chase State");
             pathUpdateTimer = 0f;
             stateEntryTimer = 0f;
+            parasiteModeTimer = 0f;
         }
 
         private void UpdateBasicChase(EnemyController enemy)
@@ -179,7 +194,8 @@ namespace AI.Enemy.States
 
             if (distance >= enemy.Config.mediumRangeMin && distance <= enemy.Config.mediumRangeMax)
             {
-                if (enemy.CanAttack())
+                // Check if can attack AND game mode allows attack
+                if (enemy.CanAttack() && enemy.CanTransitionToAttackState())
                 {
                     Debug.Log($"[CHASE-FAST] Initiating jump attack at distance {distance:F2}");
                     enemy.ChangeState(new EnemyFastJumpAttackState());
@@ -216,10 +232,11 @@ namespace AI.Enemy.States
 
             enemy.Agent.isStopped = true;
 
-            if (enemy.Animator != null)
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsMoving, false);
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsChasing, false);
+                // Stop movement animations (both IsMoving and IsChasing are booleans)
+                enemy.Animator.SetBool(enemy.Config.patrolAnimation, false);
+                enemy.Animator.SetBool(enemy.Config.chaseAnimation, false);
             }
 
             nextAttackTime = Time.time;
@@ -255,9 +272,20 @@ namespace AI.Enemy.States
                 Debug.Log($"[ATTACK] {enemy.Config.enemyName} is attacking player!");
                 enemy.PerformAttack();
 
-                // Optional animation trigger
-                if (enemy.Animator != null)
-                    enemy.Animator.SetTrigger(GameConstant.AnimationParameters.Attack);
+                // Trigger attack animation based on enemy type and whether ranged
+                if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
+                {
+                    if (enemy.Config.isRanged)
+                    {
+                        // Use projectile attack trigger
+                        enemy.Animator.SetTrigger(enemy.Config.projectileAttackAnimation);
+                    }
+                    else
+                    {
+                        // Use melee attack trigger
+                        enemy.Animator.SetTrigger(enemy.Config.meleeAttackAnimation);
+                    }
+                }
 
                 nextAttackTime = Time.time + enemy.Config.attackCooldown;
             }
@@ -293,10 +321,10 @@ namespace AI.Enemy.States
             float jumpTime = 0.5f; // Time to reach target
             targetPosition = enemy.Player.position + playerVelocity * jumpTime;
 
-            // Trigger jump animation
-            if (enemy.Animator != null)
+            // Trigger jump animation (Jump is a trigger)
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetTrigger(GameConstant.AnimationParameters.Jump);
+                enemy.Animator.SetTrigger(enemy.Config.jumpAnimation);
             }
 
             isJumping = true;
@@ -308,10 +336,10 @@ namespace AI.Enemy.States
 
             // Move towards target (simplified - in production, use proper arc)
             enemy.transform.position = Vector3.MoveTowards(
-                 enemy.transform.position,
-                    targetPosition,
-               enemy.Config.moveSpeed * 2f * Time.deltaTime
-             );
+         enemy.transform.position,
+            targetPosition,
+            enemy.Config.moveSpeed * 2f * Time.deltaTime
+                  );
 
             // Check if reached target
             float distance = Vector3.Distance(enemy.transform.position, targetPosition);
@@ -347,9 +375,10 @@ namespace AI.Enemy.States
         {
             enemy.Agent.isStopped = true;
 
-            if (enemy.Animator != null)
+            // Trigger stagger animation (Stagger is a trigger)
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetTrigger(GameConstant.AnimationParameters.Stagger);
+                enemy.Animator.SetTrigger(enemy.Config.staggerAnimation);
             }
         }
 
@@ -372,9 +401,10 @@ namespace AI.Enemy.States
         {
             enemy.Agent.isStopped = true;
 
-            if (enemy.Animator != null)
+            // Trigger death animation (Death is a trigger)
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetTrigger(GameConstant.AnimationParameters.Death);
+                enemy.Animator.SetTrigger(enemy.Config.deathAnimation);
             }
         }
 

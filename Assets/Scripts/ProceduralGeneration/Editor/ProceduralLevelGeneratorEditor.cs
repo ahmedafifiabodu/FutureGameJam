@@ -10,7 +10,6 @@ namespace ProceduralGeneration.Editor
         private SerializedProperty roomPrefabsProp;
         private SerializedProperty corridorPrefabsProp;
         private SerializedProperty startingRoomProp;
-        private SerializedProperty playerProp;
         private SerializedProperty debugLogsProp;
         private SerializedProperty currentRoomIterationProp;
 
@@ -19,7 +18,6 @@ namespace ProceduralGeneration.Editor
             roomPrefabsProp = serializedObject.FindProperty("roomPrefabs");
             corridorPrefabsProp = serializedObject.FindProperty("corridorPrefabs");
             startingRoomProp = serializedObject.FindProperty("startingRoomPrefab");
-            playerProp = serializedObject.FindProperty("player");
             debugLogsProp = serializedObject.FindProperty("enableDebugLogs");
             currentRoomIterationProp = serializedObject.FindProperty("currentRoomIteration");
         }
@@ -39,19 +37,22 @@ namespace ProceduralGeneration.Editor
 
             // Starting Room
             EditorGUILayout.LabelField("Starting Room", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(startingRoomProp, new GUIContent("Starting Room Prefab"));
+            if (startingRoomProp != null)
+            {
+                EditorGUILayout.PropertyField(startingRoomProp, new GUIContent("Starting Room Prefab"));
 
-            if (startingRoomProp.objectReferenceValue == null)
-            {
-                EditorGUILayout.HelpBox("Assign a starting room prefab with Room component!", MessageType.Warning);
-            }
-            else
-            {
-                // Validate starting room has Room component
-                GameObject startingRoom = startingRoomProp.objectReferenceValue as GameObject;
-                if (startingRoom != null && startingRoom.GetComponent<Room>() == null)
+                if (startingRoomProp.objectReferenceValue == null)
                 {
-                    EditorGUILayout.HelpBox("Starting room prefab is missing Room component!", MessageType.Error);
+                    EditorGUILayout.HelpBox("Assign a starting room prefab with Room component!", MessageType.Warning);
+                }
+                else
+                {
+                    // Validate starting room has Room component
+                    GameObject startingRoom = startingRoomProp.objectReferenceValue as GameObject;
+                    if (startingRoom != null && startingRoom.GetComponent<Room>() == null)
+                    {
+                        EditorGUILayout.HelpBox("Starting room prefab is missing Room component!", MessageType.Error);
+                    }
                 }
             }
 
@@ -59,49 +60,56 @@ namespace ProceduralGeneration.Editor
 
             // Room Prefabs
             EditorGUILayout.LabelField("Room Prefabs (Weighted)", EditorStyles.boldLabel);
-            DrawWeightedPrefabArray(roomPrefabsProp, "Room");
-
-            if (GUILayout.Button("+ Add Room Prefab"))
+            if (roomPrefabsProp != null)
             {
-                roomPrefabsProp.arraySize++;
-                serializedObject.ApplyModifiedProperties();
+                DrawWeightedPrefabArray(roomPrefabsProp, "Room");
+
+                if (GUILayout.Button("+ Add Room Prefab"))
+                {
+                    roomPrefabsProp.arraySize++;
+                    serializedObject.ApplyModifiedProperties();
+                }
             }
 
             EditorGUILayout.Space();
 
             // Corridor Prefabs
             EditorGUILayout.LabelField("Corridor Prefabs (Weighted)", EditorStyles.boldLabel);
-            DrawWeightedPrefabArray(corridorPrefabsProp, "Corridor");
-
-            if (GUILayout.Button("+ Add Corridor Prefab"))
+            if (corridorPrefabsProp != null)
             {
-                corridorPrefabsProp.arraySize++;
-                serializedObject.ApplyModifiedProperties();
+                DrawWeightedPrefabArray(corridorPrefabsProp, "Corridor");
+
+                if (GUILayout.Button("+ Add Corridor Prefab"))
+                {
+                    corridorPrefabsProp.arraySize++;
+                    serializedObject.ApplyModifiedProperties();
+                }
             }
 
             EditorGUILayout.Space();
 
-            // Player Settings
+            // Player Settings - Removed since it's now auto-detected
             EditorGUILayout.LabelField("Player Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(playerProp, new GUIContent("Player Transform"));
-
-            if (playerProp.objectReferenceValue == null)
-            {
-                EditorGUILayout.HelpBox("Player will be auto-detected by 'Player' tag if not assigned.", MessageType.Info);
-            }
+            EditorGUILayout.HelpBox("Player is automatically detected from ParasiteController via ServiceLocator at runtime.", MessageType.Info);
 
             EditorGUILayout.Space();
 
             // Difficulty Scaling
             EditorGUILayout.LabelField("Difficulty Scaling", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(currentRoomIterationProp, new GUIContent("Current Room Iteration"));
-            EditorGUILayout.HelpBox("This tracks the current difficulty level. Higher iterations spawn more enemies.", MessageType.Info);
+            if (currentRoomIterationProp != null)
+            {
+                EditorGUILayout.PropertyField(currentRoomIterationProp, new GUIContent("Current Room Iteration"));
+                EditorGUILayout.HelpBox("This tracks the current difficulty level. Higher iterations spawn more enemies.", MessageType.Info);
+            }
 
             EditorGUILayout.Space();
 
             // Debug
             EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(debugLogsProp, new GUIContent("Enable Debug Logs"));
+            if (debugLogsProp != null)
+            {
+                EditorGUILayout.PropertyField(debugLogsProp, new GUIContent("Enable Debug Logs"));
+            }
 
             EditorGUILayout.Space();
 
@@ -133,9 +141,17 @@ namespace ProceduralGeneration.Editor
 
         private void DrawWeightedPrefabArray(SerializedProperty arrayProp, string prefabType)
         {
+            if (arrayProp == null)
+            {
+                EditorGUILayout.HelpBox($"{prefabType} array property not found!", MessageType.Error);
+                return;
+            }
+
             for (int i = 0; i < arrayProp.arraySize; i++)
             {
                 SerializedProperty element = arrayProp.GetArrayElementAtIndex(i);
+                if (element == null) continue;
+
                 SerializedProperty prefabProp = element.FindPropertyRelative(prefabType.ToLower() + "Prefab");
                 SerializedProperty weightProp = element.FindPropertyRelative("weight");
                 SerializedProperty descProp = element.FindPropertyRelative("description");
@@ -153,43 +169,49 @@ namespace ProceduralGeneration.Editor
                 }
                 EditorGUILayout.EndHorizontal();
 
-                EditorGUILayout.PropertyField(prefabProp, new GUIContent("Prefab"));
-                EditorGUILayout.PropertyField(weightProp, new GUIContent("Weight (1-100)"));
-                EditorGUILayout.PropertyField(descProp, new GUIContent("Description"));
+                if (prefabProp != null)
+                    EditorGUILayout.PropertyField(prefabProp, new GUIContent("Prefab"));
+                if (weightProp != null)
+                    EditorGUILayout.PropertyField(weightProp, new GUIContent("Weight (1-100)"));
+                if (descProp != null)
+                    EditorGUILayout.PropertyField(descProp, new GUIContent("Description"));
 
                 // Validation
-                if (prefabProp.objectReferenceValue == null)
+                if (prefabProp != null && prefabProp.objectReferenceValue == null)
                 {
                     EditorGUILayout.HelpBox("Prefab not assigned!", MessageType.Error);
                 }
-                else
+                else if (prefabProp != null && prefabProp.objectReferenceValue != null)
                 {
                     GameObject prefab = prefabProp.objectReferenceValue as GameObject;
-                    bool hasComponent = prefabType == "Room"
-                        ? prefab.GetComponent<Room>() != null
-                        : prefab.GetComponent<Corridor>() != null;
+                    if (prefab != null)
+                    {
+                        bool hasComponent = prefabType == "Room"
+                            ? prefab.GetComponent<Room>() != null
+                            : prefab.GetComponent<Corridor>() != null;
 
-                    if (!hasComponent)
-                    {
-                        EditorGUILayout.HelpBox($"Prefab is missing {prefabType} component!", MessageType.Error);
-                    }
-                    else
-                    {
-                        // Additional validation for connection points
-                        if (prefab.TryGetComponent<LevelPiece>(out var levelPiece))
+                        if (!hasComponent)
                         {
-                            // Check for connection points
-                            var connectionPoints = prefab.GetComponentsInChildren<ConnectionPoint>();
-                            bool hasPointA = connectionPoints.Any(cp => cp.Type == ConnectionPoint.PointType.A);
-                            bool hasPointB = connectionPoints.Any(cp => cp.Type == ConnectionPoint.PointType.B);
+                            EditorGUILayout.HelpBox($"Prefab is missing {prefabType} component!", MessageType.Error);
+                        }
+                        else
+                        {
+                            // Additional validation for connection points
+                            if (prefab.TryGetComponent<LevelPiece>(out var levelPiece))
+                            {
+                                // Check for connection points
+                                var connectionPoints = prefab.GetComponentsInChildren<ConnectionPoint>();
+                                bool hasPointA = connectionPoints.Any(cp => cp.Type == ConnectionPoint.PointType.A);
+                                bool hasPointB = connectionPoints.Any(cp => cp.Type == ConnectionPoint.PointType.B);
 
-                            if (prefabType == "Room" && (!hasPointA || !hasPointB))
-                            {
-                                EditorGUILayout.HelpBox("Room should have both Point A (entrance) and Point B (exit)!", MessageType.Warning);
-                            }
-                            else if (prefabType == "Corridor" && (!hasPointA || !hasPointB))
-                            {
-                                EditorGUILayout.HelpBox("Corridor should have both Point A and Point B!", MessageType.Warning);
+                                if (prefabType == "Room" && (!hasPointA || !hasPointB))
+                                {
+                                    EditorGUILayout.HelpBox("Room should have both Point A (entrance) and Point B (exit)!", MessageType.Warning);
+                                }
+                                else if (prefabType == "Corridor" && (!hasPointA || !hasPointB))
+                                {
+                                    EditorGUILayout.HelpBox("Corridor should have both Point A and Point B!", MessageType.Warning);
+                                }
                             }
                         }
                     }

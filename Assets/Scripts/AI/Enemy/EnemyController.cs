@@ -20,11 +20,15 @@ namespace AI.Enemy
         [SerializeField] private NavMeshAgent agent;
 
         [SerializeField] private Animator animator;
-        [SerializeField] private Collider attackCollider;
         [SerializeField] private Transform projectileSpawnPoint;
 
         [Header("Patrol Points")]
         [SerializeField] private Transform[] patrolPoints;
+
+        [Header("Raycast Attack Settings")]
+        [SerializeField] private bool debugRaycast = true;
+
+        [SerializeField] private float raycastOriginHeight = 1.5f;
 
         [Header("Debug")]
         [SerializeField] private bool showDebugTargeting = true;
@@ -141,10 +145,6 @@ namespace AI.Enemy
 
             // Initialize player target
             UpdatePlayerTarget();
-
-            // Disable attack collider initially
-            if (attackCollider != null)
-                attackCollider.enabled = false;
         }
 
         private void InitializeStates()
@@ -336,15 +336,31 @@ namespace AI.Enemy
             if (angleToPlayer > config.fieldOfViewAngle / 2f)
                 return;
 
-            // Check if there are obstacles blocking vision (raycast should NOT hit anything to see the player)
+            // Check if there are obstacles blocking vision
+            // Use RaycastAll to get all hits, then filter out the player/host
             Vector3 rayOrigin = transform.position + Vector3.up * 1.5f; // Eye level
-            if (Physics.Raycast(rayOrigin, directionToPlayer, distanceToPlayer, config.visionObstacleMask))
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToPlayer, distanceToPlayer, config.visionObstacleMask);
+
+            // Filter out hits on the player/host - we only care about obstacles
+            foreach (RaycastHit hit in hits)
             {
-                // Something is blocking the view
+                // Skip if the hit object is the player/host we're looking for
+                if (hit.transform == player || hit.transform.IsChildOf(player))
+                    continue;
+
+                // Skip if hit is on this enemy itself
+                if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                    continue;
+
+                // We hit something that's NOT the player - vision is blocked!
+                if (showDebugTargeting)
+                {
+                    Debug.Log($"[EnemyController] {config.enemyName} vision blocked by {hit.collider.name}");
+                }
                 return;
             }
 
-            // Player spotted!
+            // No obstacles blocking vision - player spotted!
             OnPlayerSpotted();
         }
 
@@ -375,8 +391,37 @@ namespace AI.Enemy
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-            if (distanceToPlayer <= config.sightRange &&
-                !Physics.Raycast(transform.position + Vector3.up, directionToPlayer, distanceToPlayer, config.visionObstacleMask))
+            // Check sight range and obstacles
+            bool canSeePlayer = false;
+
+            if (distanceToPlayer <= config.sightRange)
+            {
+                // Use RaycastAll to check for obstacles, but ignore the player
+                Vector3 rayOrigin = transform.position + Vector3.up;
+                RaycastHit[] hits = Physics.RaycastAll(rayOrigin, directionToPlayer, distanceToPlayer, config.visionObstacleMask);
+
+                bool visionBlocked = false;
+
+                // Filter out hits on the player/host
+                foreach (RaycastHit hit in hits)
+                {
+                    // Skip if the hit object is the player/host
+                    if (hit.transform == player || hit.transform.IsChildOf(player))
+                        continue;
+
+                    // Skip if hit is on this enemy itself
+                    if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                        continue;
+
+                    // We hit an obstacle
+                    visionBlocked = true;
+                    break;
+                }
+
+                canSeePlayer = !visionBlocked;
+            }
+
+            if (canSeePlayer)
             {
                 lastKnownPlayerPosition = player.position;
                 timeSinceLastSaw = 0f;
@@ -430,6 +475,18 @@ namespace AI.Enemy
             return attackCooldownTimer <= 0f && !isStaggered;
         }
 
+        public bool CanTransitionToAttackState()
+        {
+            // Don't allow attack state transition in Parasite mode
+            if (gameStateManager != null && gameStateManager.GetCurrentMode() == GameStateManager.GameMode.Parasite)
+            {
+                return false;
+            }
+
+            // Allow attack state transition in Host mode or if gameStateManager is null (fail-safe)
+            return true;
+        }
+
         private void UpdateAttackCooldown()
         {
             if (attackCooldownTimer > 0f)
@@ -445,8 +502,95 @@ namespace AI.Enemy
 
         public void PerformAttack()
         {
-            // Your attack logic here — deal damage, play sound, etc.
-            Debug.Log($"[EnemyController] {config.enemyName} performed an attack!");
+            if (player == null)
+            {
+                Debug.LogWarning($"[EnemyController] {config.enemyName} attempted to attack but player reference is null!");
+                return;
+            }
+
+            if (gameStateManager == null)
+            {
+                Debug.LogWarning($"[EnemyController] {config.enemyName} cannot attack - GameStateManager is null!");
+                return;
+            }
+
+            // Get current game mode
+            GameStateManager.GameMode currentMode = gameStateManager.GetCurrentMode();
+
+            // If in Parasite mode, exit attack state and return to patrol
+            if (currentMode == GameStateManager.GameMode.Parasite)
+            {
+                if (showDebugTargeting)
+                {
+                    Debug.Log($"[EnemyController] {config.enemyName} detected Parasite mode - exiting attack state, returning to patrol");
+                }
+
+                // Reset aggro and return to patrol
+                hasSeenPlayer = false;
+                timeSinceLastSaw = 0f;
+                agent.speed = config.patrolSpeed;
+                ChangeState(patrolState);
+                return;
+            }
+
+            // Only proceed with attack if in Host mode
+            if (currentMode != GameStateManager.GameMode.Host)
+            {
+                Debug.LogWarning($"[EnemyController] {config.enemyName} in unknown game mode, cannot attack!");
+                return;
+            }
+
+            // Perform raycast attack (Host mode only from here)
+            Vector3 rayOrigin = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position + Vector3.up * raycastOriginHeight;
+
+            Vector3 directionToTarget = (player.position - rayOrigin).normalized;
+            float distanceToTarget = Vector3.Distance(rayOrigin, player.position);
+
+            // Perform the raycast using visionObstacleMask (same as vision detection)
+            if (Physics.Raycast(rayOrigin, directionToTarget, out RaycastHit hit, config.attackRange, config.visionObstacleMask))
+            {
+                if (debugRaycast)
+                {
+                    Debug.DrawRay(rayOrigin, directionToTarget * hit.distance, Color.red, 1f);
+                    Debug.Log($"[EnemyController] {config.enemyName} raycast hit: {hit.collider.name} at distance {hit.distance:F2}");
+                }
+
+                // Check if the hit object or its parents have IDamageable
+                IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
+                if (damageable != null)
+                {
+                    // In Host mode: Only damage the current possessed host
+                    HostController currentHost = gameStateManager.CurrentHostController;
+                    HostController hitHost = hit.collider.GetComponentInParent<HostController>();
+
+                    if (hitHost != null && hitHost == currentHost)
+                    {
+                        // This is the possessed host - deal damage
+                        damageable.TakeDamage(config.attackDamage);
+                        Debug.Log($"[EnemyController] {config.enemyName} successfully damaged possessed host for {config.attackDamage} damage!");
+                    }
+                    else if (debugRaycast)
+                    {
+                        Debug.Log($"[EnemyController] {config.enemyName} hit IDamageable but it's not the current possessed host. Ignoring.");
+                    }
+                }
+                else
+                {
+                    if (debugRaycast)
+                    {
+                        Debug.Log($"[EnemyController] {config.enemyName} hit {hit.collider.name} but it's not IDamageable (checked parents too).");
+                    }
+                }
+            }
+            else
+            {
+                // Raycast didn't hit anything
+                if (debugRaycast)
+                {
+                    Debug.DrawRay(rayOrigin, directionToTarget * config.attackRange, Color.yellow, 1f);
+                    Debug.Log($"[EnemyController] {config.enemyName} raycast attack missed!");
+                }
+            }
         }
 
         /// <summary>
@@ -474,9 +618,7 @@ namespace AI.Enemy
 
             // Immediately spot player if hit
             if (!hasSeenPlayer && player != null)
-            {
                 OnPlayerSpotted();
-            }
         }
 
         /// <summary>
@@ -533,12 +675,6 @@ namespace AI.Enemy
 
             ChangeState(deadState);
 
-            // Disable colliders
-            if (attackCollider != null)
-            {
-                attackCollider.enabled = false;
-            }
-
             if (TryGetComponent<Collider>(out var collider))
             {
                 collider.enabled = false;
@@ -547,28 +683,6 @@ namespace AI.Enemy
             // TODO: Implement ragdoll or death animation
             // For now, just destroy after a delay
             Destroy(gameObject, 3f);
-        }
-
-        /// <summary>
-        /// Enable attack collider (called from animation event)
-        /// </summary>
-        public void EnableAttackCollider()
-        {
-            if (attackCollider != null)
-            {
-                attackCollider.enabled = true;
-            }
-        }
-
-        /// <summary>
-        /// Disable attack collider (called from animation event)
-        /// </summary>
-        public void DisableAttackCollider()
-        {
-            if (attackCollider != null)
-            {
-                attackCollider.enabled = false;
-            }
         }
 
         #endregion Combat System
@@ -619,11 +733,11 @@ namespace AI.Enemy
         {
             if (isDead)
             {
-                Debug.LogWarning($"[EnemyController] {config?.enemyName ?? gameObject.name} is already dead!");
+                Debug.LogWarning($"[EnemyController] {config.enemyName ?? gameObject.name} is already dead!");
                 return;
             }
 
-            Debug.Log($"[EnemyController] {config?.enemyName ?? gameObject.name} taking {damage} damage from inspector. Health: {currentHealth} -> {currentHealth - damage}");
+            Debug.Log($"[EnemyController] {config.enemyName ?? gameObject.name} taking {damage} damage from inspector. Health: {currentHealth} -> {currentHealth - damage}");
 
             // Use the existing TakeDamage function with enemy's current position as hit point
             TakeDamage(damage, transform.position);

@@ -178,11 +178,11 @@ namespace ProceduralGeneration
                 if (showDebugLogs)
                     Debug.Log($"[Room] {roomName} - Spawning enemies at {spawnPoints.Length} spawn points for iteration {currentIteration}");
 
-                // Count expected enemies (rough estimate)
-                expectedEnemyCount = EstimateExpectedEnemyCount(currentIteration);
+                // Count expected enemies based on this piece's settings or manager defaults
+                expectedEnemyCount = EstimateExpectedEnemyCount(currentIteration, spawnManager);
 
-                // Attempt to spawn enemies and get actual count
-                actuallySpawnedCount = spawnManager.SpawnEnemiesAtPoints(spawnPoints, true, currentIteration);
+                // Attempt to spawn enemies and get actual count - pass 'this' for per-piece configuration
+                actuallySpawnedCount = spawnManager.SpawnEnemiesAtPoints(spawnPoints, true, currentIteration, this);
                 spawnManager.SpawnPropsAtPoints(spawnPoints);
 
                 if (showDebugLogs)
@@ -210,15 +210,24 @@ namespace ProceduralGeneration
             }
         }
 
-        private int EstimateExpectedEnemyCount(int iteration)
+        private int EstimateExpectedEnemyCount(int iteration, AI.Spawning.EnemySpawnManager manager)
         {
-            // Simple estimation based on spawn manager logic
-            int baseEnemies = 3; // Default from EnemySpawnManager
-            float perIteration = 0.5f;
-            int maxEnemies = 10;
+            // Use this piece's custom settings if enabled, otherwise use manager defaults
+            if (useCustomSpawnSettings)
+            {
+                int estimated = baseEnemiesPerPiece + Mathf.FloorToInt(iteration * enemiesPerIteration);
+                return Mathf.Min(estimated, maxEnemiesPerPiece);
+            }
+            else
+            {
+                // Fallback to manager defaults
+                int baseEnemies = 3;
+                float perIteration = 0.5f;
+                int maxEnemies = 10;
 
-            int estimated = baseEnemies + Mathf.FloorToInt(iteration * perIteration);
-            return Mathf.Min(estimated, maxEnemies);
+                int estimated = baseEnemies + Mathf.FloorToInt(iteration * perIteration);
+                return Mathf.Min(estimated, maxEnemies);
+            }
         }
 
         private void CompleteEnemySpawning()

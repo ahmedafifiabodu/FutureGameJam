@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5566860279227744308}
   - component: {fileID: 7680169232296080436}
   - component: {fileID: 9172865939613856901}
+  - component: {fileID: 5954829682475382025}
   m_Layer: 0
   m_Name: Stairs (1)
   m_TagString: Untagged
@@ -2247,6 +2248,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &5954829682475382025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 645804095491169247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &904279201946471077
 GameObject:
   m_ObjectHideFlags: 0
@@ -5400,6 +5421,7 @@ GameObject:
   - component: {fileID: 8728874180725552621}
   - component: {fileID: 5778611571486060328}
   - component: {fileID: 9054031775422100841}
+  - component: {fileID: 8077592846932536215}
   m_Layer: 0
   m_Name: Stairs (2)
   m_TagString: Untagged
@@ -7633,6 +7655,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &8077592846932536215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2947971252306033713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &3001932746914794715
 GameObject:
   m_ObjectHideFlags: 0
@@ -8002,6 +8044,7 @@ GameObject:
   - component: {fileID: 6094267235088832940}
   - component: {fileID: 3025663520917738468}
   - component: {fileID: 4866140344923585016}
+  - component: {fileID: 1399280421204486351}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -8343,6 +8386,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &1399280421204486351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3032375244485652073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &3848399631758459251
 GameObject:
   m_ObjectHideFlags: 0
@@ -13346,6 +13409,7 @@ GameObject:
   - component: {fileID: 3735936013157982488}
   - component: {fileID: 7564318253124515303}
   - component: {fileID: 6621328206795723433}
+  - component: {fileID: 3777426985289493144}
   m_Layer: 0
   m_Name: Stairs (3)
   m_TagString: Untagged
@@ -15579,6 +15643,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &3777426985289493144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6905223555268269283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &6906268787808886092
 GameObject:
   m_ObjectHideFlags: 0
@@ -15593,6 +15677,7 @@ GameObject:
   - component: {fileID: 7559970891154279889}
   - component: {fileID: 1330217273227300262}
   - component: {fileID: 6329625583118414336}
+  - component: {fileID: 2238768685794687579}
   m_Layer: 0
   m_Name: WallWest (1)
   m_TagString: Untagged
@@ -15934,6 +16019,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &2238768685794687579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906268787808886092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &6972742492180220944
 GameObject:
   m_ObjectHideFlags: 0
@@ -15948,6 +16053,7 @@ GameObject:
   - component: {fileID: 3807697603638741274}
   - component: {fileID: 8476548598426384124}
   - component: {fileID: 3139663797115054439}
+  - component: {fileID: 3263455319379483645}
   m_Layer: 0
   m_Name: Stairs
   m_TagString: Untagged
@@ -18181,6 +18287,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &3263455319379483645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6972742492180220944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &7028102527328787066
 GameObject:
   m_ObjectHideFlags: 0
@@ -18602,6 +18728,7 @@ GameObject:
   m_Component:
   - component: {fileID: 646676971553826823}
   - component: {fileID: 4506358885198219646}
+  - component: {fileID: 2617790223023701439}
   m_Layer: 0
   m_Name: 1_Small_Room
   m_TagString: Untagged
@@ -18675,6 +18802,13 @@ MonoBehaviour:
   - {fileID: 668872201161360252}
   - {fileID: 138719685693007902}
   - {fileID: 9109458793505206416}
+  baseEnemiesPerPiece: 3
+  enemiesPerIteration: 0.5
+  maxEnemiesPerPiece: 10
+  spawnChance: 0.8
+  minIteration: 0
+  maxIteration: 1
+  useCustomSpawnSettings: 1
   playerHasEntered: 0
   showEnemyDebug: 0
   roomName: Room
@@ -18682,6 +18816,38 @@ MonoBehaviour:
   startingRoom: 0
   startingRoomDoorDelay: 1.5
   showDebugLogs: 1
+--- !u!114 &2617790223023701439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7604991661879118048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 3
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 555504bc85ef7d2489508cd4c3616142, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &7998966816874250461
 GameObject:
   m_ObjectHideFlags: 0

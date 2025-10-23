@@ -10,6 +10,7 @@ public class CanvasCrosshair : MonoBehaviour
 {
     [Header("Crosshair Elements")]
     [SerializeField] private RectTransform topLine;
+
     [SerializeField] private RectTransform bottomLine;
     [SerializeField] private RectTransform leftLine;
     [SerializeField] private RectTransform rightLine;
@@ -17,6 +18,7 @@ public class CanvasCrosshair : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private bool showCrosshair = true;
+
     [SerializeField] private Color crosshairColor = Color.white;
     [SerializeField] private float baseSize = 10f;
     [SerializeField] private float thickness = 2f;
@@ -24,14 +26,17 @@ public class CanvasCrosshair : MonoBehaviour
 
     [Header("Dynamic Spread")]
     [SerializeField] private bool dynamicSpread = true;
+
     [SerializeField] private float maxSpread = 30f;
     [SerializeField] private float spreadSpeed = 10f;
     [SerializeField] private float spreadRecoverySpeed = 5f;
 
     [Header("Center Dot")]
     [SerializeField] private bool showDotWhenAiming = true;
+
     [Tooltip("Show dot only when aiming, or always show it")]
     [SerializeField] private bool dotOnlyWhenAiming = true;
+
     [SerializeField] private Color dotColor = Color.red;
     [SerializeField] private float dotSize = 4f;
 
@@ -160,7 +165,7 @@ public class CanvasCrosshair : MonoBehaviour
 
         if (showDebugLogs && shouldShowDot != centerDot.gameObject.activeSelf)
         {
-            Debug.Log($"[CanvasCrosshair] Center dot: {(shouldShowDot ? "SHOWN" : "HIDDEN")} (Aiming: {currentWeapon?.IsAiming()})");
+            Debug.Log($"[CanvasCrosshair] Center dot: {(shouldShowDot ? "SHOWN" : "HIDDEN")} (Aiming: {currentWeapon.IsAiming()})");
         }
     }
 
@@ -210,7 +215,7 @@ public class CanvasCrosshair : MonoBehaviour
         UpdateCenterDot();
 
         if (showDebugLogs)
-          Debug.Log($"[CanvasCrosshair] Showing crosshair - Alpha: {(canvasGroup ? canvasGroup.alpha : -1)}");
+            Debug.Log($"[CanvasCrosshair] Showing crosshair - Alpha: {(canvasGroup ? canvasGroup.alpha : -1)}");
     }
 
     public void Hide()
@@ -220,7 +225,7 @@ public class CanvasCrosshair : MonoBehaviour
         UpdateCenterDot();
 
         if (showDebugLogs)
-          Debug.Log($"[CanvasCrosshair] Hiding crosshair - Alpha: {(canvasGroup ? canvasGroup.alpha : -1)}");
+            Debug.Log($"[CanvasCrosshair] Hiding crosshair - Alpha: {(canvasGroup ? canvasGroup.alpha : -1)}");
     }
 
     public void SetColor(Color color)

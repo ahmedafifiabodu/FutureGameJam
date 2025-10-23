@@ -75,11 +75,11 @@ namespace ProceduralGeneration
                 if (showDebugLogs)
                     Debug.Log($"[Corridor] {corridorName} - Spawning enemies at {spawnPoints.Length} spawn points for iteration {currentIteration}");
 
-                // Count expected enemies (corridors typically have fewer enemies)
-                expectedEnemyCount = EstimateExpectedEnemyCount(currentIteration);
+                // Count expected enemies based on this piece's settings or fallback
+                expectedEnemyCount = EstimateExpectedEnemyCount(currentIteration, spawnManager);
 
-                // Attempt to spawn enemies and get actual count
-                actuallySpawnedCount = spawnManager.SpawnEnemiesAtPoints(spawnPoints, false, currentIteration); // false for corridor
+                // Attempt to spawn enemies and get actual count - pass 'this' for per-piece configuration
+                actuallySpawnedCount = spawnManager.SpawnEnemiesAtPoints(spawnPoints, false, currentIteration, this);
                 spawnManager.SpawnPropsAtPoints(spawnPoints);
 
                 if (showDebugLogs)
@@ -107,11 +107,20 @@ namespace ProceduralGeneration
             }
         }
 
-        private int EstimateExpectedEnemyCount(int iteration)
+        private int EstimateExpectedEnemyCount(int iteration, AI.Spawning.EnemySpawnManager manager)
         {
-            // Corridors typically have fewer enemies than rooms
-            // Random range 0-2 for corridors based on EnemySpawnManager logic
-            return Random.Range(0, 3);
+            // Use this piece's custom settings if enabled, otherwise use fallback
+            if (useCustomSpawnSettings)
+            {
+                int estimated = baseEnemiesPerPiece + Mathf.FloorToInt(iteration * enemiesPerIteration);
+                return Mathf.Min(estimated, maxEnemiesPerPiece);
+            }
+            else
+            {
+                // Fallback: Corridors typically have fewer enemies than rooms
+                // Random range 0-2 for corridors
+                return Random.Range(0, 3);
+            }
         }
 
         private void CompleteEnemySpawning()

@@ -411,16 +411,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.Room
   pointA: {fileID: 7759317771539849431}
   pointB: {fileID: 4095663225388612890}
-  doors: []
+  entranceDoor: {fileID: 0}
+  exitDoor: {fileID: 0}
   spawnPoints:
   - {fileID: 6116864505154014348}
   - {fileID: 5856820201555239272}
   - {fileID: 3522133031224015305}
   - {fileID: 5504504693473038456}
+  baseEnemiesPerPiece: 3
+  enemiesPerIteration: 0.5
+  maxEnemiesPerPiece: 10
+  spawnChance: 0.8
+  useCustomSpawnSettings: 0
   playerHasEntered: 0
+  showEnemyDebug: 0
   roomName: Room
-  startingRoom: 0
   enemySpawnDelay: 0.5
+  startingRoom: 0
+  startingRoomDoorDelay: 1.5
+  showDebugLogs: 1
 --- !u!1 &3577644436611353357
 GameObject:
   m_ObjectHideFlags: 0
@@ -478,6 +487,7 @@ GameObject:
   m_Component:
   - component: {fileID: 458128836314303137}
   - component: {fileID: 7759317771539849431}
+  - component: {fileID: 6530736438225915479}
   m_Layer: 0
   m_Name: EntrancePoint
   m_TagString: Untagged
@@ -515,6 +525,33 @@ MonoBehaviour:
   pointType: 0
   detectionRadius: 2
   showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &6530736438225915479
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3630325952847257613}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4599954761283058415
 GameObject:
   m_ObjectHideFlags: 0
@@ -824,6 +861,7 @@ GameObject:
   m_Component:
   - component: {fileID: 399096311205085957}
   - component: {fileID: 4095663225388612890}
+  - component: {fileID: 4146890885563281519}
   m_Layer: 0
   m_Name: ExitPoint
   m_TagString: Untagged
@@ -861,6 +899,33 @@ MonoBehaviour:
   pointType: 0
   detectionRadius: 2
   showGizmos: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  debugMode: 1
+  doorCloseDelay: 2
+  disableProximityGeneration: 1
+--- !u!135 &4146890885563281519
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5390480041252154227}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6328103484077409435
 GameObject:
   m_ObjectHideFlags: 0

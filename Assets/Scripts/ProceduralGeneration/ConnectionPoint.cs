@@ -131,6 +131,17 @@ namespace ProceduralGeneration
                 {
                     Debug.Log($"[ConnectionPoint] Delayed door close triggered for {gameObject.name}");
                 }
+
+                // CRITICAL: Clean up previous room/corridor AFTER the door closes
+                // This ensures the previous room stays visible while the door is open
+                if (levelGenerator != null && pointType == PointType.A)
+                {
+                    if (debugMode)
+                    {
+                        Debug.Log($"[ConnectionPoint] Triggering previous room cleanup after door close");
+                    }
+                    levelGenerator.OnPlayerEnteredNewRoom();
+                }
             }
         }
 
@@ -144,12 +155,8 @@ namespace ProceduralGeneration
                 parentLevelPiece.OnPlayerEntered();
             }
 
-            // Only notify level generator for cleanup when entering rooms (Point A)
-            // Point B interactions are now handled by the Door system or starting room logic
-            if (levelGenerator != null && pointType == PointType.A)
-            {
-                levelGenerator.OnPlayerEnteredNewRoom();
-            }
+            // REMOVED: Don't cleanup previous room immediately when entering
+            // The cleanup now happens when the entrance door closes (in DelayedCloseDoor)
         }
 
         /// <summary>

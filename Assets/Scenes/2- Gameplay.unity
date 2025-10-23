@@ -751,14 +751,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 488538c63a440954a83ca22b9d2f791c, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1694,36 +1694,6 @@ MonoBehaviour:
   roomPrefabs:
   - roomPrefab: {fileID: 7604991661879118048, guid: 323586b191138b0408447fc144fb0bab, type: 3}
     weight: 60
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: 3f56394dd54458d4d902ac877cd0b70c, type: 3}
-    weight: 60
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: e84ed08b4e61df34a940441a4fd934f4, type: 3}
-    weight: 60
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: ca6e381f6ef9a9541837b87030fea73e, type: 3}
-    weight: 60
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: bbdaa7e5720fec64dacb44ac6f146aa3, type: 3}
-    weight: 60
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: d73e13a5f70ba30479151bf66bcddd1f, type: 3}
-    weight: 50
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: d281201311b5d624492d6dbf10961dbe, type: 3}
-    weight: 50
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: c928e9baa66391446be724fa3a34e5c9, type: 3}
-    weight: 50
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: eac10a1497c8da94d83cf6119ccdab9f, type: 3}
-    weight: 40
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: eac10a1497c8da94d83cf6119ccdab9f, type: 3}
-    weight: 40
-    description: 
-  - roomPrefab: {fileID: 7604991661879118048, guid: 2037e11b095191a46abf7cfcb30b434e, type: 3}
-    weight: 4
     description: 
   corridorPrefabs:
   - corridorPrefab: {fileID: 7647134066835127503, guid: 9e0c9eef0c43f3a4a94d2feeda663403, type: 3}
@@ -4082,12 +4052,11 @@ GameObject:
   - component: {fileID: 1296481842}
   - component: {fileID: 1296481841}
   - component: {fileID: 1296481840}
-  - component: {fileID: 1296481839}
   - component: {fileID: 1296481838}
   - component: {fileID: 1296481837}
   - component: {fileID: 1296481836}
   - component: {fileID: 1296481835}
-  m_Layer: 0
+  m_Layer: 21
   m_Name: Player (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4229,29 +4198,6 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!136 &1296481839
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1296481834}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &1296481840
 MeshRenderer:
@@ -4781,14 +4727,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 488538c63a440954a83ca22b9d2f791c, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7249,12 +7195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.EnemySpawnManager
   enemyConfigs:
-  - {fileID: 11400000, guid: cf0e28ce7cf7ec3419628a0d22fd156d, type: 2}
-  baseEnemiesPerRoom: 3
-  enemiesPerIteration: 0.5
-  maxEnemiesPerRoom: 10
-  baseRoomSpawnChance: 0.8
-  baseCorridorSpawnChance: 0.3
+  - {fileID: 11400000, guid: f6dd0948c27ff2b41b86c9c0a1915249, type: 2}
   navMeshSearchRadius: 5
   maxSpawnAttempts: 5
   propPrefabs: []

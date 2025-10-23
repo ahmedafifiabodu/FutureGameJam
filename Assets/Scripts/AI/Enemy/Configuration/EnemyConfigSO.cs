@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace AI.Enemy.Configuration
 {
@@ -59,7 +58,7 @@ namespace AI.Enemy.Configuration
         [Range(0.1f, 2f)]
         public float visionCheckInterval = 0.5f;
 
-        [Tooltip("Layer mask for vision obstruction (walls, obstacles)")]
+        [Tooltip("Layer mask for vision obstruction and attack detection (walls, obstacles). Player/host is automatically excluded from blocking vision.")]
         public LayerMask visionObstacleMask;
 
         [Header("Combat Settings")]
@@ -145,12 +144,28 @@ namespace AI.Enemy.Configuration
         [Tooltip("Enable if this enemy has specific animations")]
         public bool hasCustomAnimations = false;
 
+        [Tooltip("Idle animation - typically uses IsMoving = false")]
         public string idleAnimation = "Idle";
-        public string patrolAnimation = "Patrol";
-        public string chaseAnimation = "Chase";
-        public string attackAnimation = "Attack";
+
+        [Tooltip("Patrol animation - uses IsMoving boolean parameter")]
+        public string patrolAnimation = GameConstant.AnimationParameters.IsMoving;
+
+        [Tooltip("Chase animation - uses IsChasing boolean parameter")]
+        public string chaseAnimation = GameConstant.AnimationParameters.IsChasing;
+
+        [Tooltip("Melee attack animation - uses meeleAttack trigger parameter")]
+        public string meleeAttackAnimation = GameConstant.AnimationParameters.MeleeAttack;
+
+        [Tooltip("Projectile attack animation - uses ProjectileAttack trigger parameter")]
+        public string projectileAttackAnimation = GameConstant.AnimationParameters.AnimationProjectileName;
+
+        [Tooltip("Stagger animation - uses Stagger trigger parameter")]
         public string staggerAnimation = GameConstant.AnimationParameters.Stagger;
+
+        [Tooltip("Death animation - uses Death trigger parameter")]
         public string deathAnimation = GameConstant.AnimationParameters.Death;
+
+        [Tooltip("Jump animation - uses Jump trigger parameter")]
         public string jumpAnimation = GameConstant.AnimationParameters.Jump;
     }
 

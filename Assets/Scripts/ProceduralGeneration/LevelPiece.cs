@@ -24,6 +24,29 @@ namespace ProceduralGeneration
         [Header("Spawn Points")]
         [SerializeField] protected SpawnPoint[] spawnPoints;
 
+        [Header("Spawn Configuration")]
+        [Tooltip("Base number of enemies for this piece")]
+        [SerializeField] protected int baseEnemiesPerPiece = 3;
+
+        [Tooltip("Additional enemies per room iteration")]
+        [SerializeField] protected float enemiesPerIteration = 0.5f;
+
+        [Tooltip("Maximum enemies for this piece")]
+        [SerializeField] protected int maxEnemiesPerPiece = 10;
+
+        [Tooltip("Spawn chance for this piece")]
+        [Range(0f, 1f)]
+        [SerializeField] protected float spawnChance = 0.8f;
+
+        [Tooltip("Minimum room iteration where this piece can spawn")]
+        [SerializeField] protected int minIteration = 0;
+
+        [Tooltip("Maximum room iteration where this piece can spawn (0 = unlimited)")]
+        [SerializeField] protected int maxIteration = 0;
+
+        [Tooltip("Use custom spawn settings (if false, uses EnemySpawnManager defaults)")]
+        [SerializeField] protected bool useCustomSpawnSettings = false;
+
         [Header("Player Tracking")]
         [SerializeField] protected bool playerHasEntered = false;
 
@@ -41,6 +64,15 @@ namespace ProceduralGeneration
         public SpawnPoint[] SpawnPoints => spawnPoints;
         public bool PlayerHasEntered => playerHasEntered;
         public bool EnemiesSpawned => enemiesSpawned;
+
+        // Public properties for spawn settings
+        public int BaseEnemiesPerPiece => baseEnemiesPerPiece;
+        public float EnemiesPerIteration => enemiesPerIteration;
+        public int MaxEnemiesPerPiece => maxEnemiesPerPiece;
+        public float SpawnChance => spawnChance;
+        public int MinIteration => minIteration;
+        public int MaxIteration => maxIteration;
+        public bool UseCustomSpawnSettings => useCustomSpawnSettings;
 
         protected virtual void Awake()
         {

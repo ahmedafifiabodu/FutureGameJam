@@ -1,9 +1,14 @@
 fileFormatVersion: 2
-guid: b35c11fb2b4fa4ae6a16d7e8c69aef76
+guid: 4b07262f0b2e2489f9f7ab0a2b658691
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 784484c659fac477a9e8c10ca97971d1, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -39,10 +44,10 @@ ModelImporter:
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
     importPhysicalCameras: 1
-    importVisibility: 1
-    importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
@@ -79,7 +84,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human:
@@ -818,7 +823,7 @@ ModelImporter:
     - name: mixamorig:RightLeg
       parentName: mixamorig:RightUpLeg
       position: {x: -6.844746e-10, y: 0.4730594, z: -1.5030359e-10}
-      rotation: {x: -0.06899694, y: 0.0024522932, z: -0.039239533, w: 0.99684185}
+      rotation: {x: -0.06899694, y: 0.0024522934, z: -0.039239533, w: 0.9968419}
       scale: {x: 1, y: 1, z: 1}
     - name: mixamorig:RightFoot
       parentName: mixamorig:RightLeg
@@ -847,11 +852,11 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 1
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 4b07262f0b2e2489f9f7ab0a2b658691, type: 3}
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
-  avatarSetup: 2
+  avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0

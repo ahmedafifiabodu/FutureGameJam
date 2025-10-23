@@ -23,6 +23,15 @@ namespace ProceduralGeneration.Editor
         private SerializedProperty playerHasEnteredProp;
         private SerializedProperty showEnemyDebugProp;
 
+        // Spawn Configuration properties (from LevelPiece)
+        private SerializedProperty baseEnemiesPerPieceProp;
+        private SerializedProperty enemiesPerIterationProp;
+        private SerializedProperty maxEnemiesPerPieceProp;
+        private SerializedProperty spawnChanceProp;
+        private SerializedProperty minIterationProp;
+        private SerializedProperty maxIterationProp;
+        private SerializedProperty useCustomSpawnSettingsProp;
+
         private void OnEnable()
         {
             // Room-specific properties
@@ -40,6 +49,15 @@ namespace ProceduralGeneration.Editor
             spawnPointsProp = serializedObject.FindProperty("spawnPoints");
             playerHasEnteredProp = serializedObject.FindProperty("playerHasEntered");
             showEnemyDebugProp = serializedObject.FindProperty("showEnemyDebug");
+
+            // Spawn Configuration properties (from LevelPiece)
+            baseEnemiesPerPieceProp = serializedObject.FindProperty("baseEnemiesPerPiece");
+            enemiesPerIterationProp = serializedObject.FindProperty("enemiesPerIteration");
+            maxEnemiesPerPieceProp = serializedObject.FindProperty("maxEnemiesPerPiece");
+            spawnChanceProp = serializedObject.FindProperty("spawnChance");
+            minIterationProp = serializedObject.FindProperty("minIteration");
+            maxIterationProp = serializedObject.FindProperty("maxIteration");
+            useCustomSpawnSettingsProp = serializedObject.FindProperty("useCustomSpawnSettings");
         }
 
         public override void OnInspectorGUI()
@@ -60,7 +78,7 @@ namespace ProceduralGeneration.Editor
 
             if (startingRoomProp.boolValue)
             {
-                EditorGUILayout.HelpBox("Starting Room: Only has exit door (Point B). Next area generation is triggered by ConnectionPoint when player enters Point B trigger area.", MessageType.Info);
+                EditorGUILayout.HelpBox("Starting Room: Only has exit door (Point B). Next area generation is triggered by ConnectionPoint when player enters Point B trigger.", MessageType.Info);
             }
             else
             {
@@ -131,8 +149,103 @@ namespace ProceduralGeneration.Editor
 
             EditorGUILayout.Space();
 
-            // Enemy Spawning (only for non-starting rooms)
+            // Spawn Configuration (from LevelPiece) - only for non-starting rooms
             if (!startingRoomProp.boolValue)
+            {
+                EditorGUILayout.LabelField("Spawn Configuration", EditorStyles.boldLabel);
+                
+                 if (useCustomSpawnSettingsProp != null)
+                 {
+                       EditorGUILayout.PropertyField(useCustomSpawnSettingsProp, new GUIContent("Use Custom Spawn Settings", 
+                   "If enabled, this room uses its own spawn settings instead of EnemySpawnManager defaults"));
+
+ if (useCustomSpawnSettingsProp.boolValue)
+  {
+         EditorGUI.indentLevel++;
+
+     EditorGUILayout.HelpBox("Custom spawn settings enabled. Configure this room's specific enemy spawn behavior below.", MessageType.Info);
+
+       // Iteration Range
+        EditorGUILayout.BeginHorizontal();
+    if (minIterationProp != null && maxIterationProp != null)
+      {
+ EditorGUILayout.PropertyField(minIterationProp, new GUIContent("Min Iteration",
+"Minimum room iteration where this room can spawn"));
+     EditorGUILayout.PropertyField(maxIterationProp, new GUIContent("Max Iteration",
+"Maximum room iteration where this room can spawn (0 = unlimited)"));
+    }
+    EditorGUILayout.EndHorizontal();
+
+    if (minIterationProp != null && minIterationProp.intValue < 0)
+   {
+   EditorGUILayout.HelpBox("Min Iteration cannot be negative!", MessageType.Warning);
+       }
+
+            if (maxIterationProp != null && minIterationProp != null &&
+    maxIterationProp.intValue > 0 && maxIterationProp.intValue < minIterationProp.intValue)
+   {
+    EditorGUILayout.HelpBox("Max Iteration must be greater than Min Iteration!", MessageType.Error);
+  }
+
+    EditorGUILayout.Space(5);
+
+   // Enemy spawn settings
+       if (baseEnemiesPerPieceProp != null)
+          EditorGUILayout.PropertyField(baseEnemiesPerPieceProp, new GUIContent("Base Enemies",
+      "Starting number of enemies for this room"));
+      
+ if (enemiesPerIterationProp != null)
+     EditorGUILayout.PropertyField(enemiesPerIterationProp, new GUIContent("Enemies Per Iteration", 
+     "Additional enemies added per room iteration (difficulty scaling)"));
+       
+        if (maxEnemiesPerPieceProp != null)
+  EditorGUILayout.PropertyField(maxEnemiesPerPieceProp, new GUIContent("Max Enemies", 
+        "Maximum number of enemies this room can spawn"));
+      
+ if (spawnChanceProp != null)
+EditorGUILayout.PropertyField(spawnChanceProp, new GUIContent("Spawn Chance", 
+ "Probability (0-1) that each spawn point will spawn an enemy"));
+
+   // Show preview of spawn count at different iterations
+     if (baseEnemiesPerPieceProp != null && enemiesPerIterationProp != null && 
+     maxEnemiesPerPieceProp != null && minIterationProp != null)
+        {
+         EditorGUILayout.Space(5);
+     EditorGUILayout.LabelField("Preview Enemy Counts:", EditorStyles.miniBoldLabel);
+
+     int baseEnemies = baseEnemiesPerPieceProp.intValue;
+  float perIteration = enemiesPerIterationProp.floatValue;
+    int maxEnemies = maxEnemiesPerPieceProp.intValue;
+    int minIter = minIterationProp.intValue;
+int maxIter = maxIterationProp != null && maxIterationProp.intValue > 0 ? maxIterationProp.intValue : 5;
+            int displayMax = Mathf.Min(maxIter, 5);
+
+  EditorGUI.indentLevel++;
+      for (int iter = minIter; iter <= displayMax; iter++)
+ {
+            int enemyCount = Mathf.Min(baseEnemies + Mathf.FloorToInt(iter * perIteration), maxEnemies);
+      EditorGUILayout.LabelField($"Iteration {iter}:", $"{enemyCount} enemies");
+            }
+       if (maxIter > 5)
+      {
+      EditorGUILayout.LabelField("...", "");
+       }
+        EditorGUI.indentLevel--;
+    }
+
+EditorGUI.indentLevel--;
+     }
+       else
+    {
+          EditorGUILayout.HelpBox("Using global EnemySpawnManager settings for this room.", MessageType.Info);
+      }
+       }
+      
+    EditorGUILayout.Space();
+ }
+
+     // Enemy Spawning (only for non-starting rooms)
+     if (!startingRoomProp.boolValue)
             {
                 EditorGUILayout.LabelField("Enemy Spawning", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(enemySpawnDelayProp, new GUIContent("Enemy Spawn Delay", "Delay before spawning enemies (allows NavMesh to update)"));

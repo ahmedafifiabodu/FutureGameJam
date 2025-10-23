@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -8,21 +9,25 @@ public class TargetDummy : MonoBehaviour, IDamageable
 {
     [Header("Health")]
     [SerializeField] private float maxHealth = 100f;
+
     [SerializeField] private bool respawnOnDeath = true;
     [SerializeField] private float respawnDelay = 3f;
 
     [Header("Visual Feedback")]
     [SerializeField] private Renderer targetRenderer;
+
     [SerializeField] private Color damageColor = Color.red;
     [SerializeField] private float damageFlashDuration = 0.1f;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
+
     [SerializeField] private AudioClip hitSound;
     [SerializeField] private AudioClip destroySound;
 
     [Header("Effects")]
     [SerializeField] private GameObject hitEffectPrefab;
+
     [SerializeField] private GameObject destroyEffectPrefab;
 
     private float currentHealth;
@@ -127,50 +132,52 @@ public class TargetDummy : MonoBehaviour, IDamageable
     {
         currentHealth = maxHealth;
         gameObject.SetActive(true);
-        
+
         if (materialInstance)
             materialInstance.color = originalColor;
 
         Debug.Log($"[TargetDummy] Respawned with {maxHealth} health");
     }
 
-    // Show health bar in GUI for debugging
-    private void OnGUI()
-    {
-        if (currentHealth <= 0) return;
+    //// Show health bar in GUI for debugging
+    //private void OnGUI()
+    //{
+    //    if (currentHealth <= 0) return;
 
-        // Get screen position
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 2f);
-        
-        if (screenPos.z > 0 && screenPos.x > 0 && screenPos.x < Screen.width && screenPos.y > 0 && screenPos.y < Screen.height)
-        {
-            // Convert to GUI coordinates (inverted Y)
-            screenPos.y = Screen.height - screenPos.y;
+    //    if (Camera.main == null) return;
 
-            // Draw health bar
-            float barWidth = 100f;
-            float barHeight = 10f;
-            float barX = screenPos.x - barWidth / 2f;
-            float barY = screenPos.y;
+    //    // Get screen position
+    //    Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 2f);
 
-            // Background
-            GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
+    //    if (screenPos.z > 0 && screenPos.x > 0 && screenPos.x < Screen.width && screenPos.y > 0 && screenPos.y < Screen.height)
+    //    {
+    //        // Convert to GUI coordinates (inverted Y)
+    //        screenPos.y = Screen.height - screenPos.y;
 
-            // Health fill
-            float healthPercent = currentHealth / maxHealth;
-            Color barColor = healthPercent > 0.5f ? Color.green : (healthPercent > 0.25f ? Color.yellow : Color.red);
-            GUI.color = barColor;
-            GUI.Box(new Rect(barX, barY, barWidth * healthPercent, barHeight), "",
-                new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
+    //        // Draw health bar
+    //        float barWidth = 100f;
+    //        float barHeight = 10f;
+    //        float barX = screenPos.x - barWidth / 2f;
+    //        float barY = screenPos.y;
 
-            // Reset color
-            GUI.color = Color.white;
+    //        // Background
+    //        GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
 
-            // Health text
-            GUI.Label(new Rect(barX, barY - 15, barWidth, 15), $"{currentHealth:F0}/{maxHealth:F0}",
-                new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 10 });
-        }
-    }
+    //        // Health fill
+    //        float healthPercent = currentHealth / maxHealth;
+    //        Color barColor = healthPercent > 0.5f ? Color.green : (healthPercent > 0.25f ? Color.yellow : Color.red);
+    //        GUI.color = barColor;
+    //        GUI.Box(new Rect(barX, barY, barWidth * healthPercent, barHeight), "",
+    //            new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
+
+    //        // Reset color
+    //        GUI.color = Color.white;
+
+    //        // Health text
+    //        GUI.Label(new Rect(barX, barY - 15, barWidth, 15), $"{currentHealth:F0}/{maxHealth:F0}",
+    //            new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 10 });
+    //    }
+    //}
 
     private void OnDestroy()
     {
@@ -185,10 +192,4 @@ public class TargetDummy : MonoBehaviour, IDamageable
         Gizmos.color = currentHealth > 0 ? Color.green : Color.red;
         Gizmos.DrawWireCube(transform.position, Vector3.one);
     }
-
-    // Public getters
-    public float GetCurrentHealth() => currentHealth;
-    public float GetMaxHealth() => maxHealth;
-    public float GetHealthPercent() => currentHealth / maxHealth;
-    public bool IsAlive() => currentHealth > 0;
 }

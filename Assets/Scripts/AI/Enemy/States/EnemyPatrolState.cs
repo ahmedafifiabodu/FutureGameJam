@@ -11,33 +11,52 @@ namespace AI.Enemy.States
         private float waitTimer = 0f;
         private bool isWaiting = false;
         private Vector3 wanderTarget;
+        private bool hasStartedMoving = false;
+        private Vector3 currentDestination;
+        private const float PATROL_STOPPING_DISTANCE = 0.5f; // Fixed stopping distance for patrol
+        private float originalStoppingDistance; // Store original stopping distance to restore later
 
         public void EnterState(EnemyController enemy)
         {
-            enemy.Agent.isStopped = false;
+            // Store original stopping distance and set patrol-specific stopping distance
+            originalStoppingDistance = enemy.Agent.stoppingDistance;
+            enemy.Agent.stoppingDistance = PATROL_STOPPING_DISTANCE;
 
-            if (enemy.Animator != null)
+            enemy.Agent.isStopped = false;
+            hasStartedMoving = false;
+
+            if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsMoving, true);
-                enemy.Animator.SetBool(GameConstant.AnimationParameters.IsChasing, false);
+                enemy.Animator.SetBool(enemy.Config.patrolAnimation, true);
+                enemy.Animator.SetBool(enemy.Config.chaseAnimation, false);
+                enemy.Animator.SetBool(enemy.Config.idleAnimation, false);
             }
 
             // Start moving to first patrol point or wander
             if (enemy.Config.usePatrolPoints && enemy.PatrolPoints != null && enemy.PatrolPoints.Length > 0)
-            {
-                Debug.Log($"[PATROL] Using patrol points. Total points: {enemy.PatrolPoints.Length}");
                 MoveToNextPatrolPoint(enemy);
-            }
             else
-            {
-                Debug.Log($"[PATROL] No patrol points, using wander mode");
                 SetRandomWanderTarget(enemy);
-            }
         }
 
         public void UpdateState(EnemyController enemy)
         {
-            // Vision system will handle transition to chase
+            // CRITICAL: Check if player has been spotted and transition to chase
+            if (enemy.HasSeenPlayer && enemy.Player != null)
+            {
+                // Player has been spotted, switch to chase state immediately
+                enemy.Agent.speed = enemy.Config.chaseSpeed;
+                enemy.ChangeState(new EnemyChaseStateNew());
+                return;
+            }
+
+            // Check if player is in attack range AND game mode allows attack state
+            // This prevents entering attack state in Parasite mode
+            if (enemy.IsPlayerInAttackRange() && enemy.CanAttack() && enemy.CanTransitionToAttackState())
+            {
+                enemy.ChangeState(new EnemyAttackState());
+                return;
+            }
 
             if (isWaiting)
             {
@@ -45,76 +64,113 @@ namespace AI.Enemy.States
                 if (waitTimer <= 0f)
                 {
                     isWaiting = false;
-                    Debug.Log($"[PATROL] Wait finished, moving to next point");
+                    hasStartedMoving = false;
+
+                    if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
+                    {
+                        enemy.Animator.SetBool(enemy.Config.idleAnimation, false);
+                        enemy.Animator.SetBool(enemy.Config.patrolAnimation, true);
+                    }
 
                     if (enemy.Config.usePatrolPoints && enemy.PatrolPoints != null && enemy.PatrolPoints.Length > 0)
-                    {
                         MoveToNextPatrolPoint(enemy);
-                    }
                     else
-                    {
                         SetRandomWanderTarget(enemy);
-                    }
                 }
             }
             else
             {
-                // Check if reached destination
-                if (!enemy.Agent.pathPending && enemy.Agent.remainingDistance <= enemy.Agent.stoppingDistance)
+                // Check if agent has started moving
+                if (!hasStartedMoving && enemy.Agent.velocity.magnitude > 0.1f)
+                    hasStartedMoving = true;
+
+                // Only check for arrival if we've actually started moving
+                if (hasStartedMoving && !enemy.Agent.pathPending && enemy.Agent.hasPath)
                 {
-                    // Start waiting
-                    Debug.Log($"[PATROL] Reached patrol point, starting wait ({enemy.Config.patrolWaitTime}s)");
-                    isWaiting = true;
-                    waitTimer = enemy.Config.patrolWaitTime;
-                    enemy.Agent.isStopped = true;
+                    // Use actual distance to destination
+                    float actualDistance = Vector3.Distance(enemy.transform.position, currentDestination);
+
+                    // Use patrol stopping distance with small buffer
+                    float arrivalThreshold = PATROL_STOPPING_DISTANCE + 0.3f; // 0.8m total
+
+                    // Check if we're close enough and have slowed down
+                    bool isCloseEnough = actualDistance <= arrivalThreshold;
+                    bool isSettled = enemy.Agent.velocity.magnitude < 0.2f;
+
+                    if (isCloseEnough && isSettled)
+                    {
+                        isWaiting = true;
+                        hasStartedMoving = false;
+                        waitTimer = enemy.Config.patrolWaitTime;
+                        enemy.Agent.isStopped = true;
+
+                        if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
+                        {
+                            enemy.Animator.SetBool(enemy.Config.idleAnimation, true);
+                            enemy.Animator.SetBool(enemy.Config.patrolAnimation, false);
+                        }
+                    }
                 }
             }
         }
 
         public void ExitState(EnemyController enemy)
         {
-            Debug.Log($"[PATROL] {enemy.Config.enemyName} EXITING Patrol State");
+            // Restore original stopping distance when exiting patrol
+            enemy.Agent.stoppingDistance = originalStoppingDistance;
+
             isWaiting = false;
             waitTimer = 0f;
+            hasStartedMoving = false;
         }
 
         private void MoveToNextPatrolPoint(EnemyController enemy)
         {
-            if (enemy.PatrolPoints == null || enemy.PatrolPoints.Length == 0) return;
+            if (enemy.PatrolPoints == null || enemy.PatrolPoints.Length == 0)
+                return;
 
             currentPatrolIndex = (currentPatrolIndex + 1) % enemy.PatrolPoints.Length;
 
             if (enemy.PatrolPoints[currentPatrolIndex] != null)
             {
-                Vector3 targetPos = enemy.PatrolPoints[currentPatrolIndex].position;
-                Debug.Log($"[PATROL] Moving to patrol point {currentPatrolIndex}: {targetPos}");
+                currentDestination = enemy.PatrolPoints[currentPatrolIndex].position;
 
                 enemy.Agent.isStopped = false;
-                enemy.Agent.SetDestination(targetPos);
-            }
-            else
-            {
-                Debug.LogWarning($"[PATROL] Patrol point {currentPatrolIndex} is NULL!");
+                enemy.Agent.SetDestination(currentDestination);
+                hasStartedMoving = false;
             }
         }
 
         private void SetRandomWanderTarget(EnemyController enemy)
         {
-            // Generate random point within wander radius
-            Vector2 randomCircle = Random.insideUnitCircle * 10f;
-            wanderTarget = enemy.transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);
+            int maxAttempts = 10;
+            float minWanderDistance = 4f;
+            float maxWanderDistance = 10f;
 
-            // Sample NavMesh to find valid position
-            UnityEngine.AI.NavMeshHit hit;
-            if (UnityEngine.AI.NavMesh.SamplePosition(wanderTarget, out hit, 10f, UnityEngine.AI.NavMesh.AllAreas))
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
-                Debug.Log($"[PATROL] Wander target set to: {hit.position}");
-                enemy.Agent.isStopped = false;
-                enemy.Agent.SetDestination(hit.position);
-            }
-            else
-            {
-                Debug.LogWarning($"[PATROL] Failed to find valid wander position near {wanderTarget}");
+                float randomDistance = Random.Range(minWanderDistance, maxWanderDistance);
+                Vector2 randomDirection = Random.insideUnitCircle.normalized;
+                Vector3 randomOffset = new Vector3(randomDirection.x, 0, randomDirection.y) * randomDistance;
+                wanderTarget = enemy.transform.position + randomOffset;
+
+                if (UnityEngine.AI.NavMesh.SamplePosition(wanderTarget, out UnityEngine.AI.NavMeshHit hit, maxWanderDistance, UnityEngine.AI.NavMesh.AllAreas))
+                {
+                    float actualDistance = Vector3.Distance(enemy.transform.position, hit.position);
+                    if (actualDistance >= minWanderDistance)
+                    {
+                        UnityEngine.AI.NavMeshPath testPath = new UnityEngine.AI.NavMeshPath();
+                        if (enemy.Agent.CalculatePath(hit.position, testPath) && testPath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+                        {
+                            currentDestination = hit.position;
+
+                            enemy.Agent.isStopped = false;
+                            enemy.Agent.SetDestination(currentDestination);
+                            hasStartedMoving = false;
+                            return;
+                        }
+                    }
+                }
             }
         }
     }

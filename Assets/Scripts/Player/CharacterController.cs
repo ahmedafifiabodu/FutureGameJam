@@ -327,7 +327,6 @@ public class FirstPersonZoneController : MonoBehaviour
             var h = overlapBuffer[i];
             if (h == null) continue;
             if (h.transform == transform || h.transform.IsChildOf(transform)) continue;
-            Debug.Log($"[Overlap] Touching: {h.name} (trigger={h.isTrigger}) layer={LayerMask.LayerToName(h.gameObject.layer)}");
         }
     }
 

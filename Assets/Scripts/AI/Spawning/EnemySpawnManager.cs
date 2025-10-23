@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using ProceduralGeneration;
 
 namespace AI.Spawning
 {
@@ -14,24 +15,6 @@ namespace AI.Spawning
     {
         [Header("Enemy Configurations")]
         [SerializeField] private List<EnemyConfigSO> enemyConfigs = new List<EnemyConfigSO>();
-
-        [Header("Spawn Settings")]
-        [Tooltip("Base number of enemies per room")]
-        [SerializeField] private int baseEnemiesPerRoom = 3;
-
-        [Tooltip("Additional enemies per room iteration")]
-        [SerializeField] private float enemiesPerIteration = 0.5f;
-
-        [Tooltip("Maximum enemies per room")]
-        [SerializeField] private int maxEnemiesPerRoom = 10;
-
-        [Tooltip("Base spawn chance for rooms")]
-        [Range(0f, 1f)]
-        [SerializeField] private float baseRoomSpawnChance = 0.8f;
-
-        [Tooltip("Base spawn chance for corridors")]
-        [Range(0f, 1f)]
-        [SerializeField] private float baseCorridorSpawnChance = 0.3f;
 
         [Header("NavMesh Settings")]
         [Tooltip("Maximum distance to search for valid NavMesh position")]
@@ -118,7 +101,7 @@ namespace AI.Spawning
         /// Spawn enemies at the given spawn points
         /// Returns the number of enemies successfully spawned
         /// </summary>
-        public int SpawnEnemiesAtPoints(SpawnPoint[] spawnPoints, bool isRoom, int roomIteration)
+        public int SpawnEnemiesAtPoints(SpawnPoint[] spawnPoints, bool isRoom, int roomIteration, LevelPiece levelPiece = null)
         {
             if (spawnPoints == null || spawnPoints.Length == 0)
             {
@@ -129,15 +112,37 @@ namespace AI.Spawning
 
             currentRoomIteration = roomIteration;
 
-            // Calculate spawn chance based on room or corridor
-            float spawnChance = isRoom ? baseRoomSpawnChance : baseCorridorSpawnChance;
+            // Determine spawn settings based on whether the piece has custom settings
+            int enemiesToSpawn;
+            float spawnChanceToUse;
 
-            // Increase spawn chance slightly with iteration
-            float iterationBonus = Mathf.Min(roomIteration * 0.05f, 0.2f);
-            spawnChance = Mathf.Min(spawnChance + iterationBonus, 1f);
+            if (levelPiece != null && levelPiece.UseCustomSpawnSettings)
+            {
+                // Use per-piece custom settings
+                enemiesToSpawn = CalculateEnemyCountForPiece(levelPiece, roomIteration);
+                spawnChanceToUse = levelPiece.SpawnChance;
 
-            // Calculate number of enemies to spawn
-            int enemiesToSpawn = CalculateEnemyCount(isRoom, roomIteration);
+                if (showSpawnDebug)
+                    Debug.Log($"[EnemySpawnManager] Using CUSTOM spawn settings for {levelPiece.name}: {enemiesToSpawn} enemies, {spawnChanceToUse:P0} spawn chance");
+            }
+            else
+            {
+                // Use fallback default settings (per-piece configuration is recommended)
+                float baseRoomSpawnChance = 0.8f;
+                float baseCorridorSpawnChance = 0.3f;
+
+                spawnChanceToUse = isRoom ? baseRoomSpawnChance : baseCorridorSpawnChance;
+
+                // Increase spawn chance slightly with iteration
+                float iterationBonus = Mathf.Min(roomIteration * 0.05f, 0.2f);
+                spawnChanceToUse = Mathf.Min(spawnChanceToUse + iterationBonus, 1f);
+
+                // Calculate number of enemies to spawn using fallback defaults
+                enemiesToSpawn = CalculateEnemyCountFallback(isRoom, roomIteration);
+
+                if (showSpawnDebug)
+                    Debug.LogWarning($"[EnemySpawnManager] Using FALLBACK defaults for {(levelPiece != null ? levelPiece.name : "unknown")}. Consider enabling custom spawn settings! Spawning {enemiesToSpawn} enemies, {spawnChanceToUse:P0} spawn chance");
+            }
 
             // Get valid enemy spawn points
             var validPoints = spawnPoints.Where(sp =>
@@ -169,7 +174,7 @@ namespace AI.Spawning
                 if (spawned >= enemiesToSpawn) break;
 
                 // Random chance to spawn
-                if (Random.value > spawnChance) continue;
+                if (Random.value > spawnChanceToUse) continue;
 
                 // Select enemy type
                 EnemyConfigSO config = SelectEnemyConfig(roomIteration);
@@ -236,12 +241,33 @@ namespace AI.Spawning
 
         #region Helper Methods
 
-        private int CalculateEnemyCount(bool isRoom, int iteration)
+        /// <summary>
+        /// Calculate enemy count using fallback defaults (for pieces without custom settings)
+        /// </summary>
+        private int CalculateEnemyCountFallback(bool isRoom, int iteration)
         {
-            if (!isRoom) return Mathf.Min(Random.Range(0, 3), maxEnemiesPerRoom); // Corridors have fewer enemies
+            // Fallback defaults (recommend using per-piece custom settings instead)
+            int baseEnemiesPerRoom = 3;
+            float enemiesPerIteration = 0.5f;
+            int maxEnemiesPerRoom = 10;
+
+            if (!isRoom)
+            {
+                // Corridors have fewer enemies
+                return Mathf.Min(Random.Range(0, 3), maxEnemiesPerRoom);
+            }
 
             int count = baseEnemiesPerRoom + Mathf.FloorToInt(iteration * enemiesPerIteration);
             return Mathf.Min(count, maxEnemiesPerRoom);
+        }
+
+        /// <summary>
+        /// Calculate enemy count for a specific LevelPiece using its custom settings
+        /// </summary>
+        private int CalculateEnemyCountForPiece(LevelPiece piece, int iteration)
+        {
+            int count = piece.BaseEnemiesPerPiece + Mathf.FloorToInt(iteration * piece.EnemiesPerIteration);
+            return Mathf.Min(count, piece.MaxEnemiesPerPiece);
         }
 
         private EnemyConfigSO SelectEnemyConfig(int roomIteration)
