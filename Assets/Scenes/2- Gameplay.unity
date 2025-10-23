@@ -508,7 +508,7 @@ LineRenderer:
     numCapVertices: 90
     alignment: 0
     textureMode: 0
-    textureScale: {x: -1, y: 1}
+    textureScale: {x: 1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
   m_MaskInteraction: 0
@@ -6058,6 +6058,7 @@ MonoBehaviour:
   enableLifetimeDecay: 1
   showLifetimeWarning: 1
   lifetimeWarningThreshold: 15
+  gravity: 0
 --- !u!33 &1667444199430107346
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -6427,11 +6428,11 @@ MonoBehaviour:
   lineEndWidth: 0.1
   nearCameraFadeDistance: 0.5
   enableNearCameraFade: 1
+  useEmission: 1
+  emissionIntensity: 2
   animateArrows: 1
   arrowAnimationSpeed: 2
   animateOnlyWhenVisible: 1
-  arrowTexture: {fileID: 0}
-  lineMaterial: {fileID: 0}
   horizontalOffset: 0.1
   trajectoryStartOffset: {x: 0, y: 0, z: 0}
   landingIndicatorPrefab: {fileID: 0}
