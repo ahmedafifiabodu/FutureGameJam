@@ -15,7 +15,7 @@ MonoBehaviour:
   profileName: Rifle
   description: Medium impact feedback for rifles
   enableCameraShake: 1
-  shakeIntensity: 0.2
+  shakeIntensity: 0.15
   shakeDuration: 0.35
   shakeIntensityCurve:
     serializedVersion: 2

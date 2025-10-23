@@ -216,12 +216,13 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 10
-  jumpHeight: 2
-  gravity: -40
+  jumpHeight: 1
+  gravity: -15
   sprintAlwaysOn: 0
   sprintMultiplier: 1
   cameraTilt: 1.5
   tiltTimeChange: 15
+  airControl: 2
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -769,12 +770,13 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 10
-  jumpHeight: 2
-  gravity: -40
+  jumpHeight: 1
+  gravity: -15
   sprintAlwaysOn: 0
   sprintMultiplier: 1
   cameraTilt: 1.5
   tiltTimeChange: 15
+  airControl: 2
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -1439,6 +1441,7 @@ MonoBehaviour:
   sprintMultiplier: 1.6
   cameraTilt: 5
   tiltTimeChange: 50
+  airControl: 0.5
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -1980,12 +1983,13 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 10
-  jumpHeight: 2
-  gravity: -40
+  jumpHeight: 1
+  gravity: -15
   sprintAlwaysOn: 0
   sprintMultiplier: 1
   cameraTilt: 1.5
   tiltTimeChange: 15
+  airControl: 2
   allowedZones: []
   restrictVertical: 1
   zoneMargin: 0
@@ -2547,7 +2551,7 @@ MonoBehaviour:
   hitSound: {fileID: 0}
   destroySound: {fileID: 0}
   hitEffectPrefab: {fileID: 0}
-  destroyEffectPrefab: {fileID: 6343699840357871614, guid: e06a1872263832642ab59a94953a3f91, type: 3}
+  destroyEffectPrefab: {fileID: 6343699840357871614, guid: 5b086e910fe4e454ca81ba941f9f92e4, type: 3}
 --- !u!65 &1606861711
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2921,7 +2925,7 @@ MonoBehaviour:
   hitSound: {fileID: 0}
   destroySound: {fileID: 0}
   hitEffectPrefab: {fileID: 0}
-  destroyEffectPrefab: {fileID: 6343699840357871614, guid: e06a1872263832642ab59a94953a3f91, type: 3}
+  destroyEffectPrefab: {fileID: 6343699840357871614, guid: 5b086e910fe4e454ca81ba941f9f92e4, type: 3}
 --- !u!65 &1799368791
 BoxCollider:
   m_ObjectHideFlags: 0

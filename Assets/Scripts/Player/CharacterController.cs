@@ -11,6 +11,7 @@ public class FirstPersonZoneController : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float airSpeedMultiplier = 1.15f;
 
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float gravity = -30f;             // Keep negative
@@ -173,7 +174,7 @@ public class FirstPersonZoneController : MonoBehaviour
         Vector2 mv = inputManager.PlayerActions.Move.ReadValue<Vector2>();
         if (mv.sqrMagnitude > 1f) mv.Normalize();
 
-        float speed = moveSpeed * (controller.isGrounded ? 1f : 1.25f);
+        float speed = moveSpeed * (controller.isGrounded ? 1f : airSpeedMultiplier);
 
         Vector3 dir = (transform.right * mv.x + transform.forward * mv.y);
         return new Vector3(dir.x, 0f, dir.z) * speed;
