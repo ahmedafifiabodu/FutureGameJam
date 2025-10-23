@@ -4,11 +4,10 @@ using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Manages game state transitions between Parasite mode and Host mode
+/// Works in conjunction with GameStateMachineManager for lifecycle management
 /// </summary>
 public class GameStateManager : MonoBehaviour
 {
-    public static GameStateManager Instance { get; private set; }
-
     [Header("Mode Management")]
     [SerializeField] private GameMode currentMode = GameMode.Parasite;
 
@@ -33,8 +32,16 @@ public class GameStateManager : MonoBehaviour
     [Header("Voluntary Exit")]
     [SerializeField] private bool useTransitionForExit = true;
 
-    private InputManager inputManager;
-    private Transform parasiteCameraPivot; // Store parasite's camera pivot reference
+    [Header("Game Over UI")]
+    [SerializeField] private GameOverUI gameOverUI;
+
+    [SerializeField] private bool autoFindGameOverUI = true;
+
+    private InputManager _inputManager;
+    private PossessionTransitionEffect _possessionTransitionEffect;
+    private Transform parasiteCameraPivot;
+    private GameStateMachine.GameStateMachineManager _stateMachine;
+    private GameplayHUD _gameplayHUD;
 
     public enum GameMode
     {
@@ -42,35 +49,68 @@ public class GameStateManager : MonoBehaviour
         Host
     }
 
-    // Public properties for external access
+    // Public properties
     public GameObject CurrentHost => currentHost;
 
     public HostController CurrentHostController => currentHostController;
     public GameObject ParasitePlayer => parasitePlayer;
     public ParasiteController ParasiteController => parasiteController;
 
+    public int GetHostsConsumed() => hostsConsumed;
+
+    public float GetTotalSurvivalTime() => totalSurvivalTime;
+
+    public GameMode GetCurrentMode() => currentMode;
+
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        ServiceLocator.Instance.RegisterService(this, false);
     }
 
     private void Start()
     {
-        // Get InputManager from ServiceLocator
-        inputManager = ServiceLocator.Instance.GetService<InputManager>();
+        _inputManager = ServiceLocator.Instance.GetService<InputManager>();
+        _possessionTransitionEffect = ServiceLocator.Instance.GetService<PossessionTransitionEffect>();
+        _gameplayHUD = ServiceLocator.Instance.GetService<GameplayHUD>();
 
+        // Try to get state machine (optional - for integration)
+        if (ServiceLocator.Instance.TryGetService(out GameStateMachine.GameStateMachineManager stateMachine))
+        {
+            _stateMachine = stateMachine;
+        }
+
+        // Try to find HUD if not registered
+        if (_gameplayHUD == null)
+        {
+            _gameplayHUD = FindFirstObjectByType<GameplayHUD>();
+
+            if (_gameplayHUD == null)
+            {
+                Debug.LogWarning("[GameStateManager] GameplayHUD not found! UI panels won't switch correctly.");
+            }
+        }
+
+        InitializeParasite();
+        InitializeGameOverUI();
+        StartParasiteMode();
+    }
+
+    private void Update()
+    {
+        if (currentMode == GameMode.Host)
+            totalSurvivalTime += Time.deltaTime;
+    }
+
+    #region Initialization
+
+    private void InitializeParasite()
+    {
         // Find or spawn parasite
         if (!parasitePlayer)
         {
-            parasitePlayer = FindFirstObjectByType<ParasiteController>().gameObject;
+            var parasiteInScene = FindFirstObjectByType<ParasiteController>();
+            if (parasiteInScene != null)
+                parasitePlayer = parasiteInScene.gameObject;
 
             if (!parasitePlayer && parasitePrefab && parasiteSpawnPoint)
                 parasitePlayer = Instantiate(parasitePrefab, parasiteSpawnPoint.position, Quaternion.identity);
@@ -83,15 +123,24 @@ public class GameStateManager : MonoBehaviour
             if (parasitePlayer.TryGetComponent<FirstPersonZoneController>(out var zoneController))
                 parasiteCameraPivot = zoneController.CameraPivot;
         }
-
-        StartParasiteMode();
     }
 
-    private void Update()
+    private void InitializeGameOverUI()
     {
-        if (currentMode == GameMode.Host)
-            totalSurvivalTime += Time.deltaTime;
+        if (gameOverUI == null && autoFindGameOverUI)
+        {
+            gameOverUI = FindFirstObjectByType<GameOverUI>();
+
+            if (gameOverUI == null)
+            {
+                Debug.LogWarning("[GameState] No GameOverUI found in scene! Please create one using Tools/Game Over UI/Setup Wizard");
+            }
+        }
     }
+
+    #endregion Initialization
+
+    #region Mode Switching
 
     public void SwitchToHostMode(GameObject host)
     {
@@ -99,55 +148,115 @@ public class GameStateManager : MonoBehaviour
         currentHost = host;
         hostsConsumed++;
 
-        // Get host controller
         currentHostController = host.GetComponent<HostController>();
 
-        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
-            fisheye.active = false;
+        // Disable fisheye effect for host mode
+        SetFisheyeEffect(false);
 
         // Disable parasite
         if (parasitePlayer)
             parasitePlayer.SetActive(false);
 
-        // NOTE: HostController.OnParasiteAttached() already enables the host's movement controller
-        // DO NOT enable it here to avoid enabling the wrong controller
-
         // Switch input to Player actions
-        inputManager.EnablePlayerActions();
+        _inputManager.EnablePlayerActions();
+
+        // Update HUD to show host UI
+        if (_gameplayHUD != null && currentHostController != null)
+        {
+            _gameplayHUD.ShowHostUI(currentHostController);
+        }
+        else if (_gameplayHUD == null)
+        {
+            Debug.LogWarning("[GameStateManager] Cannot update HUD - GameplayHUD not found!");
+        }
+
+        // Notify state machine if available
+        _stateMachine?.SwitchToHostMode();
 
         Debug.Log($"[GameState] Switched to Host Mode. Hosts consumed: {hostsConsumed}");
     }
 
-    /// <summary>
-    /// Called when player voluntarily exits from a host body
-    /// </summary>
+    private void StartParasiteMode()
+    {
+        currentMode = GameMode.Parasite;
+
+        Vector3 spawnPosition = GetParasiteSpawnPosition();
+        currentHost = null;
+        currentHostController = null;
+
+        EnableParasite(spawnPosition);
+        SetFisheyeEffect(true);
+        EnableParasiteCamera();
+
+        _inputManager.EnableParasiteActions();
+
+        // Update HUD to show parasite UI
+        if (_gameplayHUD != null)
+        {
+            _gameplayHUD.ShowParasiteUI();
+        }
+
+        // Notify state machine if available
+        _stateMachine?.SwitchToParasiteMode();
+
+        Debug.Log("[GameState] Switched to Parasite Mode.");
+    }
+
+    private void StartParasiteModeWithLaunch(Vector3 spawnPosition, Vector3 launchDirection, float launchForce)
+    {
+        currentMode = GameMode.Parasite;
+        currentHost = null;
+        currentHostController = null;
+
+        SetFisheyeEffect(true);
+        EnableParasite(spawnPosition);
+
+        if (parasiteController)
+        {
+            parasiteController.enabled = true;
+            parasiteController.ExitLaunch(launchDirection * launchForce);
+        }
+
+        EnableParasiteCamera();
+        _inputManager.EnableParasiteActions();
+
+        // Update HUD to show parasite UI
+        if (_gameplayHUD != null)
+        {
+            _gameplayHUD.ShowParasiteUI();
+        }
+
+        // Notify state machine if available
+        _stateMachine.SwitchToParasiteMode();
+
+        Debug.Log("[GameState] Switched to Parasite Mode with launch exit.");
+    }
+
+    #endregion Mode Switching
+
+    #region Host Exit/Death
+
     public void OnVoluntaryHostExit(ParasiteController parasite, Vector3 exitDirection, float exitForce)
     {
         Debug.Log("[GameState] Player voluntarily exiting host.");
 
-        // Get references before we clear them
         Transform hostCameraPivot = currentHostController.GetCameraPivot();
         Camera transferredCamera = hostCameraPivot.GetComponentInChildren<Camera>();
-        Vector3 exitPosition = currentHost.transform.position; // Spawn above host
+        Vector3 exitPosition = currentHost.transform.position;
 
         if (useTransitionForExit)
         {
-            // Play exit transition effect
-            var transitionEffect = PossessionTransitionEffect.Instance != null ?
-                   PossessionTransitionEffect.Instance : PossessionTransitionEffect.CreateInstance();
+            var transitionEffect = _possessionTransitionEffect ?? PossessionTransitionEffect.CreateInstance();
 
             if (transferredCamera != null && parasiteCameraPivot != null)
             {
-                // Play transition with camera transfer back to parasite
                 transitionEffect.PlayExitTransition(transferredCamera, parasiteCameraPivot, () =>
                 {
-                    // This callback happens at the midpoint (after camera transfer)
                     CompleteVoluntaryExit(parasite, exitPosition, exitDirection, exitForce);
                 });
             }
             else
             {
-                // Fallback without camera transfer
                 transitionEffect.PlayExitTransition(() =>
                 {
                     CompleteVoluntaryExit(parasite, exitPosition, exitDirection, exitForce);
@@ -156,10 +265,8 @@ public class GameStateManager : MonoBehaviour
         }
         else
         {
-            // Immediate exit without transition
             if (transferredCamera != null && parasiteCameraPivot != null)
             {
-                // Transfer camera immediately
                 transferredCamera.transform.SetParent(parasiteCameraPivot, false);
                 transferredCamera.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
@@ -169,16 +276,12 @@ public class GameStateManager : MonoBehaviour
 
     private void CompleteVoluntaryExit(ParasiteController parasite, Vector3 exitPosition, Vector3 exitDirection, float exitForce)
     {
-        // Notify current host that parasite detached
         if (currentHostController != null)
-        {
             currentHostController.OnParasiteDetached();
-        }
 
         if (parasite != null && parasiteController == null)
             parasiteController = parasite;
 
-        // Return to parasite mode
         StartParasiteModeWithLaunch(exitPosition, exitDirection, exitForce);
     }
 
@@ -186,173 +289,156 @@ public class GameStateManager : MonoBehaviour
     {
         Debug.Log("[GameState] Host died. Returning to Parasite Mode.");
 
-        // Get references before we clear them
-        Transform hostCameraPivot = currentHostController.GetCameraPivot();
-        Camera transferredCamera = hostCameraPivot.GetComponentInChildren<Camera>();
+        // CRITICAL: Capture host position BEFORE any transitions or destruction
+        Vector3 hostPosition = currentHost != null ? currentHost.transform.position : GetParasiteSpawnPosition();
 
-        // Play exit transition effect
-        var transitionEffect = PossessionTransitionEffect.Instance != null ? PossessionTransitionEffect.Instance : PossessionTransitionEffect.CreateInstance();
+        Transform hostCameraPivot = currentHostController?.GetCameraPivot();
+        Camera transferredCamera = hostCameraPivot?.GetComponentInChildren<Camera>();
+
+        var transitionEffect = _possessionTransitionEffect ?? PossessionTransitionEffect.CreateInstance();
 
         if (transferredCamera != null && parasiteCameraPivot != null)
         {
-            // Play transition with camera transfer back to parasite
+            // Pass captured position to callback
             transitionEffect.PlayExitTransition(transferredCamera, parasiteCameraPivot, () =>
-            {
-                // This callback happens at the midpoint (after camera transfer)
-                CompleteHostDeath(parasite);
-            });
+ {
+     CompleteHostDeath(parasite, hostPosition);
+ });
         }
         else
         {
-            // Fallback without camera transfer
+            // Pass captured position to callback
             transitionEffect.PlayExitTransition(() =>
-            {
-                CompleteHostDeath(parasite);
-            });
+                  {
+                      CompleteHostDeath(parasite, hostPosition);
+                  });
         }
     }
 
-    private void CompleteHostDeath(ParasiteController parasite)
+    private void CompleteHostDeath(ParasiteController parasite, Vector3 hostPosition)
     {
-        // Get host position and generate a random upward exit direction
-        Vector3 hostPosition = currentHost != null ? currentHost.transform.position : (parasiteSpawnPoint ? parasiteSpawnPoint.position : Vector3.zero);
-        Vector3 exitPosition = hostPosition; // Spawn above host
+        // Use the passed host position (already captured before destruction)
+        Vector3 exitPosition = hostPosition + Vector3.up; // Spawn above the host
 
-        // Generate a random direction for the exit (upward bias)
-        Vector3 randomDirection = new Vector3(
-            Random.Range(-0.5f, 0.5f), // Random horizontal X
-            Random.Range(0.5f, 1f),    // Upward bias Y
-            Random.Range(-0.5f, 0.5f)  // Random horizontal Z
-        ).normalized;
+        // Generate random upward direction for ejection
+        Vector3 randomDirection = new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(0.7f, 1f), Random.Range(-0.3f, 0.3f)).normalized;
 
-        float exitForce = 5f; // Slightly less force than voluntary exit
+        float exitForce = 5f; // Stronger force for more noticeable ejection
 
-        // Notify current host that parasite detached
+        // Detach parasite from host
         if (currentHostController != null)
-        {
             currentHostController.OnParasiteDetached();
-        }
 
         if (parasite != null && parasiteController == null)
             parasiteController = parasite;
 
-        // Use the same launch behavior as voluntary exit
+        // IMPORTANT: Ensure parasite controller is properly reset before launching
+        if (parasiteController != null)
+            parasiteController.ResetParasiteState();
+
+        // Launch parasite from host death position
         StartParasiteModeWithLaunch(exitPosition, randomDirection, exitForce);
 
-        Debug.Log($"[GameState] Host died - parasite launched from {exitPosition} in direction {randomDirection}");
+        Debug.Log($"[GameState] Host died - parasite ejected from {exitPosition} in direction {randomDirection} with force {exitForce}");
     }
 
-    private void StartParasiteMode()
-    {
-        currentMode = GameMode.Parasite;
+    #endregion Host Exit/Death
 
-        // Store last host position before clearing reference
-        Vector3 spawnPosition = parasiteSpawnPoint ? parasiteSpawnPoint.position : Vector3.zero;
-        if (currentHost != null)
-            spawnPosition = currentHost.transform.position;
-
-        currentHost = null;
-        currentHostController = null;
-
-        // Enable parasite
-        if (parasitePlayer)
-        {
-            parasitePlayer.SetActive(true);
-            parasitePlayer.transform.position = spawnPosition;
-
-            if (parasiteController)
-                parasiteController.enabled = true;
-        }
-
-        // Camera should already be in parasite pivot from OnHostDied transfer
-        // Just ensure it's enabled
-        if (parasiteCameraPivot != null)
-        {
-            Camera camera = parasiteCameraPivot.GetComponentInChildren<Camera>();
-            if (camera != null)
-            {
-                camera.enabled = true;
-                Debug.Log("[GameState] Parasite camera enabled");
-            }
-        }
-
-        // Switch input to Parasite actions
-        inputManager.EnableParasiteActions();
-
-        Debug.Log("[GameState] Switched to Parasite Mode.");
-    }
-
-    /// <summary>
-    /// Starts parasite mode with an initial launch velocity (used for voluntary exit)
-    /// </summary>
-    private void StartParasiteModeWithLaunch(Vector3 spawnPosition, Vector3 launchDirection, float launchForce)
-    {
-        currentMode = GameMode.Parasite;
-
-        currentHost = null;
-        currentHostController = null;
-
-        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
-            fisheye.active = true;
-
-        // Enable parasite
-        if (parasitePlayer)
-        {
-            parasitePlayer.SetActive(true);
-            parasitePlayer.transform.position = spawnPosition;
-
-            if (parasiteController)
-            {
-                parasiteController.enabled = true;
-                // Trigger a launch with the exit trajectory
-                parasiteController.ExitLaunch(launchDirection * launchForce);
-            }
-        }
-
-        // Camera should already be in parasite pivot from exit transition
-        // Just ensure it's enabled
-        if (parasiteCameraPivot != null)
-        {
-            Camera camera = parasiteCameraPivot.GetComponentInChildren<Camera>();
-            if (camera != null)
-            {
-                camera.enabled = true;
-                Debug.Log("[GameState] Parasite camera enabled");
-            }
-        }
-
-        // Switch input to Parasite actions
-        inputManager.EnableParasiteActions();
-
-        Debug.Log("[GameState] Switched to Parasite Mode with launch exit.");
-    }
+    #region Game Lifecycle
 
     public void RestartGame()
     {
+        // Reset stats
         hostsConsumed = 0;
         totalSurvivalTime = 0f;
         HostController.ResetHostCount();
 
-        StartParasiteMode();
+        // Hide game over UI
+        if (gameOverUI != null && gameOverUI.IsShowing())
+            gameOverUI.HideGameOver();
+
+        // Reset parasite state
+        if (parasiteController != null)
+            parasiteController.ResetParasiteState();
+
+        // If called directly (without state machine), handle restart locally
+        // Otherwise, let the state machine handle the transition
+        if (_stateMachine == null)
+        {
+            StartParasiteMode();
+        }
+        // Note: If _stateMachine exists, it will handle state transition via ChangeState()
+        // We don't call _stateMachine.RestartGame() here to avoid circular dependency
     }
 
     public void GameOver()
     {
         Debug.Log($"[GameState] GAME OVER! Hosts: {hostsConsumed}, Time: {totalSurvivalTime:F1}s");
 
-        // TODO: Show game over UI
+        // Show game over UI
+        if (gameOverUI != null)
+            gameOverUI.ShowGameOver(hostsConsumed, totalSurvivalTime);
 
-        Time.timeScale = 0f;
+        // Notify state machine if available
+        _stateMachine?.TriggerGameOver(hostsConsumed, totalSurvivalTime);
     }
 
-    public GameMode GetCurrentMode() => currentMode;
+    #endregion Game Lifecycle
 
-    public int GetHostsConsumed() => hostsConsumed;
+    #region Helper Methods
 
-    public float GetTotalSurvivalTime() => totalSurvivalTime;
-
-    private void OnGUI()
+    private Vector3 GetParasiteSpawnPosition()
     {
-        GUI.Label(new Rect(8, 68, 300, 20), $"Mode: {currentMode} | Hosts: {hostsConsumed} | Time: {totalSurvivalTime:F1}s");
+        if (parasiteSpawnPoint != null)
+            return parasiteSpawnPoint.position;
+
+        if (currentHost != null)
+            return currentHost.transform.position;
+
+        return Vector3.zero;
     }
+
+    private void EnableParasite(Vector3 position)
+    {
+        if (parasitePlayer)
+        {
+            parasitePlayer.SetActive(true);
+            parasitePlayer.transform.position = position;
+
+            if (parasiteController)
+            {
+                parasiteController.enabled = true;
+
+                var characterController = parasiteController.GetComponent<CharacterController>();
+                if (characterController != null && !characterController.enabled)
+                {
+                    characterController.enabled = true;
+                    Debug.Log("[GameState] Re-enabled CharacterController");
+                }
+            }
+        }
+    }
+
+    private void EnableParasiteCamera()
+    {
+        if (parasiteCameraPivot != null)
+        {
+            Camera camera = parasiteCameraPivot.GetComponentInChildren<Camera>();
+            if (camera != null)
+            {
+                camera.enabled = true;
+                Debug.Log("[GameState] Parasite camera enabled");
+            }
+        }
+    }
+
+    private void SetFisheyeEffect(bool active)
+    {
+        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
+            fisheye.active = active;
+    }
+
+    public static void ResetHostCount() => HostController.ResetHostCount();
+
+    #endregion Helper Methods
 }

@@ -1,13 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Manages weapon switching and equipping for the host controller.
+/// Manages weapon switching and equipping for the host _controller.
 /// Supports both ranged and melee weapons.
 /// </summary>
 public class WeaponManager : MonoBehaviour
 {
     [Header("Weapon Slots")]
     [SerializeField] private WeaponBase primaryWeapon;
+
     [SerializeField] private WeaponBase secondaryWeapon;
 
     [Header("Weapon Holder")]
@@ -123,7 +124,9 @@ public class WeaponManager : MonoBehaviour
 
     // Public getters
     public WeaponBase GetCurrentWeapon() => currentWeapon;
+
     public WeaponBase GetPrimaryWeapon() => primaryWeapon;
+
     public WeaponBase GetSecondaryWeapon() => secondaryWeapon;
 
     // Assign weapons at runtime

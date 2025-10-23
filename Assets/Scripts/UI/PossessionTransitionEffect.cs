@@ -46,18 +46,9 @@ public class PossessionTransitionEffect : MonoBehaviour
     private static PossessionTransitionEffect instance;
     private Canvas transitionCanvas;
 
-    public static PossessionTransitionEffect Instance => instance;
-
     private void Awake()
     {
-        // Singleton pattern
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        instance = this;
-        DontDestroyOnLoad(gameObject);
+        ServiceLocator.Instance.RegisterService(this, false);
 
         SetupCanvas();
     }
@@ -67,9 +58,7 @@ public class PossessionTransitionEffect : MonoBehaviour
         // Get or create canvas
         transitionCanvas = GetComponent<Canvas>();
         if (transitionCanvas == null)
-        {
             transitionCanvas = gameObject.AddComponent<Canvas>();
-        }
 
         transitionCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         transitionCanvas.sortingOrder = 9999; // Render on top of everything

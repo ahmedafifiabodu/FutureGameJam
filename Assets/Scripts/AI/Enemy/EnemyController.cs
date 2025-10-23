@@ -6,7 +6,7 @@ using UnityEngine.AI;
 namespace AI.Enemy
 {
     /// <summary>
-    /// Main controller for enemy behavior using state machine pattern
+    /// Main _controller for enemy behavior using state machine pattern
     /// Replaces the old Enemy and EnemyStateManager classes
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
@@ -59,6 +59,7 @@ namespace AI.Enemy
 
         // Player targeting system
         private GameStateManager gameStateManager;
+
         private ParasiteController parasiteController;
         private Transform parasiteTransform;
         private Transform hostTransform;
@@ -113,11 +114,6 @@ namespace AI.Enemy
                 enabled = false;
                 return;
             }
-
-            if (config.enemyPrefab == null)
-            {
-                Debug.LogWarning($"[EnemyController] {config.enemyName} config is missing enemy prefab!", this);
-            }
         }
 
         private void InitializeEnemy()
@@ -131,9 +127,9 @@ namespace AI.Enemy
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.HighQualityObstacleAvoidance;
 
             // Get game state manager for player targeting
-            gameStateManager = GameStateManager.Instance;
+            gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
 
-            // Find parasite controller
+            // Find parasite _controller
             parasiteController = ServiceLocator.Instance.GetService<ParasiteController>();
             if (parasiteController != null)
             {
@@ -146,35 +142,9 @@ namespace AI.Enemy
             // Initialize player target
             UpdatePlayerTarget();
 
-            // Auto-find patrol points if not assigned
-            if (patrolPoints == null || patrolPoints.Length == 0)
-            {
-                FindPatrolPoints();
-            }
-
             // Disable attack collider initially
             if (attackCollider != null)
-            {
                 attackCollider.enabled = false;
-            }
-        }
-
-        private void FindPatrolPoints()
-        {
-            // Try to find patrol points in parent room/corridor
-            if (transform.parent != null)
-            {
-                Transform patrolContainer = transform.parent.Find("PatrolPoints");
-                if (patrolContainer != null)
-                {
-                    int childCount = patrolContainer.childCount;
-                    patrolPoints = new Transform[childCount];
-                    for (int i = 0; i < childCount; i++)
-                    {
-                        patrolPoints[i] = patrolContainer.GetChild(i);
-                    }
-                }
-            }
         }
 
         private void InitializeStates()
@@ -667,7 +637,7 @@ namespace AI.Enemy
         {
             if (config != null)
             {
-                Debug.Log($"[EnemyController] {config.enemyName} Health: {currentHealth}/{config.maxHealth} ({(float)currentHealth/config.maxHealth*100:F1}%)");
+                Debug.Log($"[EnemyController] {config.enemyName} Health: {currentHealth}/{config.maxHealth} ({(float)currentHealth / config.maxHealth * 100:F1}%)");
             }
             else
             {

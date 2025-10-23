@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class ParasiteController : MonoBehaviour
+public class ParasiteController : MonoBehaviour, IDamageable
 {
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
@@ -70,9 +70,18 @@ public class ParasiteController : MonoBehaviour
     [Header("Visual Effects")]
     [SerializeField] private bool usePossessionTransition = true;
 
-    private CharacterController controller;
-    private InputManager inputManager;
+    [Header("Parasite Lifetime")]
+    [SerializeField] private float maxParasiteLifetime = 60f; // How long parasite can survive without a host
+
+    [SerializeField] private bool enableLifetimeDecay = true;
+    [SerializeField] private bool showLifetimeWarning = true;
+    [SerializeField] private float lifetimeWarningThreshold = 15f;
+
+    private CharacterController _controller;
+    private InputManager _inputManager;
+    private GameStateManager _gameStateManager;
     private FirstPersonZoneController zoneController;
+    private PossessionTransitionEffect _possessionTransitionEffect;
 
     // Shared settings from FirstPersonZoneController
     private Transform cameraPivot;
@@ -93,11 +102,14 @@ public class ParasiteController : MonoBehaviour
     private Vector3 launchVelocity;
     private bool canLaunch; // Track if target is far enough to launch
     private bool isAttachingToHost = false; // Prevent multiple host attachments
+    private float currentParasiteLifetime;
+    private bool isDead = false;
 
     private void Awake()
     {
-        ServiceLocator.Instance.RegisterService(this, true);
-        controller = GetComponent<CharacterController>();
+        ServiceLocator.Instance.RegisterService(this, false);
+
+        _controller = GetComponent<CharacterController>();
         zoneController = GetComponent<FirstPersonZoneController>();
 
         if (zoneController != null)
@@ -126,11 +138,14 @@ public class ParasiteController : MonoBehaviour
             }
         }
         lastLandTime = -slideTime;
+
+        // Initialize parasite lifetime
+        currentParasiteLifetime = maxParasiteLifetime;
     }
 
     private void OnEnable()
     {
-        // When parasite controller is enabled, disable FirstPersonZoneController
+        // When parasite _controller is enabled, disable FirstPersonZoneController
         if (zoneController != null && zoneController.enabled)
         {
             zoneController.enabled = false;
@@ -144,7 +159,7 @@ public class ParasiteController : MonoBehaviour
 
     private void OnDisable()
     {
-        // When parasite controller is disabled, re-enable FirstPersonZoneController
+        // When parasite _controller is disabled, re-enable FirstPersonZoneController
         if (zoneController != null && !zoneController.enabled)
         {
             zoneController.enabled = true;
@@ -161,17 +176,31 @@ public class ParasiteController : MonoBehaviour
 
     private void Start()
     {
-        inputManager = ServiceLocator.Instance.GetService<InputManager>();
+        _inputManager = ServiceLocator.Instance.GetService<InputManager>();
+        _gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
+        _possessionTransitionEffect = ServiceLocator.Instance.GetService<PossessionTransitionEffect>();
 
         if (!cameraPivot)
             Debug.LogWarning("[Parasite] CameraPivot not found! Ensure FirstPersonZoneController has cameraPivot assigned.");
 
-        inputManager.EnableParasiteActions();
+        _inputManager.EnableParasiteActions();
     }
 
     private void Update()
     {
-        if (inputManager == null) return;
+        if (_inputManager == null || isDead) return;
+
+        // Count down parasite lifetime
+        if (enableLifetimeDecay)
+        {
+            currentParasiteLifetime -= Time.deltaTime;
+
+            if (currentParasiteLifetime <= 0f)
+            {
+                Die();
+                return;
+            }
+        }
 
         Look();
 
@@ -199,7 +228,7 @@ public class ParasiteController : MonoBehaviour
     {
         if (!cameraPivot) return;
 
-        Vector2 look = inputManager.ParasiteActions.Look.ReadValue<Vector2>();
+        Vector2 look = _inputManager.ParasiteActions.Look.ReadValue<Vector2>();
         float mx = look.x * mouseSensitivity * (lookInputIsDelta ? 1f : Time.deltaTime);
         float my = look.y * mouseSensitivity * (lookInputIsDelta ? 1f : Time.deltaTime);
 
@@ -207,14 +236,14 @@ public class ParasiteController : MonoBehaviour
         pitch = Mathf.Clamp(pitch - my, -85f, 85f);
 
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-        Vector2 moveInput = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
+        Vector2 moveInput = _inputManager.ParasiteActions.Move.ReadValue<Vector2>();
         roll = Mathf.MoveTowards(roll, moveInput.x != 0f ? Mathf.Sign(moveInput.x) * cameraTilt : 0f, tiltTimeChange * Time.deltaTime);
         cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, roll);
     }
 
     private void HandleCrawling()
     {
-        Vector2 moveInput = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
+        Vector2 moveInput = _inputManager.ParasiteActions.Move.ReadValue<Vector2>();
 
         if (moveInput.sqrMagnitude > 1f)
             moveInput.Normalize();
@@ -223,28 +252,28 @@ public class ParasiteController : MonoBehaviour
         moveDir.y = 0f;
 
         float moveControl = 1f;
-        if (!controller.isGrounded)
+        if (!_controller.isGrounded)
             moveControl = airControl * Time.deltaTime;
         else if (Time.time < lastLandTime + slideTime)
             moveControl = slideControl * Time.deltaTime;
 
         move = Vector3.Lerp(move, moveDir * crawlSpeed, moveControl);
 
-        if (controller.isGrounded && yVel < 0f)
+        if (_controller.isGrounded && yVel < 0f)
         {
             yVel = -2f;
         }
 
-        if (controller.isGrounded && inputManager.ParasiteActions.Jump.IsPressed())
+        if (_controller.isGrounded && _inputManager.ParasiteActions.Jump.IsPressed())
         {
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
         yVel += gravity * Time.deltaTime;
         move.y = yVel;
 
-        controller.Move(move * Time.deltaTime);
+        _controller.Move(move * Time.deltaTime);
         if (!cameraPivot) return;
-        if (moveDir != Vector3.zero && controller.isGrounded)
+        if (moveDir != Vector3.zero && _controller.isGrounded)
         {
             bobTimer += bobSpeed * Time.deltaTime;
         }
@@ -275,7 +304,7 @@ public class ParasiteController : MonoBehaviour
         }
 
         // Check if attack button is held down
-        bool attackHeld = inputManager.ParasiteActions.Attack.IsPressed();
+        bool attackHeld = _inputManager.ParasiteActions.Attack.IsPressed();
 
         if (attackHeld)
         {
@@ -356,7 +385,7 @@ public class ParasiteController : MonoBehaviour
             }
         }
 
-        CollisionFlags flags = controller.Move(launchVelocity * Time.deltaTime);
+        CollisionFlags flags = _controller.Move(launchVelocity * Time.deltaTime);
 
         if ((flags & CollisionFlags.Below) != 0 && launchVelocity.y < 0)
         {
@@ -376,7 +405,7 @@ public class ParasiteController : MonoBehaviour
         }
 
         // Apply air friction
-        if (!controller.isGrounded && enableFriction)
+        if (!_controller.isGrounded && enableFriction)
         {
             float friction = airFriction * Time.deltaTime;
             launchVelocity.x = Mathf.MoveTowards(launchVelocity.x, 0, friction);
@@ -476,7 +505,7 @@ public class ParasiteController : MonoBehaviour
         Transform hostCameraPivot = hostController.GetCameraPivot();
 
         // Play transition effect with camera transfer
-        var transitionEffect = PossessionTransitionEffect.Instance != null ? PossessionTransitionEffect.Instance : PossessionTransitionEffect.CreateInstance();
+        var transitionEffect = _possessionTransitionEffect != null ? _possessionTransitionEffect : PossessionTransitionEffect.CreateInstance();
 
         if (parasiteCamera != null && hostCameraPivot != null)
         {
@@ -488,7 +517,7 @@ public class ParasiteController : MonoBehaviour
                     hostController.OnParasiteAttached(this);
 
                 // Pass the actual host GameObject, not the head
-                GameStateManager.Instance.SwitchToHostMode(hostGameObject);
+                _gameStateManager.SwitchToHostMode(hostGameObject);
 
                 this.enabled = false;
             });
@@ -503,7 +532,7 @@ public class ParasiteController : MonoBehaviour
                     hostController.OnParasiteAttached(this);
 
                 // Pass the actual host GameObject, not the head
-                GameStateManager.Instance.SwitchToHostMode(hostGameObject);
+                _gameStateManager.SwitchToHostMode(hostGameObject);
 
                 this.enabled = false;
             });
@@ -628,48 +657,240 @@ public class ParasiteController : MonoBehaviour
         }
     }
 
-    private void OnGUI()
+    //private void OnGUI()
+    //{
+    //    if (!showDebug || _inputManager == null) return;
+
+    //    float cooldownRemaining = Mathf.Max(0, launchCooldown - (Time.time - lastLaunchTime));
+
+    //    // Determine aim status
+    //    string aimStatus;
+    //    Color statusColor;
+
+    //    if (!isAiming)
+    //    {
+    //        aimStatus = "Not Aiming";
+    //        statusColor = Color.white;
+    //    }
+    //    else if (!canLaunch)
+    //    {
+    //        aimStatus = "TOO CLOSE";
+    //        statusColor = Color.red;
+    //    }
+    //    else
+    //    {
+    //        aimStatus = "READY";
+    //        statusColor = Color.green;
+    //    }
+
+    //    GUI.color = statusColor;
+    //    GUI.Label(new Rect(8, 8, 480, 20), $"Parasite Mode | {aimStatus} | Cooldown: {cooldownRemaining:F1}s");
+    //    GUI.color = Color.white;
+
+    //    Vector2 mv = _inputManager.ParasiteActions.Move.ReadValue<Vector2>();
+    //    GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
+
+    //    GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {_controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1} | Gravity: {gravity:F1}");
+    //    GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
+
+    //    // Show parasite lifetime
+    //    Color lifetimeColor = currentParasiteLifetime <= lifetimeWarningThreshold ? Color.red : Color.yellow;
+    //    GUI.color = lifetimeColor;
+    //    GUI.Label(new Rect(8, 88, 400, 20), $"Parasite Lifetime: {currentParasiteLifetime:F1}s / {maxParasiteLifetime:F1}s");
+    //    GUI.color = Color.white;
+
+    //    if (isAiming)
+    //    {
+    //        float distance = CalculateDistanceToTarget(cameraPivot ? cameraPivot.forward : transform.forward);
+    //        GUI.Label(new Rect(8, 108, 400, 20), $"Target Distance: {distance:F1}m (Min: {minLaunchDistance:F1}m)");
+    //    }
+    //}
+
+    #region IDamageable Implementation
+
+    /// <summary>
+    /// Take damage - reduces parasite lifetime
+    /// </summary>
+    public void TakeDamage(float damage)
     {
-        if (!showDebug || inputManager == null) return;
+        if (isDead) return;
 
-        float cooldownRemaining = Mathf.Max(0, launchCooldown - (Time.time - lastLaunchTime));
+        currentParasiteLifetime -= damage;
 
-        // Determine aim status
-        string aimStatus;
-        Color statusColor;
+        if (showDebug)
+            Debug.Log($"[Parasite] Took {damage} damage! Remaining lifetime: {currentParasiteLifetime:F1}s");
 
-        if (!isAiming)
+        if (currentParasiteLifetime <= 0f)
         {
-            aimStatus = "Not Aiming";
-            statusColor = Color.white;
-        }
-        else if (!canLaunch)
-        {
-            aimStatus = "TOO CLOSE";
-            statusColor = Color.red;
-        }
-        else
-        {
-            aimStatus = "READY";
-            statusColor = Color.green;
-        }
-
-        GUI.color = statusColor;
-        GUI.Label(new Rect(8, 8, 480, 20), $"Parasite Mode | {aimStatus} | Cooldown: {cooldownRemaining:F1}s");
-        GUI.color = Color.white;
-
-        Vector2 mv = inputManager.ParasiteActions.Move.ReadValue<Vector2>();
-        GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
-
-        GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1} | Gravity: {gravity:F1}");
-        GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
-
-        if (isAiming)
-        {
-            float distance = CalculateDistanceToTarget(cameraPivot ? cameraPivot.forward : transform.forward);
-            GUI.Label(new Rect(8, 88, 400, 20), $"Target Distance: {distance:F1}m (Min: {minLaunchDistance:F1}m)");
+            Die();
         }
     }
+
+    #endregion IDamageable Implementation
+
+    #region Lifetime Management
+
+    /// <summary>
+    /// Reset parasite lifetime to max (called when exiting a host)
+    /// </summary>
+    public void ResetLifetime()
+    {
+        currentParasiteLifetime = maxParasiteLifetime;
+        isDead = false;
+
+        if (showDebug)
+            Debug.Log($"[Parasite] Lifetime reset to {maxParasiteLifetime}s");
+    }
+
+    /// <summary>
+    /// Full reset of parasite state (called when restarting game)
+    /// </summary>
+    public void ResetParasiteState()
+    {
+        // Reset lifetime and death state
+        currentParasiteLifetime = maxParasiteLifetime;
+        isDead = false;
+
+        // Reset physics state
+        isLaunching = false;
+        isAiming = false;
+        isAttachingToHost = false;
+        launchTimedOut = false;
+        launchVelocity = Vector3.zero;
+        move = Vector3.zero;
+        yVel = 0f;
+
+        // Reset rotation
+        yaw = transform.eulerAngles.y;
+        pitch = 0f;
+        roll = 0f;
+
+        // Reset timers
+        lastLaunchTime = -launchCooldown;
+        lastLandTime = -slideTime;
+        bobTimer = Mathf.PI / 2;
+
+        // Ensure controller is enabled
+        if (_controller != null)
+            _controller.enabled = true;
+
+        // Ensure this component is enabled
+        enabled = true;
+
+        // Hide trajectory
+        if (trajectorySystem != null)
+            trajectorySystem.HideTrajectory();
+
+        if (showDebug)
+            Debug.Log("[Parasite] Full state reset complete");
+    }
+
+    /// <summary>
+    /// Add time to parasite lifetime
+    /// </summary>
+    public void AddLifetime(float amount)
+    {
+        currentParasiteLifetime = Mathf.Min(currentParasiteLifetime + amount, maxParasiteLifetime);
+
+        if (showDebug)
+            Debug.Log($"[Parasite] Added {amount}s lifetime. New lifetime: {currentParasiteLifetime:F1}s");
+    }
+
+    /// <summary>
+    /// Get current parasite lifetime
+    /// </summary>
+    public float GetRemainingLifetime() => currentParasiteLifetime;
+
+    /// <summary>
+    /// Get lifetime as percentage
+    /// </summary>
+    public float GetLifetimePercentage() => currentParasiteLifetime / maxParasiteLifetime;
+
+    /// <summary>
+    /// Check if parasite is dead
+    /// </summary>
+    public bool IsDead() => isDead;
+
+    private void Die()
+    {
+        if (isDead) return;
+
+        isDead = true;
+
+        Debug.Log("[Parasite] Parasite died - Game Over!");
+
+        // Disable controls
+        if (_inputManager != null)
+            _inputManager.DisableAllActions();
+
+        // Disable _controller
+        if (_controller != null)
+            _controller.enabled = false;
+
+        // Hide trajectory
+        if (trajectorySystem != null)
+            trajectorySystem.HideTrajectory();
+
+        // Notify game manager
+        _gameStateManager.GameOver();
+
+        // Optional: Add death effect, animation, etc.
+    }
+
+    #endregion Lifetime Management
+
+    #region Inspector Test Functions
+
+    [ContextMenu("Take 5s Damage")]
+    public void TakeDamage5Seconds()
+    {
+        TakeDamage(5f);
+    }
+
+    [ContextMenu("Take 10s Damage")]
+    public void TakeDamage10Seconds()
+    {
+        TakeDamage(10f);
+    }
+
+    [ContextMenu("Take 25s Damage")]
+    public void TakeDamage25Seconds()
+    {
+        TakeDamage(25f);
+    }
+
+    [ContextMenu("Take Half Lifetime Damage")]
+    public void TakeHalfLifetimeDamage()
+    {
+        float damage = currentParasiteLifetime * 0.5f;
+        TakeDamage(damage);
+    }
+
+    [ContextMenu("Kill Parasite")]
+    public void KillParasiteFromInspector()
+    {
+        TakeDamage(currentParasiteLifetime);
+    }
+
+    [ContextMenu("Show Parasite Lifetime")]
+    public void ShowParasiteLifetime()
+    {
+        Debug.Log($"[Parasite] Lifetime: {currentParasiteLifetime:F1}s / {maxParasiteLifetime:F1}s ({GetLifetimePercentage() * 100f:F1}%)");
+    }
+
+    [ContextMenu("Reset Parasite Lifetime")]
+    public void ResetLifetimeFromInspector()
+    {
+        ResetLifetime();
+    }
+
+    [ContextMenu("Add 10s Lifetime")]
+    public void Add10SecondsLifetime()
+    {
+        AddLifetime(10f);
+    }
+
+    #endregion Inspector Test Functions
 
     /// <summary>
     /// Called when voluntarily exiting a host - launches the parasite with given velocity

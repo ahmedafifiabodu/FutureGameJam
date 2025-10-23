@@ -50,6 +50,7 @@ public class FirstPersonZoneController : MonoBehaviour
 
     // Public properties for sharing with other controllers
     public Transform CameraPivot => cameraPivot;
+
     public float MouseSensitivity => mouseSensitivity;
     public bool LookInputIsDelta => lookInputIsDelta;
     public float Gravity => gravity;
@@ -98,7 +99,6 @@ public class FirstPersonZoneController : MonoBehaviour
 
         if (allowedZones != null && allowedZones.Length > 0 && !CapsuleInsideAnyZone(GetControllerWorldCenter()))
             Debug.LogWarning("Player starts outside all allowed zones.");
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
@@ -349,11 +349,11 @@ public class FirstPersonZoneController : MonoBehaviour
         }
     }
 
-    private void OnGUI()
-    {
-        if (!showDebug || inputManager == null) return;
-        GUI.Label(new Rect(8, 8, 480, 20), $"In zone: {CapsuleInsideAnyZone(GetControllerWorldCenter())} | yVel: {yVel:F2} | gravity: {gravity:F2}");
-        Vector2 mv = inputManager.PlayerActions.Move.ReadValue<Vector2>();
-        GUI.Label(new Rect(8, 28, 300, 20), $"Move input: {mv}");
-    }
+    //private void OnGUI()
+    //{
+    //    if (!showDebug || inputManager == null) return;
+    //    GUI.Label(new Rect(8, 8, 480, 20), $"In zone: {CapsuleInsideAnyZone(GetControllerWorldCenter())} | yVel: {yVel:F2} | gravity: {gravity:F2}");
+    //    Vector2 mv = inputManager.PlayerActions.Move.ReadValue<Vector2>();
+    //    GUI.Label(new Rect(8, 28, 300, 20), $"Move input: {mv}");
+    //}
 }

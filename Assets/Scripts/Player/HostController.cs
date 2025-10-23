@@ -4,10 +4,10 @@ using UnityEngine;
 /// Controls a host body that the parasite can attach to.
 /// Manages host health/timer, death, and weapons.
 /// </summary>
-public class HostController : MonoBehaviour
+public class HostController : MonoBehaviour, IDamageable
 {
     [Header("Host Stats")]
-    [SerializeField] private float hostLifetime = 30f; // How long the host survives
+    [SerializeField] private float hostLifetime = 30f;
 
     [SerializeField] private bool decreaseLifetimeEachHost = true;
     [SerializeField] private float lifetimeDecreasePerHost = 5f;
@@ -36,15 +36,17 @@ public class HostController : MonoBehaviour
 
     private bool isControlled = false;
     private float remainingLifetime;
-    private float timeSinceAttached;
-    private ParasiteController attachedParasite;
-    private InputManager inputManager;
     private float lastExitAttemptTime = -10f;
     private bool isShowingExitTrajectory = false;
-    private FirstPersonZoneController zoneController;
+    private float timeSinceAttached;
     private float gravity;
 
-    private static int hostCount = 0; // Track number of hosts used
+    private ParasiteController attachedParasite;
+    private InputManager _inputManager;
+    private FirstPersonZoneController zoneController;
+    private GameStateManager _gameStateManager;
+
+    private static int hostCount = 0;
 
     private void Awake()
     {
@@ -57,12 +59,10 @@ public class HostController : MonoBehaviour
         if (!cameraPivot)
             Debug.LogWarning($"[Host] CameraPivot not assigned on {gameObject.name}");
 
-        // Get zone controller for gravity settings
+        // Get zone _controller for gravity settings
         zoneController = GetComponent<FirstPersonZoneController>();
         if (zoneController != null)
-        {
             gravity = zoneController.Gravity;
-        }
 
         // Setup trajectory system if not assigned
         if (trajectorySystem == null && showExitTrajectory)
@@ -83,26 +83,24 @@ public class HostController : MonoBehaviour
 
     private void Start()
     {
-        // Get InputManager from ServiceLocator
-        inputManager = ServiceLocator.Instance.GetService<InputManager>();
+        _inputManager = ServiceLocator.Instance.GetService<InputManager>();
+        _gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
 
         // Initially disable host movement
         if (hostMovementController)
             hostMovementController.enabled = false;
 
         // Initialize weapon manager
-        if (weaponManager && inputManager)
+        if (weaponManager && _inputManager)
         {
-            weaponManager.Initialize(inputManager);
+            weaponManager.Initialize(_inputManager);
             weaponManager.Disable();
         }
 
         // Calculate lifetime based on host count
         remainingLifetime = hostLifetime;
         if (decreaseLifetimeEachHost && hostCount > 0)
-        {
             remainingLifetime = Mathf.Max(minLifetime, hostLifetime - (hostCount * lifetimeDecreasePerHost));
-        }
     }
 
     private void Update()
@@ -114,29 +112,22 @@ public class HostController : MonoBehaviour
         remainingLifetime -= Time.deltaTime;
 
         if (remainingLifetime <= 0f)
-        {
             Die();
-        }
 
         // Check for voluntary exit input
-        if (allowVoluntaryExit && inputManager != null && Time.time - lastExitAttemptTime >= exitCooldown)
+        if (allowVoluntaryExit && _inputManager != null && Time.time - lastExitAttemptTime >= exitCooldown)
         {
             // Check if exit button is being held
-            bool exitButtonHeld = inputManager.ParasiteActions.ExitForHost.IsPressed();
+            bool exitButtonHeld = _inputManager.ParasiteActions.ExitForHost.IsPressed();
 
             if (exitButtonHeld)
             {
                 // Show trajectory while button is held
                 if (!isShowingExitTrajectory)
-                {
                     isShowingExitTrajectory = true;
-                    Debug.Log("[Host] Showing exit trajectory preview");
-                }
 
                 if (showExitTrajectory && trajectorySystem != null)
-                {
                     UpdateExitTrajectoryVisualization();
-                }
             }
             else if (isShowingExitTrajectory)
             {
@@ -145,9 +136,7 @@ public class HostController : MonoBehaviour
                 lastExitAttemptTime = Time.time;
 
                 if (trajectorySystem != null)
-                {
                     trajectorySystem.HideTrajectory();
-                }
 
                 ExitHost();
             }
@@ -157,9 +146,7 @@ public class HostController : MonoBehaviour
             // Hide trajectory if cooldown active
             isShowingExitTrajectory = false;
             if (trajectorySystem != null)
-            {
                 trajectorySystem.HideTrajectory();
-            }
         }
     }
 
@@ -188,7 +175,7 @@ public class HostController : MonoBehaviour
         isControlled = true;
         hostCount++;
 
-        // Enable host movement controller
+        // Enable host movement _controller
         if (hostMovementController)
             hostMovementController.enabled = true;
 
@@ -198,14 +185,7 @@ public class HostController : MonoBehaviour
 
         Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
         if (transferredCamera != null)
-        {
             transferredCamera.enabled = true;
-            Debug.Log($"[Host] Using transferred camera for control");
-        }
-        else
-        {
-            Debug.LogWarning("[Host] No camera found in camera pivot after transfer!");
-        }
 
         // Disable the parasite object visually
         if (parasite != null)
@@ -221,25 +201,19 @@ public class HostController : MonoBehaviour
 
         // Hide trajectory
         if (trajectorySystem != null)
-        {
             trajectorySystem.HideTrajectory();
-        }
 
-        // Get camera before detaching (will be moved back to parasite)
-        Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
-        if (transferredCamera != null)
-        {
-            // Camera will be moved back to parasite by GameStateManager
-            Debug.Log($"[Host] Camera will be transferred back to parasite");
-        }
-
-        // Disable host movement controller
+        // Disable host movement _controller
         if (hostMovementController)
             hostMovementController.enabled = false;
 
         // Disable weapon manager
         if (weaponManager)
             weaponManager.Disable();
+
+        // Reset parasite lifetime when exiting host
+        if (attachedParasite != null)
+            attachedParasite.ResetLifetime();
 
         Debug.Log($"[Host] Parasite detached");
     }
@@ -252,7 +226,7 @@ public class HostController : MonoBehaviour
         Debug.Log($"[Host] Player initiated voluntary exit from host");
 
         // Notify game manager to handle the voluntary exit
-        GameStateManager.Instance.OnVoluntaryHostExit(attachedParasite, cameraPivot.forward, exitLaunchForce);
+        _gameStateManager.OnVoluntaryHostExit(attachedParasite, cameraPivot.forward, exitLaunchForce);
     }
 
     private void Die()
@@ -282,19 +256,14 @@ public class HostController : MonoBehaviour
         if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        // Notify game manager to switch back to parasite mode
-        GameStateManager.Instance.OnHostDied(attachedParasite);
-
-        // Optional: Enable ragdoll or death animation
+        _gameStateManager.OnHostDied(attachedParasite);
         EnableRagdoll();
-
-        // Destroy host after ragdoll duration
         Destroy(gameObject, ragdollDuration);
     }
 
     private void EnableRagdoll()
     {
-        // Disable character controller
+        // Disable character _controller
         var cc = GetComponent<CharacterController>();
         if (cc) cc.enabled = false;
 
@@ -308,52 +277,110 @@ public class HostController : MonoBehaviour
 
     public Transform GetCameraPivot() => cameraPivot;
 
-    public float GetRemainingLifetime() => remainingLifetime;
-
     public float GetLifetimePercentage() => remainingLifetime / hostLifetime;
 
-    public bool IsControlled() => isControlled;
+    //private void OnGUI()
+    //{
+    //    if (!isControlled) return;
 
-    public WeaponManager GetWeaponManager() => weaponManager;
+    //    // Display lifetime warning
+    //    float screenWidth = Screen.width;
 
-    private void OnGUI()
+    //    GUI.Label(new Rect(screenWidth - 220, 8, 200, 30), $"Host Time: {remainingLifetime:F1}s", new GUIStyle(GUI.skin.label) { fontSize = 18, normal = { textColor = remainingLifetime < 10f ? Color.red : Color.white } });
+
+    //    // Lifetime bar
+    //    float barWidth = 200f;
+    //    float barHeight = 20f;
+    //    float barX = screenWidth - barWidth - 10f;
+    //    float barY = 40f;
+
+    //    GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
+    //    GUI.Box(new Rect(barX, barY, barWidth * GetLifetimePercentage(), barHeight), "", new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
+
+    //    // Exit hint
+    //    if (allowVoluntaryExit)
+    //    {
+    //        string exitHint = isShowingExitTrajectory ?
+    //        "Release J to Exit" : "Hold J to Show Exit Trajectory";
+
+    //        Color hintColor = isShowingExitTrajectory ? Color.green : Color.yellow;
+
+    //        GUI.Label(new Rect(screenWidth - 220, 70, 200, 20), exitHint, new GUIStyle(GUI.skin.label) { fontSize = 12, normal = { textColor = hintColor } });
+    //    }
+    //}
+
+    public static void ResetHostCount() => hostCount = 0;
+
+    #region IDamageable Implementation
+
+    /// <summary>
+    /// Take damage - reduces host lifetime
+    /// </summary>
+    public void TakeDamage(float damage)
     {
-        if (!isControlled) return;
-
-        // Display lifetime warning
-        float screenWidth = Screen.width;
-
-        GUI.Label(new Rect(screenWidth - 220, 8, 200, 30),
-   $"Host Time: {remainingLifetime:F1}s",
-     new GUIStyle(GUI.skin.label) { fontSize = 18, normal = { textColor = remainingLifetime < 10f ? Color.red : Color.white } });
-
-        // Lifetime bar
-        float barWidth = 200f;
-        float barHeight = 20f;
-        float barX = screenWidth - barWidth - 10f;
-        float barY = 40f;
-
-        GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
-        GUI.Box(new Rect(barX, barY, barWidth * GetLifetimePercentage(), barHeight), "",
-    new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
-
-        // Exit hint
-        if (allowVoluntaryExit)
+        if (!isControlled)
         {
-            string exitHint = isShowingExitTrajectory ?
- "Release J to Exit" :
-       "Hold J to Show Exit Trajectory";
-
-            Color hintColor = isShowingExitTrajectory ? Color.green : Color.yellow;
-
-            GUI.Label(new Rect(screenWidth - 220, 70, 200, 20),
-          exitHint,
-    new GUIStyle(GUI.skin.label) { fontSize = 12, normal = { textColor = hintColor } });
+            Debug.LogWarning("[Host] Cannot take damage - not currently controlled by parasite!");
+            return;
         }
+
+        remainingLifetime -= damage;
+
+        Debug.Log($"[Host] Took {damage} damage! Remaining lifetime: {remainingLifetime:F1}s");
+
+        if (remainingLifetime <= 0f)
+            Die();
     }
 
-    public static void ResetHostCount()
+    #endregion IDamageable Implementation
+
+    #region Inspector Test Functions
+
+    [ContextMenu("Take 5s Damage")]
+    public void TakeDamage5Seconds()
     {
-        hostCount = 0;
+        TakeDamage(5f);
     }
+
+    [ContextMenu("Take 10s Damage")]
+    public void TakeDamage10Seconds()
+    {
+        TakeDamage(10f);
+    }
+
+    [ContextMenu("Take 15s Damage")]
+    public void TakeDamage15Seconds()
+    {
+        TakeDamage(15f);
+    }
+
+    [ContextMenu("Take Half Lifetime Damage")]
+    public void TakeHalfLifetimeDamage()
+    {
+        float damage = remainingLifetime * 0.5f;
+        TakeDamage(damage);
+    }
+
+    [ContextMenu("Kill Host")]
+    public void KillHostFromInspector()
+    {
+        if (isControlled)
+            TakeDamage(remainingLifetime);
+    }
+
+    [ContextMenu("Show Host Lifetime")]
+    public void ShowHostLifetime()
+    {
+        Debug.Log($"[Host] Lifetime: {remainingLifetime:F1}s / {hostLifetime:F1}s ({GetLifetimePercentage() * 100f:F1}%)");
+        Debug.Log($"[Host] Is Controlled: {isControlled}");
+    }
+
+    [ContextMenu("Force Exit Host")]
+    public void ForceExitHostFromInspector()
+    {
+        if (isControlled)
+            ExitHost();
+    }
+
+    #endregion Inspector Test Functions
 }
