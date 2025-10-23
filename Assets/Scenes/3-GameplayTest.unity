@@ -186,6 +186,7 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 888035284}
+  hostHeadCollider: {fileID: 0}
   hostMovementController: {fileID: 274775743}
   weaponManager: {fileID: 2005583425}
   weaponProfile: {fileID: 11400000, guid: 220f878e6fa31d047bd595122da20db5, type: 2}
@@ -216,6 +217,7 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 10
+  airSpeedMultiplier: 1.15
   jumpHeight: 1
   gravity: -15
   sprintAlwaysOn: 0
@@ -740,6 +742,7 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 667089613}
+  hostHeadCollider: {fileID: 0}
   hostMovementController: {fileID: 669009866}
   weaponManager: {fileID: 2005583425}
   weaponProfile: {fileID: 11400000, guid: 2225c748f7e5c7742a810f76ee5aca06, type: 2}
@@ -770,6 +773,7 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 10
+  airSpeedMultiplier: 1.15
   jumpHeight: 1
   gravity: -15
   sprintAlwaysOn: 0
@@ -952,7 +956,6 @@ MonoBehaviour:
     weight: 53
     description: 
   startingRoomPrefab: {fileID: 6181002203944844611, guid: 9e4ba49b2dfaec74ba9d6cc53878cceb, type: 3}
-  player: {fileID: 0}
   currentRoomIteration: 0
   enableDebugLogs: 1
 --- !u!4 &681777859
@@ -1240,6 +1243,8 @@ MonoBehaviour:
   hostsConsumed: 0
   totalSurvivalTime: 0
   useTransitionForExit: 1
+  gameOverUI: {fileID: 0}
+  autoFindGameOverUI: 1
 --- !u!4 &835765377
 Transform:
   m_ObjectHideFlags: 0
@@ -1381,7 +1386,10 @@ MonoBehaviour:
   bobAmount: 1.5
   bobTimer: 1.5707964
   usePossessionTransition: 1
-  controller: {fileID: 0}
+  maxParasiteLifetime: 60
+  enableLifetimeDecay: 1
+  showLifetimeWarning: 1
+  lifetimeWarningThreshold: 15
 --- !u!114 &926719476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1435,6 +1443,7 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 20
+  airSpeedMultiplier: 1.15
   jumpHeight: 1.2
   gravity: -30
   sprintAlwaysOn: 0
@@ -1864,14 +1873,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MusicManager
       objectReference: {fileID: 0}
-    - target: {fileID: 563247586615579082, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4484510572557723543, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
-      propertyPath: showHUD
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6335539201552355989, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
       propertyPath: m_LocalPosition.x
       value: 14.63086
@@ -1953,6 +1954,7 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 312920970}
+  hostHeadCollider: {fileID: 0}
   hostMovementController: {fileID: 1252195044}
   weaponManager: {fileID: 2005583425}
   weaponProfile: {fileID: 11400000, guid: 495c8556979173145b1f68dccefdcd39, type: 2}
@@ -1983,6 +1985,7 @@ MonoBehaviour:
   mouseSensitivity: 0.12
   lookInputIsDelta: 1
   moveSpeed: 10
+  airSpeedMultiplier: 1.15
   jumpHeight: 1
   gravity: -15
   sprintAlwaysOn: 0
