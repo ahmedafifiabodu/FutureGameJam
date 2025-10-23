@@ -5,6 +5,7 @@ public class ParasiteController : MonoBehaviour
 {
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
+    [SerializeField] private float airSpeed = 4f;
 
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float airControl = 2.5f;
@@ -228,7 +229,7 @@ public class ParasiteController : MonoBehaviour
         else if (Time.time < lastLandTime + slideTime)
             moveControl = slideControl * Time.deltaTime;
 
-        move = Vector3.Lerp(move, moveDir * crawlSpeed, moveControl);
+        move = Vector3.Lerp(move, moveDir * (controller.isGrounded ? crawlSpeed : airSpeed), moveControl);
 
         if (controller.isGrounded && yVel < 0f)
         {

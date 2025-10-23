@@ -181,7 +181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cce8ee9b46f5e2b4683513f8fb696e0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostController
-  hostLifetime: 5
+  hostLifetime: 9999
   decreaseLifetimeEachHost: 1
   lifetimeDecreasePerHost: 5
   minLifetime: 5
@@ -189,9 +189,9 @@ MonoBehaviour:
   hostMovementController: {fileID: 274775743}
   weaponManager: {fileID: 2005583425}
   deathEffect: {fileID: 6343699840357871614, guid: e06a1872263832642ab59a94953a3f91, type: 3}
-  ragdollDuration: 1.5
+  ragdollDuration: 0.51
   allowVoluntaryExit: 1
-  exitLaunchForce: 15
+  exitLaunchForce: 10
   exitCooldown: 1
   trajectorySystem: {fileID: 926719476}
   showExitTrajectory: 1
@@ -826,10 +826,10 @@ PrefabInstance:
     - target: {fileID: 8941377227937359732, guid: 13c46916fa552fb4e846d566e8b3a073, type: 3}
       propertyPath: feedbackSystem
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1521166929}
     - target: {fileID: 8941377227937359732, guid: 13c46916fa552fb4e846d566e8b3a073, type: 3}
       propertyPath: useFeedbackSystem
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8941377227937359732, guid: 13c46916fa552fb4e846d566e8b3a073, type: 3}
       propertyPath: weaponRecoilController
@@ -993,8 +993,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParasiteController
   crawlSpeed: 5
+  airSpeed: 10
   jumpHeight: 0.5
-  airControl: 5
+  airControl: 3
   slideControl: 4
   slideTime: 1
   launchForce: 10
@@ -1007,7 +1008,7 @@ MonoBehaviour:
   aimFov: 115
   idleFov: 90
   fovTimeChange: 100
-  cameraTilt: 2.5
+  cameraTilt: 3.5
   tiltTimeChange: 50
   enableBounce: 0
   bounciness: 0.6
@@ -1027,7 +1028,7 @@ MonoBehaviour:
   aimColor: {r: 1, g: 0, b: 0, a: 1}
   tooCloseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   restPosition: {x: 0, y: 2, z: 0}
-  bobSpeed: 5
+  bobSpeed: 10
   bobAmount: 1.5
   bobTimer: 1.5707964
   usePossessionTransition: 1
@@ -1098,8 +1099,8 @@ MonoBehaviour:
   showDebug: 1
   debugOverlaps: 1
   overlapDebugFrames: 90
-  bobSpeed: 4.8
-  bobAmount: 0.05
+  bobSpeed: 5
+  bobAmount: 0.1
   bobTimer: 1.5707964
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
@@ -1511,11 +1512,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 563247586615579082, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
       propertyPath: m_Name
-      value: 'Music menager '
+      value: MusicManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 563247586615579082, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4484510572557723543, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
       propertyPath: showHUD
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6335539201552355989, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1574,6 +1579,7 @@ GameObject:
   - component: {fileID: 1381224135}
   - component: {fileID: 1381224134}
   - component: {fileID: 1381224133}
+  - component: {fileID: 1381224136}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1701,6 +1707,27 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1381224136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1381224131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f64fb8585a0c7c41ac7c1d4b1237cc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShakeManager
+  cameraTransform: {fileID: 1381224132}
+  maxShakeDuration: 0.5
+  shakeMultiplier: 1
+  noiseFrequency: 25
+  traumaPower: 2
+  traumaDecayRate: 1
+  maxTrauma: 1
+  traumaPerShot: 0.15
+  showDebug: 0
 --- !u!1 &1422345221
 GameObject:
   m_ObjectHideFlags: 0
@@ -1888,6 +1915,17 @@ MonoBehaviour:
   maxTrauma: 0.5
   traumaPerShot: 0.15
   showDebug: 0
+--- !u!114 &1521166929 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3437712111664989908, guid: 13c46916fa552fb4e846d566e8b3a073, type: 3}
+  m_PrefabInstance: {fileID: 689216629}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1521166903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6becadf9674dafc4f9fc5ce0e7db55de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShootingFeedbackSystem
 --- !u!1 &1626064684
 GameObject:
   m_ObjectHideFlags: 0

@@ -76,7 +76,7 @@ public class RangedWeaponProfile : ScriptableObject
     public float aimRecoilMultiplier = 0.7f;
 
     [Header("Visual Effects")]
-    public ParticleSystem muzzleFlashPrefab;
+    public GameObject muzzleFlash;
 
     public GameObject impactEffectPrefab;
     public GameObject bulletTrailPrefab;

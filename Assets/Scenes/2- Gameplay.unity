@@ -1945,8 +1945,8 @@ MonoBehaviour:
   showDebug: 1
   debugOverlaps: 1
   overlapDebugFrames: 90
-  bobSpeed: 4.8
-  bobAmount: 0.05
+  bobSpeed: 5
+  bobAmount: 0.1
   bobTimer: 1.5707964
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
@@ -2022,6 +2022,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParasiteController
   crawlSpeed: 5
+  airSpeed: 4
   jumpHeight: 0.5
   airControl: 5
   slideControl: 4
@@ -2036,7 +2037,7 @@ MonoBehaviour:
   aimFov: 115
   idleFov: 90
   fovTimeChange: 100
-  cameraTilt: 2.5
+  cameraTilt: 3.5
   tiltTimeChange: 50
   enableBounce: 0
   bounciness: 0.6
@@ -2056,7 +2057,7 @@ MonoBehaviour:
   aimColor: {r: 1, g: 0, b: 0, a: 1}
   tooCloseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   restPosition: {x: 0, y: 2, z: 0}
-  bobSpeed: 5
+  bobSpeed: 10
   bobAmount: 1.5
   bobTimer: 1.5707964
   usePossessionTransition: 1

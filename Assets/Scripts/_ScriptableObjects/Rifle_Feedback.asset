@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShootingFeedbackProfile
   profileName: Rifle
   description: Medium impact feedback for rifles
-  enableCameraShake: 1
-  shakeIntensity: 0.08
-  shakeDuration: 0.1
+  enableCameraShake: 0
+  shakeIntensity: 1
+  shakeDuration: 1
   shakeIntensityCurve:
     serializedVersion: 2
     m_Curve:
@@ -41,7 +41,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  enableScreenFlash: 1
+  enableScreenFlash: 0
   flashColor: {r: 1, g: 0.9, b: 0.7, a: 0.1}
   flashDuration: 0.05
   enableChromaticAberration: 0
@@ -53,7 +53,7 @@ MonoBehaviour:
   impactDecalPrefab: {fileID: 0}
   decalLifetime: 10
   maxDecals: 50
-  enableHitMarker: 1
+  enableHitMarker: 0
   hitMarkerColor: {r: 1, g: 1, b: 1, a: 1}
   hitMarkerSize: 20
   hitMarkerDuration: 0.2

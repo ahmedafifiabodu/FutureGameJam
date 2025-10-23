@@ -115,6 +115,7 @@ public class HostController : MonoBehaviour
 
         if (remainingLifetime <= 0f)
         {
+            remainingLifetime = 0f;
             Die();
         }
 

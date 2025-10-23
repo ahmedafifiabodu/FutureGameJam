@@ -171,9 +171,7 @@ public class FirstPersonZoneController : MonoBehaviour
         Vector2 mv = inputManager.PlayerActions.Move.ReadValue<Vector2>();
         if (mv.sqrMagnitude > 1f) mv.Normalize();
 
-        // Check for sprint input if not always on
-        bool isSprinting = false;
-        float speed = moveSpeed * (isSprinting ? sprintMultiplier : 1f);
+        float speed = moveSpeed * (controller.isGrounded ? 1f : 1.5f);
 
         Vector3 dir = (transform.right * mv.x + transform.forward * mv.y);
         return new Vector3(dir.x, 0f, dir.z) * speed;

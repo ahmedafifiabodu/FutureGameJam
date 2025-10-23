@@ -11,7 +11,6 @@ public class RangedWeapon : WeaponBase
     [SerializeField] private RangedWeaponProfile weaponProfile;
 
     [Header("Visual Effects (Instance References)")]
-    [SerializeField] private GameObject muzzleFlash;
 
     [SerializeField] private Transform muzzlePoint; // Where bullets spawn from
 
@@ -163,8 +162,8 @@ public class RangedWeapon : WeaponBase
     private void Shoot()
     {
 
-        // Play shoot sound
-        PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)]);
+        if (weaponProfile.shootSounds.Length > 0)
+            PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)]);
 
         // Add recoil (with ADS modifier if aiming)
         ApplyRecoil();
@@ -211,8 +210,8 @@ public class RangedWeapon : WeaponBase
         }
 
         // Play muzzle flash
-        if (muzzleFlash)
-            Instantiate(muzzleFlash, muzzlePoint.position, Quaternion.LookRotation(muzzlePoint.transform.position - targetPoint));
+        if (weaponProfile.muzzleFlash)
+            Instantiate(weaponProfile.muzzleFlash, muzzlePoint.position, Quaternion.LookRotation(muzzlePoint.transform.position - targetPoint));
 
 
         // Spawn bullet trail
