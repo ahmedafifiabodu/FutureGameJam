@@ -354,11 +354,13 @@ public class RangedWeapon : WeaponBase
     {
         weaponProfile = newProfile;
 
-        // Switch feedback profile if specified
-        if (weaponProfile.feedbackProfile && feedbackSystem)
-            feedbackSystem.SwitchProfile(weaponProfile.feedbackProfile);
+        // Switch feedback profile if specified (with null check)
+        if (weaponProfile != null && weaponProfile.feedbackProfile != null && feedbackSystem != null)
+        {
+          feedbackSystem.SwitchProfile(weaponProfile.feedbackProfile);
+      }
 
-        Debug.Log($"[RangedWeapon] Switched to profile: {weaponProfile?.weaponName ?? "None"}");
+   Debug.Log($"[RangedWeapon] Switched to profile: {weaponProfile?.weaponName ?? "None"}");
     }
 
     public override void Equip()

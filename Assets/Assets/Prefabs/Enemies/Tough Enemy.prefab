@@ -2258,9 +2258,9 @@ MonoBehaviour:
   animator: {fileID: 4206389029848896758}
   projectileSpawnPoint: {fileID: 5662431594015355263}
   patrolPoints: []
-  debugRaycast: 1
+  debugRaycast: 0
   raycastOriginHeight: 1.5
-  showDebugTargeting: 1
+  showDebugTargeting: 0
 --- !u!136 &8962446232171434356
 CapsuleCollider:
   m_ObjectHideFlags: 0

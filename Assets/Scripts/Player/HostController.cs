@@ -16,6 +16,7 @@ public class HostController : MonoBehaviour, IDamageable
     [Header("References")]
     [SerializeField] private Transform cameraPivot;
 
+    [SerializeField] private Collider hostHeadCollider;
     [SerializeField] private FirstPersonZoneController hostMovementController;
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private RangedWeaponProfile weaponProfile;
@@ -218,11 +219,19 @@ public class HostController : MonoBehaviour, IDamageable
         if (weaponManager)
             weaponManager.Disable();
 
+        // Disable specific host head collider if assigned
+        if (hostHeadCollider != null)
+        {
+            hostHeadCollider.enabled = false;
+
+            Invoke(nameof(EnableCollider), 1.5f);
+        }
+
         // Reset parasite lifetime when exiting host
         if (attachedParasite != null)
             attachedParasite.ResetLifetime();
 
-        Debug.Log($"[Host] Parasite detached");
+        Debug.Log($"[Host] Parasite detached - all colliders disabled");
     }
 
     /// <summary>
@@ -280,6 +289,12 @@ public class HostController : MonoBehaviour, IDamageable
     public Transform GetCameraPivot() => cameraPivot;
 
     public float GetLifetimePercentage() => remainingLifetime / hostLifetime;
+
+    public void EnableCollider()
+    {
+        if (hostHeadCollider != null)
+            hostHeadCollider.enabled = true;
+    }
 
     //private void OnGUI()
     //{

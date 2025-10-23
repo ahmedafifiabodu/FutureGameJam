@@ -88,6 +88,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
     // Shared settings from FirstPersonZoneController
     private Transform cameraPivot;
 
+    private Camera _parasiteCamera; // Cached camera reference
+
     private float mouseSensitivity;
     private bool lookInputIsDelta;
     private float gravity;
@@ -120,6 +122,16 @@ public class ParasiteController : MonoBehaviour, IDamageable
             mouseSensitivity = zoneController.MouseSensitivity;
             lookInputIsDelta = zoneController.LookInputIsDelta;
             gravity = zoneController.Gravity;
+
+            // Cache camera reference once in Awake
+            if (cameraPivot != null)
+            {
+                _parasiteCamera = cameraPivot.GetComponentInChildren<Camera>();
+                if (_parasiteCamera == null)
+                {
+                    Debug.LogWarning("[Parasite] Camera not found in cameraPivot children!");
+                }
+            }
 
             if (showDebug && cameraPivot)
                 Debug.Log($"[Parasite] Using shared settings - CameraPivot: {cameraPivot.name}, MouseSensitivity: {mouseSensitivity}");
@@ -222,8 +234,12 @@ public class ParasiteController : MonoBehaviour, IDamageable
             HandleLaunchMovement();
             CheckForLaunchTimeout();
         }
-        Camera camera = gameObject.GetComponentInChildren<Camera>();
-        camera.fieldOfView = Mathf.MoveTowards(camera.fieldOfView, isAiming ? aimFov : idleFov, fovTimeChange * Time.deltaTime);
+
+        // Use cached camera reference instead of GetComponentInChildren every frame
+        if (_parasiteCamera != null)
+        {
+            _parasiteCamera.fieldOfView = Mathf.MoveTowards(_parasiteCamera.fieldOfView, isAiming ? aimFov : idleFov, fovTimeChange * Time.deltaTime);
+        }
     }
 
     private void Look()
@@ -499,8 +515,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
         if (showDebug)
             Debug.Log($"[Parasite] Successfully attaching to host: {hostGameObject.name}");
 
-        // Get the parasite camera
-        Camera parasiteCamera = cameraPivot.GetComponentInChildren<Camera>();
+        // Use cached camera reference
+        Camera parasiteCamera = _parasiteCamera;
         Transform hostCameraPivot = hostController.GetCameraPivot();
 
         // Play transition effect with camera transfer

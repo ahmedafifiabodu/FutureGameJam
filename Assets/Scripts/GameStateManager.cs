@@ -41,6 +41,7 @@ public class GameStateManager : MonoBehaviour
     private InputManager _inputManager;
     private PossessionTransitionEffect _possessionTransitionEffect;
     private Transform parasiteCameraPivot;
+    private Camera _parasiteCamera; // Cached camera reference
     private GameStateMachine.GameStateMachineManager _stateMachine;
     private GameplayHUD _gameplayHUD;
 
@@ -50,9 +51,7 @@ public class GameStateManager : MonoBehaviour
         Host
     }
 
-    // Public properties
     public GameObject CurrentHost => currentHost;
-
     public HostController CurrentHostController => currentHostController;
     public GameObject ParasitePlayer => parasitePlayer;
     public ParasiteController ParasiteController => parasiteController;
@@ -123,7 +122,19 @@ public class GameStateManager : MonoBehaviour
             parasiteController = parasitePlayer.GetComponent<ParasiteController>();
 
             if (parasitePlayer.TryGetComponent<FirstPersonZoneController>(out var zoneController))
+            {
                 parasiteCameraPivot = zoneController.CameraPivot;
+
+                // Cache camera reference
+                if (parasiteCameraPivot != null)
+                {
+                    _parasiteCamera = parasiteCameraPivot.GetComponentInChildren<Camera>();
+                    if (_parasiteCamera == null)
+                    {
+                        Debug.LogWarning("[GameStateManager] Camera not found in parasite camera pivot!");
+                    }
+                }
+            }
         }
     }
 
@@ -204,7 +215,7 @@ public class GameStateManager : MonoBehaviour
         Debug.Log("[GameState] Switched to Parasite Mode.");
     }
 
-    private void StartParasiteModeWithLaunch(Vector3 spawnPosition, Vector3 launchDirection, float launchForce)
+    private void StartParasiteModeWithLaunch(Vector3 spawnPosition, Vector3 launchDirection, float launchForce, Quaternion parasiteRotation = default)
     {
         currentMode = GameMode.Parasite;
         currentHost = null;
@@ -216,12 +227,15 @@ public class GameStateManager : MonoBehaviour
         if (parasiteController)
         {
             parasiteController.enabled = true;
+
+            // Set rotation if provided, otherwise keep current
+            if (parasiteRotation != default(Quaternion))
+            {
+                parasiteController.SetRotation(parasiteRotation);
+            }
+
             parasiteController.ExitLaunch(launchDirection * launchForce);
         }
-
-        parasiteController.SetRotation(currentHostController.transform.rotation);
-        // Trigger a launch with the exit trajectory
-        parasiteController.ExitLaunch(launchDirection * launchForce);
 
         EnableParasiteCamera();
         _inputManager.EnableParasiteActions();
@@ -231,7 +245,7 @@ public class GameStateManager : MonoBehaviour
             _gameplayHUD.ShowParasiteUI();
 
         // Notify state machine if available
-        _stateMachine.SwitchToParasiteMode();
+        _stateMachine?.SwitchToParasiteMode();
     }
 
     #endregion Mode Switching
@@ -278,13 +292,16 @@ public class GameStateManager : MonoBehaviour
 
     private void CompleteVoluntaryExit(ParasiteController parasite, Vector3 exitPosition, Vector3 exitDirection, float exitForce)
     {
+        // Capture host rotation BEFORE clearing references
+        Quaternion hostRotation = currentHostController != null ? currentHostController.transform.rotation : Quaternion.identity;
+
         if (currentHostController != null)
             currentHostController.OnParasiteDetached();
 
         if (parasite != null && parasiteController == null)
             parasiteController = parasite;
 
-        StartParasiteModeWithLaunch(exitPosition, exitDirection, exitForce);
+        StartParasiteModeWithLaunch(exitPosition, exitDirection, exitForce, hostRotation);
     }
 
     public void OnHostDied(ParasiteController parasite)
@@ -327,6 +344,9 @@ public class GameStateManager : MonoBehaviour
 
         float exitForce = 5f; // Stronger force for more noticeable ejection
 
+        // Capture host rotation BEFORE clearing references
+        Quaternion hostRotation = currentHostController != null ? currentHostController.transform.rotation : Quaternion.identity;
+
         // Detach parasite from host
         if (currentHostController != null)
             currentHostController.OnParasiteDetached();
@@ -338,8 +358,8 @@ public class GameStateManager : MonoBehaviour
         if (parasiteController != null)
             parasiteController.ResetParasiteState();
 
-        // Launch parasite from host death position
-        StartParasiteModeWithLaunch(exitPosition, randomDirection, exitForce);
+        // Launch parasite from host death position with captured rotation
+        StartParasiteModeWithLaunch(exitPosition, randomDirection, exitForce, hostRotation);
 
         Debug.Log($"[GameState] Host died - parasite ejected from {exitPosition} in direction {randomDirection} with force {exitForce}");
     }
@@ -423,21 +443,29 @@ public class GameStateManager : MonoBehaviour
 
     private void EnableParasiteCamera()
     {
-        volume.profile.TryGet(out LensDistortion fisheye);
+        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
         {
             fisheye.active = true;
         }
 
         if (parasiteCameraPivot != null)
         {
-            Transform hostCameraPivot = currentHostController.GetCameraPivot();
+            // Only sync rotation if we have a host controller (during possession)
+            Transform hostCameraPivot = currentHostController?.GetCameraPivot();
             if (hostCameraPivot != null)
-                parasiteCameraPivot.rotation = hostCameraPivot.rotation;
-            Camera camera = parasiteCameraPivot.GetComponentInChildren<Camera>();
-            if (camera != null)
             {
-                camera.enabled = true;
+                parasiteCameraPivot.rotation = hostCameraPivot.rotation;
+            }
+
+            // Use cached camera reference instead of GetComponentInChildren
+            if (_parasiteCamera != null)
+            {
+                _parasiteCamera.enabled = true;
                 Debug.Log("[GameState] Parasite camera enabled");
+            }
+            else
+            {
+                Debug.LogWarning("[GameState] Parasite camera reference is null!");
             }
         }
     }

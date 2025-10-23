@@ -1257,6 +1257,13 @@ MonoBehaviour:
   entranceDoor: {fileID: 0}
   exitDoor: {fileID: 4467816846560031884}
   spawnPoints: []
+  baseEnemiesPerPiece: 3
+  enemiesPerIteration: 0.5
+  maxEnemiesPerPiece: 10
+  spawnChance: 0.8
+  minIteration: 0
+  maxIteration: 0
+  useCustomSpawnSettings: 0
   playerHasEntered: 1
   showEnemyDebug: 0
   roomName: Room
