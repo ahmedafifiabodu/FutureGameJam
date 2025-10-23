@@ -17,18 +17,14 @@ namespace ProceduralGeneration
         [Header("Starting Room")]
         [SerializeField] private GameObject startingRoomPrefab;
 
-        [Header("Player Reference")]
-        [SerializeField] private Transform player;
-
         [Header("Difficulty Scaling")]
         [SerializeField] private int currentRoomIteration = 0; // Track progression
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
-        // Track current level pieces
+        private Transform player;
         private Room currentRoom;
-
         private Corridor currentCorridor;
         private Room previousRoom;
         private Corridor previousCorridor;
@@ -68,9 +64,7 @@ namespace ProceduralGeneration
             int validCorridors = corridorPrefabs.Count(c => c.IsValid());
 
             if (enableDebugLogs)
-            {
                 Debug.Log($"[ProceduralLevelGenerator] Validated {validRooms}/{roomPrefabs.Length} rooms and {validCorridors}/{corridorPrefabs.Length} corridors");
-            }
         }
 
         private void SpawnStartingRoom()
@@ -97,9 +91,7 @@ namespace ProceduralGeneration
             // Find player if not assigned
             if (player == null)
             {
-                GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-                if (playerObj != null)
-                    player = playerObj.transform;
+                player = ServiceLocator.Instance.GetService<ParasiteController>().transform;
             }
         }
 
@@ -369,6 +361,102 @@ namespace ProceduralGeneration
             {
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireCube(currentCorridor.transform.position, Vector3.one * 3f);
+            }
+        }
+
+        /// <summary>
+        /// Reset the level to initial state (called during game restart)
+        /// </summary>
+        public void ResetLevel()
+        {
+            if (enableDebugLogs)
+                Debug.Log("[ProceduralLevelGenerator] Resetting level to starting room...");
+
+            // Destroy ALL rooms and corridors in the scene (not just tracked ones)
+            Room[] allRooms = FindObjectsByType<Room>(FindObjectsSortMode.None);
+            foreach (var room in allRooms)
+            {
+                if (enableDebugLogs)
+                    Debug.Log($"[ProceduralLevelGenerator] Destroying room: {room.RoomName}");
+                Destroy(room.gameObject);
+            }
+
+            Corridor[] allCorridors = FindObjectsByType<Corridor>(FindObjectsSortMode.None);
+            foreach (var corridor in allCorridors)
+            {
+                if (enableDebugLogs)
+                    Debug.Log($"[ProceduralLevelGenerator] Destroying corridor: {corridor.CorridorName}");
+                Destroy(corridor.gameObject);
+            }
+
+            // Clear all references
+            currentRoom = null;
+            currentCorridor = null;
+            previousRoom = null;
+            previousCorridor = null;
+
+            // Clear processed connection points
+            processedPoints.Clear();
+
+            // Reset iteration counter
+            currentRoomIteration = 0;
+
+            // Update spawn manager
+            if (spawnManager)
+                spawnManager.SetRoomIteration(0);
+
+            // Reset generation flag
+            isGenerating = false;
+
+            // Spawn fresh starting room
+            SpawnStartingRoom();
+
+            // Reposition player to starting room after a frame delay
+            // (to ensure room is fully spawned and positioned)
+            StartCoroutine(RepositionPlayerDelayed());
+
+            if (enableDebugLogs)
+                Debug.Log("[ProceduralLevelGenerator] Level reset complete - fresh starting room spawned");
+        }
+
+        /// <summary>
+        /// Reposition player to starting room spawn point with a delay
+        /// </summary>
+        private System.Collections.IEnumerator RepositionPlayerDelayed()
+        {
+            // Wait for room to be fully spawned and positioned
+            yield return null;
+            yield return null;
+
+            if (currentRoom != null)
+            {
+                if (player != null)
+                {
+                    // Position player at starting room center + slightly above ground
+                    Vector3 spawnPosition = currentRoom.transform.position + Vector3.up * 1.5f;
+
+                    // Disable CharacterController temporarily to prevent physics issues during teleport
+                    CharacterController cc = player.GetComponent<CharacterController>();
+                    if (cc != null && cc.enabled)
+                    {
+                        cc.enabled = false;
+                        player.position = spawnPosition;
+                        yield return null; // Wait a frame
+                        cc.enabled = true;
+                    }
+                    else
+                    {
+                        player.position = spawnPosition;
+                    }
+
+                    if (enableDebugLogs)
+                        Debug.Log($"[ProceduralLevelGenerator] Repositioned player to starting room at {spawnPosition}");
+                }
+                else
+                {
+                    if (enableDebugLogs)
+                        Debug.LogWarning("[ProceduralLevelGenerator] Could not find player to reposition!");
+                }
             }
         }
     }

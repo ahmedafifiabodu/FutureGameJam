@@ -74,7 +74,7 @@ namespace AI.Enemy.States
             logTimer += Time.deltaTime;
             stateEntryTimer += Time.deltaTime;
 
-            // Update last known position from controller
+            // Update last known position from _controller
             enemy.UpdateLastKnownPosition();
             lastKnownPlayerPosition = enemy.LastKnownPlayerPosition;
 

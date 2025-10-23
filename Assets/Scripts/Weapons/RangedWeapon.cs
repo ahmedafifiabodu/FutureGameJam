@@ -35,7 +35,7 @@ public class RangedWeapon : WeaponBase
 
     [SerializeField] private float aimingMoveSpeedMultiplier = 0.5f; // Slow movement when aiming
 
-    // Runtime state only (not serialized)
+    [SerializeField]
     private int currentAmmo;
 
     private int reserveAmmo;
@@ -73,8 +73,8 @@ public class RangedWeapon : WeaponBase
 
     private int aimingHash;
 
-    // Reference to player controller for movement restrictions
     private FirstPersonZoneController playerController;
+    private GameplayHUD gameplayHUD;
 
     private void Awake()
     {
@@ -101,7 +101,7 @@ public class RangedWeapon : WeaponBase
         if (!weaponRecoilController)
             weaponRecoilController = GetComponent<WeaponRecoilController>();
 
-        // Find player controller for movement restrictions
+        // Find player _controller for movement restrictions
         if (!playerController)
             playerController = GetComponentInParent<FirstPersonZoneController>();
 
@@ -140,6 +140,11 @@ public class RangedWeapon : WeaponBase
         // Cache animation parameter hashes
         reloadingHash = Animator.StringToHash(GameConstant.AnimationParameters.Reloading);
         aimingHash = Animator.StringToHash(GameConstant.AnimationParameters.Aiming);
+    }
+
+    private void Start()
+    {
+        gameplayHUD = ServiceLocator.Instance.GetService<GameplayHUD>();
     }
 
     public override void Update()
@@ -197,7 +202,7 @@ public class RangedWeapon : WeaponBase
         if (disableSprintWhileAiming && aimPressed && sprintPressed)
         {
             // Cancel sprint when trying to aim
-            // The player controller will handle this, we just update state
+            // The player _controller will handle this, we just update state
             Debug.Log("[RangedWeapon] Cannot sprint while aiming!");
         }
 
@@ -525,6 +530,19 @@ public class RangedWeapon : WeaponBase
         }
 
         isAiming = false;
+
+        // Notify HUD (find if not cached)
+        if (!gameplayHUD)
+            gameplayHUD = ServiceLocator.Instance.GetService<GameplayHUD>();
+
+        if (gameplayHUD)
+        {
+            gameplayHUD.SetCurrentWeapon(this);
+        }
+        else
+        {
+            Debug.LogWarning("[RangedWeapon] GameplayHUD not found! Crosshair may not update correctly.");
+        }
     }
 
     public override void Unequip()
@@ -544,6 +562,12 @@ public class RangedWeapon : WeaponBase
         }
 
         isAiming = false;
+
+        // Notify HUD
+        if (gameplayHUD)
+        {
+            gameplayHUD.SetCurrentWeapon(null);
+        }
     }
 
     // Public getters for UI
@@ -563,50 +587,43 @@ public class RangedWeapon : WeaponBase
 
     public RangedWeaponProfile GetCurrentProfile() => weaponProfile;
 
-    // Debug UI
-    private void OnGUI()
-    {
-        if (!isEquipped || !weaponProfile) return;
+    //   private void OnGUI()
+    //   {
+    //       // Skip if using Canvas UI
+    //       if (useCanvasUI || !isEquipped || !weaponProfile) return;
 
-        // Ammo display
-        GUI.Label(new Rect(Screen.width - 220, Screen.height - 80, 200, 30),
-            $"Ammo: {currentAmmo}/{weaponProfile.magazineSize}",
-            new GUIStyle(GUI.skin.label) { fontSize = 20, normal = { textColor = Color.white } });
+    //       // Legacy OnGUI display (for backward compatibility)
+    //       // Ammo display
+    //       GUI.Label(new Rect(Screen.width - 220, Screen.height - 80, 200, 30),
+    //     $"Ammo: {currentAmmo}/{weaponProfile.magazineSize}",
+    //new GUIStyle(GUI.skin.label) { fontSize = 20, normal = { textColor = Color.white } });
 
-        GUI.Label(new Rect(Screen.width - 220, Screen.height - 50, 200, 30),
-            $"Reserve: {reserveAmmo}",
-            new GUIStyle(GUI.skin.label) { fontSize = 16, normal = { textColor = Color.gray } });
+    //       GUI.Label(new Rect(Screen.width - 220, Screen.height - 50, 200, 30),
+    //        $"Reserve: {reserveAmmo}",
+    //new GUIStyle(GUI.skin.label) { fontSize = 16, normal = { textColor = Color.gray } });
 
-        // Aiming indicator
-        if (isAiming)
-        {
-            GUI.Label(new Rect(Screen.width - 220, Screen.height - 110, 200, 20),
-                "AIMING",
-                new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
-        }
+    //       // Aiming indicator
+    //       if (isAiming)
+    //       {
+    //           GUI.Label(new Rect(Screen.width - 220, Screen.height - 110, 200, 20),
+    //          "AIMING",
+    //         new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
+    //       }
 
-        // Reload progress bar
-        if (isReloading)
-        {
-            float barWidth = 200f;
-            float barHeight = 20f;
-            float barX = Screen.width - barWidth - 10f;
-            float barY = Screen.height - 140f;
+    //       // Reload progress bar
+    //       if (isReloading)
+    //       {
+    //           float barWidth = 200f;
+    //           float barHeight = 20f;
+    //           float barX = Screen.width - barWidth - 10f;
+    //           float barY = Screen.height - 140f;
 
-            GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
-            GUI.Box(new Rect(barX, barY, barWidth * GetReloadProgress(), barHeight), "",
-                new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
+    //           GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
+    //           GUI.Box(new Rect(barX, barY, barWidth * GetReloadProgress(), barHeight), "",
+    //          new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
 
-            GUI.Label(new Rect(barX, barY - 20, barWidth, 20), "RELOADING...",
-                new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
-        }
-    }
-}
-
-/// <summary>
-/// Interface for objects that can take damage
-/// </summary>
-public interface IDamageable
-{
-    void TakeDamage(float damage);
+    //           GUI.Label(new Rect(barX, barY - 20, barWidth, 20), "RELOADING...",
+    //     new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
+    //       }
+    //   }
 }
