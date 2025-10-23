@@ -53,28 +53,32 @@ MonoBehaviour:
   music1Forward: {fileID: 6631023778527148918}
   music1Reverse: {fileID: 7231110847452054472}
   music2: {fileID: 2700009023997736389}
-  music3Forward: {fileID: 574150693572542344}
+  music3Forward: {fileID: 2515489934909173242}
   music3Reverse: {fileID: 1740374576045549919}
   music4: {fileID: 574150693572542344}
-  pitchMax: 3
+  pitchMax: 1
   crossfadeDuration: 1.25
-  rampDuration: 60
   quickSkipMusic4: 0
   music4HoldSeconds: 0.75
-  masterVolume: 0.69
+  masterVolume: 0.5
+  clockMode: 0
+  autoCalibrateClock: 1
+  calibrateSeconds: 1.5
+  ratioTolerance: 0.1
   force2D: 1
   preloadAudio: 1
   fallbackStageSecondsIfClipMissing: 8
-  showHUD: 0
-  enableShortcuts: 0
+  showHUD: 1
+  enableShortcuts: 1
   logStages: 1
-  skipRampOnPlay: 0
   toggleHUDKey: 282
   debugStageNumber: 0
   debugStageName: 
   debugStageTime: 0
   debugStageTarget: 0
   debugTotalTime: 0
+  activeClockLabel: DSP
+  dspToRealRatio: 1
 --- !u!1 &2213703526029129098
 GameObject:
   m_ObjectHideFlags: 0
@@ -505,10 +509,10 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 88ffe6adc36c848e4a0dc13bb0bdba55, type: 3}
+  m_Resource: {fileID: 8300000, guid: 71dbd212a3924470fa4dbcec7bef3d1a, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 1
+  m_Pitch: 2
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -763,7 +767,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 955ecd93790a544688a608e625ee46de, type: 3}
+  m_Resource: {fileID: 8300000, guid: 883e2f5527f444484a5b9a08795b89e2, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
