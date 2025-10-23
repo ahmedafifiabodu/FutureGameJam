@@ -168,6 +168,7 @@ public class GameStateManager : MonoBehaviour
 
         // Disable parasite
         if (parasitePlayer)
+            parasiteController.gravity = -30f;
             parasitePlayer.SetActive(false);
 
         // Switch input to Player actions
@@ -258,7 +259,7 @@ public class GameStateManager : MonoBehaviour
 
         Transform hostCameraPivot = currentHostController.GetCameraPivot();
         Camera transferredCamera = hostCameraPivot.GetComponentInChildren<Camera>();
-        Vector3 exitPosition = currentHost.transform.position;
+        Vector3 exitPosition = hostCameraPivot.transform.position;
 
         if (useTransitionForExit)
         {

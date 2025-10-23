@@ -760,6 +760,7 @@ GameObject:
   - component: {fileID: 274775751}
   - component: {fileID: 274775750}
   - component: {fileID: 274775749}
+  - component: {fileID: 274775752}
   m_Layer: 0
   m_Name: Player (2)
   m_TagString: Untagged
@@ -784,7 +785,7 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 888035284}
-  hostHeadCollider: {fileID: 0}
+  hostHeadCollider: {fileID: 888035285}
   hostMovementController: {fileID: 274775743}
   weaponManager: {fileID: 1130484890}
   weaponProfile: {fileID: 11400000, guid: 220f878e6fa31d047bd595122da20db5, type: 2}
@@ -793,12 +794,12 @@ MonoBehaviour:
   allowVoluntaryExit: 1
   exitLaunchForce: 10
   exitCooldown: 1
-  trajectorySystem: {fileID: 926719476}
+  trajectorySystem: {fileID: 274775752}
   showExitTrajectory: 1
-  maxExitDistance: 10
+  maxExitDistance: 50
   exitSimulationLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2097152
 --- !u!114 &274775743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -978,6 +979,43 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &274775752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 274775741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec6a3738317bb7441b0da8cc4e56069b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParasiteLaunchTrajectory
+  line: {fileID: 0}
+  maxPhysicsFrameIterations: 50
+  simulationLayers:
+    serializedVersion: 2
+    m_Bits: 2097153
+  validLaunchColor: {r: 0, g: 1, b: 0, a: 0.8}
+  invalidLaunchColor: {r: 1, g: 0, b: 0, a: 0.8}
+  lineStartWidth: 0.1
+  lineEndWidth: 0.1
+  nearCameraFadeDistance: 0.15
+  enableNearCameraFade: 1
+  animateArrows: 1
+  arrowAnimationSpeed: 2
+  animateOnlyWhenVisible: 1
+  arrowTexture: {fileID: 2800000, guid: 7287c88f619434d4eb06fcc46a1bf055, type: 3}
+  lineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
+  horizontalOffset: 0.15
+  trajectoryStartOffset: {x: 0, y: 0, z: 0}
+  landingIndicatorPrefab: {fileID: 0}
+  indicatorRadius: 0.1
+  showLandingIndicator: 1
+  indicatorHeightOffset: 0.01
+  indicatorLineWidth: 0.02
+  minimumDots: 10
+  dotSpacing: 0.3
 --- !u!1 &312920969
 GameObject:
   m_ObjectHideFlags: 0
@@ -2210,6 +2248,7 @@ GameObject:
   - component: {fileID: 669009871}
   - component: {fileID: 669009870}
   - component: {fileID: 669009869}
+  - component: {fileID: 669009872}
   m_Layer: 0
   m_Name: Player (4)
   m_TagString: Untagged
@@ -2234,7 +2273,7 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 667089613}
-  hostHeadCollider: {fileID: 0}
+  hostHeadCollider: {fileID: 667089614}
   hostMovementController: {fileID: 669009866}
   weaponManager: {fileID: 1130484890}
   weaponProfile: {fileID: 11400000, guid: 2225c748f7e5c7742a810f76ee5aca06, type: 2}
@@ -2243,12 +2282,12 @@ MonoBehaviour:
   allowVoluntaryExit: 1
   exitLaunchForce: 10
   exitCooldown: 1
-  trajectorySystem: {fileID: 926719476}
+  trajectorySystem: {fileID: 669009872}
   showExitTrajectory: 1
-  maxExitDistance: 10
+  maxExitDistance: 50
   exitSimulationLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2097152
 --- !u!114 &669009866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2428,6 +2467,43 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &669009872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669009864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec6a3738317bb7441b0da8cc4e56069b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParasiteLaunchTrajectory
+  line: {fileID: 0}
+  maxPhysicsFrameIterations: 50
+  simulationLayers:
+    serializedVersion: 2
+    m_Bits: 2097153
+  validLaunchColor: {r: 0, g: 1, b: 0, a: 0.8}
+  invalidLaunchColor: {r: 1, g: 0, b: 0, a: 0.8}
+  lineStartWidth: 0.1
+  lineEndWidth: 0.1
+  nearCameraFadeDistance: 0.15
+  enableNearCameraFade: 1
+  animateArrows: 1
+  arrowAnimationSpeed: 2
+  animateOnlyWhenVisible: 1
+  arrowTexture: {fileID: 2800000, guid: 7287c88f619434d4eb06fcc46a1bf055, type: 3}
+  lineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
+  horizontalOffset: 0.15
+  trajectoryStartOffset: {x: 0, y: 0, z: 0}
+  landingIndicatorPrefab: {fileID: 0}
+  indicatorRadius: 0.1
+  showLandingIndicator: 1
+  indicatorHeightOffset: 0.01
+  indicatorLineWidth: 0.02
+  minimumDots: 10
+  dotSpacing: 0.3
 --- !u!1 &677167319
 GameObject:
   m_ObjectHideFlags: 0
@@ -3434,6 +3510,7 @@ MonoBehaviour:
   enableLifetimeDecay: 1
   showLifetimeWarning: 1
   lifetimeWarningThreshold: 15
+  gravity: 0
 --- !u!114 &926719476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3455,17 +3532,17 @@ MonoBehaviour:
   invalidLaunchColor: {r: 1, g: 0, b: 0, a: 0.8}
   lineStartWidth: 0.1
   lineEndWidth: 0.1
-  nearCameraFadeDistance: 0.5
+  nearCameraFadeDistance: 0.15
   enableNearCameraFade: 1
   animateArrows: 1
   arrowAnimationSpeed: 2
   animateOnlyWhenVisible: 1
-  arrowTexture: {fileID: 0}
+  arrowTexture: {fileID: 2800000, guid: 7287c88f619434d4eb06fcc46a1bf055, type: 3}
   lineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
-  horizontalOffset: 0.1
+  horizontalOffset: 0.15
   trajectoryStartOffset: {x: 0, y: 0, z: 0}
   landingIndicatorPrefab: {fileID: 0}
-  indicatorRadius: 0.25
+  indicatorRadius: 0.1
   showLandingIndicator: 1
   indicatorHeightOffset: 0.01
   indicatorLineWidth: 0.02
@@ -4769,6 +4846,7 @@ GameObject:
   - component: {fileID: 1252195049}
   - component: {fileID: 1252195048}
   - component: {fileID: 1252195047}
+  - component: {fileID: 1252195050}
   m_Layer: 0
   m_Name: Player (3)
   m_TagString: Untagged
@@ -4793,7 +4871,7 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 312920970}
-  hostHeadCollider: {fileID: 0}
+  hostHeadCollider: {fileID: 312920971}
   hostMovementController: {fileID: 1252195044}
   weaponManager: {fileID: 1130484890}
   weaponProfile: {fileID: 11400000, guid: 495c8556979173145b1f68dccefdcd39, type: 2}
@@ -4802,12 +4880,12 @@ MonoBehaviour:
   allowVoluntaryExit: 1
   exitLaunchForce: 10
   exitCooldown: 1
-  trajectorySystem: {fileID: 926719476}
+  trajectorySystem: {fileID: 1252195050}
   showExitTrajectory: 1
-  maxExitDistance: 10
+  maxExitDistance: 50
   exitSimulationLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2097152
 --- !u!114 &1252195044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4987,6 +5065,43 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1252195050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252195042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec6a3738317bb7441b0da8cc4e56069b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParasiteLaunchTrajectory
+  line: {fileID: 0}
+  maxPhysicsFrameIterations: 50
+  simulationLayers:
+    serializedVersion: 2
+    m_Bits: 2097153
+  validLaunchColor: {r: 0, g: 1, b: 0, a: 0.8}
+  invalidLaunchColor: {r: 1, g: 0, b: 0, a: 0.8}
+  lineStartWidth: 0.1
+  lineEndWidth: 0.1
+  nearCameraFadeDistance: 0.15
+  enableNearCameraFade: 1
+  animateArrows: 1
+  arrowAnimationSpeed: 2
+  animateOnlyWhenVisible: 1
+  arrowTexture: {fileID: 2800000, guid: 7287c88f619434d4eb06fcc46a1bf055, type: 3}
+  lineMaterial: {fileID: 2100000, guid: 538e1be398df41940b73cef4e67f2093, type: 2}
+  horizontalOffset: 0.15
+  trajectoryStartOffset: {x: 0, y: 0, z: 0}
+  landingIndicatorPrefab: {fileID: 0}
+  indicatorRadius: 0.1
+  showLandingIndicator: 1
+  indicatorHeightOffset: 0.01
+  indicatorLineWidth: 0.02
+  minimumDots: 10
+  dotSpacing: 0.3
 --- !u!1 &1330690395
 GameObject:
   m_ObjectHideFlags: 0

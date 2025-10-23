@@ -19,9 +19,9 @@ public class ParasiteController : MonoBehaviour, IDamageable
     [SerializeField] private float launchCooldown = 1f;
     [SerializeField] private float maxLaunchDistance = 10f;
     [SerializeField] private float minLaunchDistance = 1.5f;
-    [SerializeField] private float launchDuration = 2f;
-    [SerializeField] private float startGravityMultiplier = 0.5f;
-    [SerializeField] private float endGravityMultiplier = 2f;
+    [SerializeField] public float launchDuration = 2f;
+    [SerializeField] public float startGravityMultiplier = 0.5f;
+    [SerializeField] public float endGravityMultiplier = 2f;
     [SerializeField] private float aimFov = 110f;
     [SerializeField] private float idleFov = 90f;
     [SerializeField] private float fovTimeChange = 100f;
@@ -92,7 +92,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
 
     private float mouseSensitivity;
     private bool lookInputIsDelta;
-    private float gravity;
+    public float gravity;
     private bool launchTimedOut = false;
 
     private float yaw, pitch, roll;
@@ -595,10 +595,13 @@ public class ParasiteController : MonoBehaviour, IDamageable
         // Show trajectory only when both conditions are met
         trajectorySystem.SimulateTrajectory(
                 transform.position,
-     launchVel,
-     gravity,
-             maxLaunchDistance,
-          hostHeadLayerMask,
+                launchVel,
+                gravity,
+                maxLaunchDistance,
+                hostHeadLayerMask,
+                startGravityMultiplier,
+                endGravityMultiplier,
+                launchDuration,
                 isValidDistance
             );
     }

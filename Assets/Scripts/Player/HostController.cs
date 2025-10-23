@@ -43,6 +43,7 @@ public class HostController : MonoBehaviour, IDamageable
     private float timeSinceAttached;
     private float gravity;
     private bool dead = false;
+    private bool exitingHost = false;
 
     private ParasiteController attachedParasite;
     private InputManager _inputManager;
@@ -108,7 +109,7 @@ public class HostController : MonoBehaviour, IDamageable
 
     private void Update()
     {
-        if (!isControlled) return;
+        if (!isControlled || exitingHost || dead) return;
 
         // Count down lifetime
         timeSinceAttached += Time.deltaTime;
@@ -161,16 +162,19 @@ public class HostController : MonoBehaviour, IDamageable
         Vector3 exitVelocity = exitDirection * exitLaunchForce;
 
         // Calculate exit spawn position (above the host)
-        Vector3 exitStartPosition = transform.position + Vector3.up * 1.5f;
+        Vector3 exitStartPosition = cameraPivot.position;
 
         // Show trajectory with exit parameters
         trajectorySystem.SimulateTrajectory(
             exitStartPosition,
             exitVelocity,
-            gravity,
+            attachedParasite.gravity,
             maxExitDistance,
             exitSimulationLayers, // Use simulation layers instead of host head mask
-            true // Always valid since it's voluntary
+            attachedParasite.startGravityMultiplier,
+            attachedParasite.endGravityMultiplier,
+            attachedParasite.launchDuration,
+            true
         );
     }
 
@@ -179,6 +183,8 @@ public class HostController : MonoBehaviour, IDamageable
         attachedParasite = parasite;
         isControlled = true;
         hostCount++;
+        if (hostHeadCollider != null)
+            hostHeadCollider.enabled = false;
 
         // Enable host movement _controller
         if (hostMovementController)
@@ -205,6 +211,7 @@ public class HostController : MonoBehaviour, IDamageable
 
     public void OnParasiteDetached()
     {
+        exitingHost = false;
         isControlled = false;
         isShowingExitTrajectory = false;
 
@@ -223,8 +230,6 @@ public class HostController : MonoBehaviour, IDamageable
         // Disable specific host head collider if assigned
         if (hostHeadCollider != null)
         {
-            hostHeadCollider.enabled = false;
-
             Invoke(nameof(EnableCollider), 1.5f);
         }
 
@@ -240,6 +245,9 @@ public class HostController : MonoBehaviour, IDamageable
     /// </summary>
     private void ExitHost()
     {
+        if (exitingHost)
+            return;
+        exitingHost = true;
         Debug.Log($"[Host] Player initiated voluntary exit from host");
 
         // Notify game manager to handle the voluntary exit
@@ -271,7 +279,8 @@ public class HostController : MonoBehaviour, IDamageable
         if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        _gameStateManager.OnHostDied(attachedParasite);
+        if  (attachedParasite != null)
+            _gameStateManager.OnHostDied(attachedParasite);
         EnableRagdoll();
         Destroy(gameObject, ragdollDuration);
     }

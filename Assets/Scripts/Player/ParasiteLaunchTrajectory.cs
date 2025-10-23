@@ -284,7 +284,8 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     /// <param name="maxDistance">Maximum distance to raycast for targets</param>
     /// <param name="targetLayerMask">Layer mask for potential targets</param>
     /// <param name="isValidDistance">Whether the target is at a valid distance to launch</param>
-    public void SimulateTrajectory(Vector3 startPosition, Vector3 velocity, float gravity, float maxDistance, LayerMask targetLayerMask, bool isValidDistance = true)
+    public void SimulateTrajectory(Vector3 startPosition, Vector3 velocity, float gravity, float maxDistance, LayerMask targetLayerMask,
+        float startGravityMultiplier, float endGravityMultiplier, float launchDuration, bool isValidDistance = true)
     {
         if (line == null || !physicsScene.IsValid())
         {
@@ -303,11 +304,13 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
         Vector3 currentPos = startPosition; // Use actual position for physics
         Vector3 currentVelocity = velocity;
 
+        float timePassed = 0;
         // Simulate trajectory using simple physics
         for (int i = 0; i < maxPhysicsFrameIterations; i++)
         {
+            timePassed += Time.fixedDeltaTime;
             // Apply gravity
-            currentVelocity.y += gravity * Time.fixedDeltaTime;
+            currentVelocity.y += gravity * (timePassed > launchDuration ? endGravityMultiplier : startGravityMultiplier) * Time.fixedDeltaTime;
             Vector3 nextPos = currentPos + currentVelocity * Time.fixedDeltaTime;
 
             // Check for collision along the path
@@ -321,6 +324,7 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
                 landingPosition = hit.point;
                 landingNormal = hit.normal;
                 foundLanding = true;
+                Debug.Log(hit.collider.transform.root.gameObject);
 
                 // Check if we hit a valid target
                 if (((1 << hit.collider.gameObject.layer) & targetLayerMask) != 0)
