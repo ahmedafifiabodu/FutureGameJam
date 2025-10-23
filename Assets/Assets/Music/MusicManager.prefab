@@ -68,10 +68,10 @@ MonoBehaviour:
   force2D: 1
   preloadAudio: 1
   fallbackStageSecondsIfClipMissing: 8
-  showHUD: 1
-  enableShortcuts: 1
+  showHUD: 0
+  enableShortcuts: 0
   logStages: 1
-  toggleHUDKey: 282
+  toggleHUDKey: 0
   debugStageNumber: 0
   debugStageName: 
   debugStageTime: 0

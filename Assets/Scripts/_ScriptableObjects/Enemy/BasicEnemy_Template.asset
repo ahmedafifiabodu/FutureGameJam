@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AI.Enemy.Configuration.EnemyConfigSO
   enemyName: Basic Soldier
   enemyType: 0
-  enemyPrefab: {fileID: 2784751966053908874, guid: 1dd4acbf3461e894fa76d41b9dfa1d4c, type: 3}
+  enemyPrefab: {fileID: 91740809569461570, guid: f80151b9940084d1cac51123b81e4be8, type: 3}
   maxHealth: 50
   attackDamage: 15
   moveSpeed: 3
@@ -50,7 +50,8 @@ MonoBehaviour:
   idleAnimation: Idle
   patrolAnimation: IsChasing
   chaseAnimation: IsChasing
-  attackAnimation: Attack
+  meleeAttackAnimation: meeleAttack
+  projectileAttackAnimation: ProjectileAttack
   staggerAnimation: Stagger
   deathAnimation: Death
   jumpAnimation: Jump

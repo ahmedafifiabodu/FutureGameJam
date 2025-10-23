@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
 
 public class PitchAwareMusicPlayer : MonoBehaviour
 {
@@ -36,8 +35,8 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     public float fallbackStageSecondsIfClipMissing = 8f;
 
     [Header("Debug / HUD")]
-    public bool showHUD = true;           // F1 toggle
-    public bool enableShortcuts = true;   // [ prev, ] next, R reset
+    public bool showHUD = true;           // F1 toggle (legacy input only)
+    public bool enableShortcuts = true;   // [ prev, ] next, R reset (legacy input only)
     public bool logStages = false;
     public KeyCode toggleHUDKey = KeyCode.F1;
 
@@ -563,10 +562,20 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     {
         if (!Mathf.Approximately(masterVolume, lastAppliedMasterVolume))
             ApplyMasterVolumeToAll();
+
+        // Shortcuts only when legacy input is enabled in Project Settings
+        #if ENABLE_LEGACY_INPUT_MANAGER
+        if (!enableShortcuts) return;
+
+        if (Input.GetKeyDown(toggleHUDKey)) showHUD = !showHUD;
+        if (Input.GetKeyDown(KeyCode.RightBracket)) StartFrom(NextStage(currentStage));
+        if (Input.GetKeyDown(KeyCode.LeftBracket))  StartFrom(PrevStage(currentStage));
+        if (Input.GetKeyDown(KeyCode.R))
         {
             SetupSources();
             StartCoroutine(BootAndStart());
         }
+        #endif
     }
 
     private Stage NextStage(Stage s)
@@ -603,14 +612,33 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         }
     }
 
-    // ===== HUD =====
+    // ===== Public controls (no input system required) =====
+    [ContextMenu("Next Stage")]
+    public void ContextNextStage() => StartFrom(NextStage(currentStage));
 
+    [ContextMenu("Prev Stage")]
+    public void ContextPrevStage() => StartFrom(PrevStage(currentStage));
+
+    [ContextMenu("Reset Player")]
+    public void ContextResetPlayer()
+    {
+        SetupSources();
+        StartCoroutine(BootAndStart());
+    }
+
+    public void SetMasterVolume(float v)
+    {
+        masterVolume = Mathf.Clamp01(v);
+        ApplyMasterVolumeToAll();
+    }
+
+    // ===== HUD (display only; toggle via legacy key or set showHUD in Inspector) =====
     void OnGUI()
     {
         if (!showHUD) return;
 
         float w = 560f;
-        float h = 300f;
+        float h = 220f;
         Rect r = new Rect(10, 10, w, h);
         GUI.Box(r, "Pitch Aware Music Player");
 
@@ -631,35 +659,10 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         GUI.Label(new Rect(x, y, w - 20, 20), $"Clock: {activeClockLabel}  |  dsp/real ratio: {dspToRealRatio:F3}  |  TimeScale: {Time.timeScale:F2}");
         y += line;
 
-        // Raw times
-        GUI.Label(new Rect(x, y, w - 20, 20), $"dspTime: {AudioSettings.dspTime:F2}  realtime: {Time.realtimeSinceStartup:F2}");
-        y += line;
-
         // Progress bar
         var barBg = new Rect(x, y, w - 20, 18);
         GUI.Box(barBg, GUIContent.none);
         var barFill = new Rect(barBg.x + 2, barBg.y + 2, (barBg.width - 4) * progress, barBg.height - 4);
         GUI.Box(barFill, GUIContent.none);
-        y += 26f;
-
-        // Master volume slider
-        GUI.Label(new Rect(x, y, 140, 20), $"Master Volume: {masterVolume:F2}");
-        float newMV = GUI.HorizontalSlider(new Rect(x + 140, y + 5, w - 170, 20), masterVolume, 0f, 1f);
-        if (!Mathf.Approximately(newMV, masterVolume))
-        {
-            masterVolume = newMV;
-            ApplyMasterVolumeToAll();
-        }
-
-        // Buttons
-        float btnY = r.y + h - 30f;
-        if (GUI.Button(new Rect(x, btnY, 60, 20), "< Prev")) StartFrom(PrevStage(currentStage));
-        if (GUI.Button(new Rect(x + 70, btnY, 60, 20), "Next >")) StartFrom(NextStage(currentStage));
-        if (GUI.Button(new Rect(x + 140, btnY, 60, 20), "Reset"))
-        {
-            SetupSources();
-            StartCoroutine(BootAndStart());
-        }
-        GUI.Label(new Rect(x + 210, btnY, w - 230, 20), "[ / ] next/prev, R reset, F1 HUD");
     }
 }

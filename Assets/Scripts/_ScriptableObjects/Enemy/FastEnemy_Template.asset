@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AI.Enemy.Configuration.EnemyConfigSO
   enemyName: Fast Assassin
   enemyType: 2
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 2784751966053908874, guid: 9a560bb6126a94a3ba78163cfa8ec4cb, type: 3}
   maxHealth: 30
   attackDamage: 20
   moveSpeed: 5
