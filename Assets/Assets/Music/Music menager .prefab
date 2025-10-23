@@ -59,6 +59,9 @@ MonoBehaviour:
   pitchMax: 3
   crossfadeDuration: 1.25
   rampDuration: 60
+  quickSkipMusic4: 0
+  music4HoldSeconds: 0.75
+  masterVolume: 0.69
   force2D: 1
   preloadAudio: 1
   fallbackStageSecondsIfClipMissing: 8

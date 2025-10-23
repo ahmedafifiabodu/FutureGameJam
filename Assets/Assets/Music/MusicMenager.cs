@@ -21,6 +21,9 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     public bool quickSkipMusic4 = true;     // true = touch M4 briefly then move on
     public float music4HoldSeconds = 0.75f; // how long to hold M4 when quickSkipMusic4 is true
 
+    [Header("Master Volume")]
+    [Range(0f, 1f)] public float masterVolume = 1f; // overall volume multiplier
+
     [Header("Robustness")]
     public bool force2D = true;
     public bool preloadAudio = true;
@@ -64,6 +67,12 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     private Stage currentStage;
     private Coroutine sequenceCo;
     private readonly Dictionary<AudioSource, Coroutine> fadeMap = new Dictionary<AudioSource, Coroutine>();
+
+    // Master volume support: keep base volumes separate from master multiplier
+    private readonly Dictionary<AudioSource, float> baseVolumeMap = new Dictionary<AudioSource, float>();
+    private float lastAppliedMasterVolume = 1f;
+    private AudioSource[] allSources;
+
     private double totalStartDSP;
 
     void Awake()
@@ -89,24 +98,25 @@ public class PitchAwareMusicPlayer : MonoBehaviour
 
     private void SetupSources()
     {
-        var all = new AudioSource[] { music1Forward, music1Reverse, music2, music3Forward, music3Reverse, music4 };
+        allSources = new AudioSource[] { music1Forward, music1Reverse, music2, music3Forward, music3Reverse, music4 };
+        baseVolumeMap.Clear();
 
-        foreach (var src in all)
+        foreach (var src in allSources)
         {
             if (src == null) continue;
             if (force2D) src.spatialBlend = 0f;
             src.loop = true;
-            src.pitch = 1f; // reset pitch
-            src.volume = 0f;
+            src.pitch = 1f;   // reset pitch
+            baseVolumeMap[src] = 0f; // start silent (base volume)
         }
 
         if (preloadAudio)
         {
-            foreach (var src in all)
+            foreach (var src in allSources)
                 if (src?.clip != null) src.clip.LoadAudioData();
         }
 
-        foreach (var src in all)
+        foreach (var src in allSources)
         {
             if (src == null) continue;
             if (src.clip == null)
@@ -116,12 +126,17 @@ public class PitchAwareMusicPlayer : MonoBehaviour
 
         if (music1Forward != null)
         {
-            music1Forward.volume = 1f;
-            music1Forward.pitch = 1f; // will ramp in Stage 1
+            baseVolumeMap[music1Forward] = 1f; // audible at start
+            music1Forward.pitch = 1f;          // will ramp in Stage 1
         }
 
         totalStartDSP = AudioSettings.dspTime;
         currentStage = skipRampOnPlay ? Stage.M1withM2 : Stage.RampM1;
+
+        // Ensure initial application of masterVolume
+        lastAppliedMasterVolume = -1f; // force apply
+        ApplyMasterVolumeToAll();
+
         SetDebugStage(currentStage, 0f, 0f);
     }
 
@@ -292,8 +307,8 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         SetDebugStage(s, 0f, 0f);
         if (logStages) Debug.Log($"[{name}] Enter stage {(int)s} - {s}");
 
-        void Full(AudioSource a) => FadeTo(a, 1f, crossfadeDuration);
-        void Kill(AudioSource a) => FadeTo(a, 0f, crossfadeDuration);
+        void Full(AudioSource a) => FadeBaseTo(a, 1f, crossfadeDuration);
+        void Kill(AudioSource a) => FadeBaseTo(a, 0f, crossfadeDuration);
         void Pitch1(AudioSource a) { if (a != null) a.pitch = 1f; }
 
         switch (s)
@@ -439,21 +454,29 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         return src.clip.length / Mathf.Abs(p);
     }
 
-    private void FadeTo(AudioSource src, float target, float duration)
+    // Master-aware fade: animates base volume and applies masterVolume
+    private void FadeBaseTo(AudioSource src, float targetBase, float duration)
     {
         if (src == null) return;
+        if (!baseVolumeMap.ContainsKey(src)) baseVolumeMap[src] = 0f;
+
         if (fadeMap.TryGetValue(src, out var running) && running != null)
             StopCoroutine(running);
-        fadeMap[src] = StartCoroutine(FadeCoroutineDSP(src, target, duration));
+
+        fadeMap[src] = StartCoroutine(FadeBaseCoroutineDSP(src, targetBase, duration));
     }
 
-    private IEnumerator FadeCoroutineDSP(AudioSource src, float target, float duration)
+    private IEnumerator FadeBaseCoroutineDSP(AudioSource src, float targetBase, float duration)
     {
         double start = AudioSettings.dspTime;
-        float startVol = src.volume;
+        float startBase = baseVolumeMap.TryGetValue(src, out var b) ? b : src.volume / Mathf.Max(0.0001f, lastAppliedMasterVolume);
+        targetBase = Mathf.Clamp01(targetBase);
+
         if (duration <= 0f)
         {
-            src.volume = target;
+            baseVolumeMap[src] = targetBase;
+            src.volume = targetBase * masterVolume;
+            lastAppliedMasterVolume = masterVolume;
             yield break;
         }
 
@@ -461,11 +484,28 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         {
             double now = AudioSettings.dspTime;
             float t = Mathf.Clamp01((float)((now - start) / duration));
-            src.volume = Mathf.Lerp(startVol, target, t);
+            float curBase = Mathf.Lerp(startBase, targetBase, t);
+            baseVolumeMap[src] = curBase;
+            src.volume = curBase * masterVolume;
+            lastAppliedMasterVolume = masterVolume;
+
             if (t >= 1f) break;
             yield return null;
         }
-        src.volume = target;
+        src.volume = targetBase * masterVolume;
+        baseVolumeMap[src] = targetBase;
+        lastAppliedMasterVolume = masterVolume;
+    }
+
+    private void ApplyMasterVolumeToAll()
+    {
+        foreach (var src in allSources)
+        {
+            if (src == null) continue;
+            float baseVol = baseVolumeMap.TryGetValue(src, out var v) ? v : src.volume / Mathf.Max(0.0001f, lastAppliedMasterVolume);
+            src.volume = baseVol * masterVolume;
+        }
+        lastAppliedMasterVolume = masterVolume;
     }
 
     private void SetDebugStage(Stage s, float elapsed, float target)
@@ -477,20 +517,18 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         debugTotalTime = (float)(AudioSettings.dspTime - totalStartDSP);
     }
 
-    // ===== Debug controls =====
+    // ===== Debug controls + master volume reapply =====
 
     void Update()
     {
+        if (!Mathf.Approximately(masterVolume, lastAppliedMasterVolume))
+            ApplyMasterVolumeToAll();
+
         if (!enableShortcuts) return;
 
         if (Input.GetKeyDown(toggleHUDKey)) showHUD = !showHUD;
-
-        if (Input.GetKeyDown(KeyCode.RightBracket))
-            StartFrom(NextStage(currentStage));
-
-        if (Input.GetKeyDown(KeyCode.LeftBracket))
-            StartFrom(PrevStage(currentStage));
-
+        if (Input.GetKeyDown(KeyCode.RightBracket)) StartFrom(NextStage(currentStage));
+        if (Input.GetKeyDown(KeyCode.LeftBracket))  StartFrom(PrevStage(currentStage));
         if (Input.GetKeyDown(KeyCode.R))
         {
             SetupSources();
@@ -517,7 +555,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         if (!showHUD) return;
 
         float w = 520f;
-        float h = 210f;
+        float h = 260f;
         Rect r = new Rect(10, 10, w, h);
         GUI.Box(r, "Pitch Aware Music Player (DSP-driven)");
 
@@ -536,11 +574,23 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         GUI.Label(new Rect(x, y, w - 20, 20), $"Total Time: {debugTotalTime:F2}s   TimeScale: {Time.timeScale:F2}  dspTime: {AudioSettings.dspTime:F2}");
         y += line;
 
+        // Progress bar
         var barBg = new Rect(x, y, w - 20, 18);
         GUI.Box(barBg, GUIContent.none);
         var barFill = new Rect(barBg.x + 2, barBg.y + 2, (barBg.width - 4) * progress, barBg.height - 4);
         GUI.Box(barFill, GUIContent.none);
+        y += 26f;
 
+        // Master volume slider
+        GUI.Label(new Rect(x, y, 120, 20), $"Master Volume: {masterVolume:F2}");
+        float newMV = GUI.HorizontalSlider(new Rect(x + 120, y + 5, w - 150, 20), masterVolume, 0f, 1f);
+        if (!Mathf.Approximately(newMV, masterVolume))
+        {
+            masterVolume = newMV;
+            ApplyMasterVolumeToAll();
+        }
+
+        // Buttons
         float btnY = r.y + h - 30f;
         if (GUI.Button(new Rect(x, btnY, 60, 20), "< Prev")) StartFrom(PrevStage(currentStage));
         if (GUI.Button(new Rect(x + 70, btnY, 60, 20), "Next >")) StartFrom(NextStage(currentStage));
