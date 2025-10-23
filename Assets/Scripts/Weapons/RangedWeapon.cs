@@ -170,7 +170,7 @@ public class RangedWeapon : WeaponBase
         for (int i = 0; i < weaponProfile.shots; i++)
         {
             Ray offset_ray = ray;
-            if (weaponProfile.shots > 1 && i > 0)
+            if (weaponProfile.shotDistance > 0f)
             {
                 float angle = Random.Range(0, 360) * Mathf.Deg2Rad;
                 float distance = Random.Range(1, 100) / 100f;

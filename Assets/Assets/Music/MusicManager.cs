@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class PitchAwareMusicPlayer : MonoBehaviour
 {
@@ -562,13 +563,6 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     {
         if (!Mathf.Approximately(masterVolume, lastAppliedMasterVolume))
             ApplyMasterVolumeToAll();
-
-        if (!enableShortcuts) return;
-
-        if (Input.GetKeyDown(toggleHUDKey)) showHUD = !showHUD;
-        if (Input.GetKeyDown(KeyCode.RightBracket)) StartFrom(NextStage(currentStage));
-        if (Input.GetKeyDown(KeyCode.LeftBracket))  StartFrom(PrevStage(currentStage));
-        if (Input.GetKeyDown(KeyCode.R))
         {
             SetupSources();
             StartCoroutine(BootAndStart());

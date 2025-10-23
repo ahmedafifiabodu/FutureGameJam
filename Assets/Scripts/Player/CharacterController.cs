@@ -18,6 +18,7 @@ public class FirstPersonZoneController : MonoBehaviour
     [SerializeField] private float sprintMultiplier = 1.6f;
     [SerializeField] private float cameraTilt = 5f;
     [SerializeField] private float tiltTimeChange = 50f;
+    [SerializeField] private float airControl = 0.5f;
 
     [Header("Zones")]
     [SerializeField] private BoxCollider[] allowedZones;
@@ -55,6 +56,7 @@ public class FirstPersonZoneController : MonoBehaviour
     private InputManager inputManager;
     private float yaw, pitch, roll, yVel;
     private int overlapFramesLeft;
+    private Vector3 hDelta;
     private Vector3 restPosition;
 
     // Public properties for sharing with other controllers
@@ -124,7 +126,7 @@ public class FirstPersonZoneController : MonoBehaviour
         Vector3 center = GetControllerWorldCenter();
 
         // Hard zone constraints (no slowdown)
-        Vector3 hDelta = ConstrainHorizontal(center, desiredH * Time.deltaTime);
+        hDelta = Vector3.Lerp(hDelta, ConstrainHorizontal(center, desiredH * Time.deltaTime), controller.isGrounded ? 1f : airControl * Time.deltaTime);
         Vector3 afterHCenter = center + hDelta;
 
         float yDelta = restrictVertical
@@ -171,7 +173,7 @@ public class FirstPersonZoneController : MonoBehaviour
         Vector2 mv = inputManager.PlayerActions.Move.ReadValue<Vector2>();
         if (mv.sqrMagnitude > 1f) mv.Normalize();
 
-        float speed = moveSpeed * (controller.isGrounded ? 1f : 1.5f);
+        float speed = moveSpeed * (controller.isGrounded ? 1f : 1.25f);
 
         Vector3 dir = (transform.right * mv.x + transform.forward * mv.y);
         return new Vector3(dir.x, 0f, dir.z) * speed;

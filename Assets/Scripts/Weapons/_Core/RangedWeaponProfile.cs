@@ -25,7 +25,7 @@ public class RangedWeaponProfile : ScriptableObject
     public float range = 100f;
     [Tooltip("How many shots it fires")]
     public int shots = 1;
-    [Tooltip("Distance from center on shots. Note that 1 will always be in the center.")]
+    [Tooltip("Distance from center on shots.")]
     public float shotDistance = 0f;
     [Tooltip("How many enemies it penetrates with shots")]
     public int penetration = 0;

@@ -18,7 +18,7 @@ MonoBehaviour:
   damage: 35
   range: 100
   shots: 1
-  shotDistance: 0
+  shotDistance: 2.5
   penetration: 0
   hitLayers:
     serializedVersion: 2
@@ -61,4 +61,4 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 188f77dd21f9b4089b067781ef468d9c, type: 3}
   reloadSound: {fileID: 0}
   emptySound: {fileID: 0}
-  feedbackProfile: {fileID: 0}
+  feedbackProfile: {fileID: 11400000, guid: 9e1ae627d51eb6b46b1785d0f36ed310, type: 2}

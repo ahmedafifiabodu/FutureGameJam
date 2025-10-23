@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShootingFeedbackProfile
   profileName: Rifle
   description: Medium impact feedback for rifles
-  enableCameraShake: 0
-  shakeIntensity: 1
-  shakeDuration: 1
+  enableCameraShake: 1
+  shakeIntensity: 0.2
+  shakeDuration: 0.35
   shakeIntensityCurve:
     serializedVersion: 2
     m_Curve:
@@ -59,3 +59,5 @@ MonoBehaviour:
   hitMarkerDuration: 0.2
   impactSounds: []
   impactSoundVolume: 0.5
+  hitstopTime: 0.1
+  hitstopSlow: 0.75
