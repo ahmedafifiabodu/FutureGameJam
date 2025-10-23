@@ -54,7 +54,7 @@ public class ServiceLocator
         {
             if (newComponent.transform.parent != null)
             {
-                newComponent.transform.parent = null;
+                newComponent.transform.SetParent(null, false);
 
                 if (dontDestroyOnLoad)
                     UnityEngine.Object.DontDestroyOnLoad(newComponent.gameObject);
@@ -64,7 +64,7 @@ public class ServiceLocator
         {
             if (newGameObject.transform.parent != null)
             {
-                newGameObject.transform.parent = null;
+                newGameObject.transform.SetParent(null, false);
 
                 if (dontDestroyOnLoad)
                     UnityEngine.Object.DontDestroyOnLoad(newGameObject);
