@@ -164,7 +164,7 @@ public class RangedWeapon : WeaponBase
     {
 
         // Play shoot sound
-        PlaySound(weaponProfile.shootSound);
+        PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)]);
 
         // Add recoil (with ADS modifier if aiming)
         ApplyRecoil();

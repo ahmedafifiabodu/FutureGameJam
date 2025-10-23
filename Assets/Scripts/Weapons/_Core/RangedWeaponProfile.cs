@@ -82,7 +82,7 @@ public class RangedWeaponProfile : ScriptableObject
     public GameObject bulletTrailPrefab;
 
     [Header("Audio")]
-    public AudioClip shootSound;
+    public AudioClip[] shootSounds;
 
     public AudioClip reloadSound;
     public AudioClip emptySound;

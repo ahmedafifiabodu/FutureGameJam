@@ -43,7 +43,19 @@ MonoBehaviour:
   muzzleFlashPrefab: {fileID: 0}
   impactEffectPrefab: {fileID: 0}
   bulletTrailPrefab: {fileID: 3636516122908459889, guid: c357917c68ac95d42998d392f3398b04, type: 3}
-  shootSound: {fileID: 0}
+  shootSounds:
+  - {fileID: 8300000, guid: 9f72ce74fc6b64bc5a85ccbeb8a8e768, type: 3}
+  - {fileID: 8300000, guid: a0b7af85846f34fa8991706f76a18353, type: 3}
+  - {fileID: 8300000, guid: ac35998c9efa24954b92edbd4dbcf153, type: 3}
+  - {fileID: 8300000, guid: d845344bcd02347d797fb6c6a0fe82b1, type: 3}
+  - {fileID: 8300000, guid: d9e1b78cabcf44349b930fd87ef2c900, type: 3}
+  - {fileID: 8300000, guid: 395abb15eac6445fa91d6c37d830135d, type: 3}
+  - {fileID: 8300000, guid: 75aa97f68fe314addbfbb35078dd0aff, type: 3}
+  - {fileID: 8300000, guid: 2cfcc92ae07484cd9bb41671ef37cd89, type: 3}
+  - {fileID: 8300000, guid: 8637ce32f8b32422fba445c4cdb9e2f9, type: 3}
+  - {fileID: 8300000, guid: 25e75f5944337494ea41ebf78a500b9b, type: 3}
+  - {fileID: 8300000, guid: a9debb3f39d0c4b0ebdd68f31e169e4a, type: 3}
+  - {fileID: 8300000, guid: 188f77dd21f9b4089b067781ef468d9c, type: 3}
   reloadSound: {fileID: 0}
   emptySound: {fileID: 0}
   feedbackProfile: {fileID: 0}
