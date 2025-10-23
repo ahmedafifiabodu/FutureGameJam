@@ -60,6 +60,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8315695510981640877, guid: 5c0acdf8c4bd2524caa192c971672105, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: -3941164549346772188, guid: 5c0acdf8c4bd2524caa192c971672105, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: -772798723794940250, guid: 5c0acdf8c4bd2524caa192c971672105, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -67,6 +75,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 5c0acdf8c4bd2524caa192c971672105, type: 3}
       propertyPath: m_Name
       value: Bottle (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 5c0acdf8c4bd2524caa192c971672105, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 1267352256287839728, guid: 5c0acdf8c4bd2524caa192c971672105, type: 3}
       propertyPath: m_LocalScale.y
