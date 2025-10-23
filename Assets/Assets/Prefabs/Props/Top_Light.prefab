@@ -17,7 +17,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &4241446802047499155
 Transform:
@@ -125,6 +125,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spot
       objectReference: {fileID: 0}
+    - target: {fileID: 5164198792430924860, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_Type
       value: 0
@@ -152,6 +156,10 @@ PrefabInstance:
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_SpotAngle
       value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Lightmapping
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_InnerSpotAngle
@@ -223,6 +231,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Point Light (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5164198792430924860, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_Type
       value: 2
@@ -250,6 +262,10 @@ PrefabInstance:
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_SpotAngle
       value: 139.65767
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Lightmapping
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_InnerSpotAngle
