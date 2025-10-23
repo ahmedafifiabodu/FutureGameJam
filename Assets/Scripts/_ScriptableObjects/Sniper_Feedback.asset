@@ -15,8 +15,8 @@ MonoBehaviour:
   profileName: Sniper
   description: Heavy, sustained feedback for snipers
   enableCameraShake: 1
-  shakeIntensity: 0.25
-  shakeDuration: 0.2
+  shakeIntensity: 0.5
+  shakeDuration: 0.5
   shakeIntensityCurve:
     serializedVersion: 2
     m_Curve:
@@ -42,8 +42,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   enableScreenFlash: 1
-  flashColor: {r: 1, g: 1, b: 1, a: 0.12}
-  flashDuration: 0.06
+  flashColor: {r: 1, g: 0, b: 0.16600227, a: 0.19607843}
+  flashDuration: 1.5
   enableChromaticAberration: 0
   chromaticIntensity: 0.5
   chromaticDuration: 0.1
@@ -59,3 +59,5 @@ MonoBehaviour:
   hitMarkerDuration: 0.2
   impactSounds: []
   impactSoundVolume: 0.5
+  hitstopTime: 0.15
+  hitstopSlow: 0.05

@@ -56,8 +56,11 @@ public class ShootingFeedbackProfile : ScriptableObject
 
     [Header("Audio")]
     public AudioClip[] impactSounds;
-
     public float impactSoundVolume = 0.5f;
+
+    [Header("Hitstop")]
+    public float hitstopTime = 0f;
+    public float hitstopSlow = 1f;
 
     #region Preset Factory Methods
 

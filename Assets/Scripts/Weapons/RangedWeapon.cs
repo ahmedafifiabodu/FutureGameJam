@@ -165,48 +165,54 @@ public class RangedWeapon : WeaponBase
         if (weaponProfile.shootSounds.Length > 0)
             PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)]);
 
-        // Add recoil (with ADS modifier if aiming)
-        ApplyRecoil();
-
-        // Also apply recoil to WeaponRecoilController if it exists
-        if (weaponRecoilController && weaponRecoilController.enabled && !isAiming)
-        {
-            // Only apply camera recoil when not aiming (more stable when aimed)
-            weaponRecoilController.ApplyRecoil();
-        }
-
-        // Trigger shooting feedback (camera shake, screen flash, etc.)
-        if (useFeedbackSystem && feedbackSystem)
-            feedbackSystem.TriggerShootFeedback();
-
-        // Raycast for hit detection
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-
-        Vector3 targetPoint;
-        if (Physics.Raycast(ray, out RaycastHit hit, weaponProfile.range, weaponProfile.hitLayers))
+        Vector3 targetPoint = ray.GetPoint(weaponProfile.range);
+        for (int i = 0; i < weaponProfile.shots; i++)
         {
-            targetPoint = hit.point;
-
-            // Apply damage if target has health
-            if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+            Ray offset_ray = ray;
+            if (weaponProfile.shots > 1 && i > 0)
             {
-                damageable.TakeDamage(weaponProfile.damage);
+                float angle = Random.Range(0, 360) * Mathf.Deg2Rad;
+                float distance = Random.Range(1, 100) / 100f;
+                Vector3 offsetDir = Quaternion.AngleAxis(weaponProfile.shotDistance * distance * Mathf.Cos(angle), playerCamera.transform.up) *
+                                    Quaternion.AngleAxis(weaponProfile.shotDistance * distance * Mathf.Sin(angle), playerCamera.transform.right) *
+                                    ray.direction;
 
-                // Trigger hit feedback (hit marker, extra shake)
-                if (useFeedbackSystem && feedbackSystem)
-                    feedbackSystem.TriggerHitFeedback(hit.point, hit.normal);
+                offset_ray = new Ray(ray.origin, offsetDir.normalized);
             }
 
-            // Spawn impact effect
-            if (weaponProfile.impactEffectPrefab)
+            RaycastHit[] hits = Physics.RaycastAll(offset_ray, weaponProfile.range, weaponProfile.hitLayers);
+            System.Array.Sort(hits, (x, y) => x.distance.CompareTo(y.distance));
+            if (hits.Length > 0)
             {
-                GameObject impact = Instantiate(weaponProfile.impactEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
-                Destroy(impact, 2f);
+                int j = weaponProfile.penetration;
+                foreach (RaycastHit hit in hits)
+                {
+                    Debug.DrawLine(ray.origin, hit.point, Color.red, 10f);
+                    if (i == 0)
+                        targetPoint = hit.point;
+
+                    // Apply damage if target has health
+                    if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+                    {
+                        damageable.TakeDamage(weaponProfile.damage);
+
+                        // Trigger hit feedback (hit marker, extra shake)
+                        if (useFeedbackSystem && feedbackSystem)
+                            feedbackSystem.TriggerHitFeedback(hit.point, hit.normal);
+                    }
+
+                    // Spawn impact effect
+                    if (weaponProfile.impactEffectPrefab)
+                    {
+                        GameObject impact = Instantiate(weaponProfile.impactEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                        Destroy(impact, 2f);
+                    }
+                    if (j == 0 || hit.collider.GetComponent<IDamageable>() == null)
+                        break;
+                    j--;
+                }
             }
-        }
-        else
-        {
-            targetPoint = ray.GetPoint(weaponProfile.range);
         }
 
         // Play muzzle flash
@@ -224,6 +230,21 @@ public class RangedWeapon : WeaponBase
         // Eject shell casing
         if (shellEjector)
             shellEjector.EjectShell();
+
+        // Add recoil (with ADS modifier if aiming)
+        ApplyRecoil();
+
+        // Also apply recoil to WeaponRecoilController if it exists
+        if (weaponRecoilController && weaponRecoilController.enabled && !isAiming)
+        {
+            // Only apply camera recoil when not aiming (more stable when aimed)
+            weaponRecoilController.ApplyRecoil();
+        }
+
+        // Trigger shooting feedback (camera shake, screen flash, etc.)
+        if (useFeedbackSystem && feedbackSystem)
+            feedbackSystem.TriggerShootFeedback();
+
     }
 
     private System.Collections.IEnumerator SpawnTrail(TrailRenderer trail, Vector3 targetPoint, float speed)

@@ -15,8 +15,11 @@ MonoBehaviour:
   weaponName: Assault Rifle
   description: Automatic rifle with medium damage
   fireRate: 0.2
-  damage: 20
+  damage: 35
   range: 100
+  shots: 1
+  shotDistance: 0
+  penetration: 0
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -30,7 +33,7 @@ MonoBehaviour:
   recoilRotation: {x: 30, y: 270, z: 0}
   recoilKickback: {x: -0.03, y: -0.05, z: 0}
   swayAmount: 0.001
-  swaySpeed: 2
+  swaySpeed: 1
   swayResetSpeed: 2
   bobSpeed: 1
   bobAmount: 0.001
@@ -40,7 +43,7 @@ MonoBehaviour:
   aimPositionOffset: {x: 0, y: -0.08, z: 0.2}
   aimSwayMultiplier: 0.3
   aimRecoilMultiplier: 0.7
-  muzzleFlashPrefab: {fileID: 0}
+  muzzleFlash: {fileID: 0}
   impactEffectPrefab: {fileID: 0}
   bulletTrailPrefab: {fileID: 3636516122908459889, guid: c357917c68ac95d42998d392f3398b04, type: 3}
   shootSounds:
@@ -58,4 +61,4 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 188f77dd21f9b4089b067781ef468d9c, type: 3}
   reloadSound: {fileID: 0}
   emptySound: {fileID: 0}
-  feedbackProfile: {fileID: 11400000, guid: 9e1ae627d51eb6b46b1785d0f36ed310, type: 2}
+  feedbackProfile: {fileID: 0}

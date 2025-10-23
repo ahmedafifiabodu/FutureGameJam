@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -48,6 +49,7 @@ public class GameStateManager : MonoBehaviour
     public HostController CurrentHostController => currentHostController;
     public GameObject ParasitePlayer => parasitePlayer;
     public ParasiteController ParasiteController => parasiteController;
+	private Coroutine hitstopCoroutine;
 
     private void Awake()
     {
@@ -354,6 +356,26 @@ public class GameStateManager : MonoBehaviour
 
         Time.timeScale = 0f;
     }
+
+	public void Hitstop(float timeScale = 1f, float duration = 1f)
+	{
+		if (hitstopCoroutine != null)
+		{
+			StopCoroutine(hitstopCoroutine);
+		}
+		Time.timeScale = timeScale;
+		hitstopCoroutine = StartCoroutine(SlowTime(duration));
+	}
+
+	IEnumerator SlowTime(float duration = 1f)
+	{
+		float startTime = Time.unscaledTime;
+		while (Time.unscaledTime <= startTime + duration)
+		{
+			yield return null;
+		}
+		Time.timeScale = 1f;
+	}
 
     public GameMode GetCurrentMode() => currentMode;
 

@@ -23,6 +23,12 @@ public class RangedWeaponProfile : ScriptableObject
 
     [Tooltip("Maximum effective range")]
     public float range = 100f;
+    [Tooltip("How many shots it fires")]
+    public int shots = 1;
+    [Tooltip("Distance from center on shots. Note that 1 will always be in the center.")]
+    public float shotDistance = 0f;
+    [Tooltip("How many enemies it penetrates with shots")]
+    public int penetration = 0;
 
     [Tooltip("What layers can be hit by bullets")]
     public LayerMask hitLayers = ~0;

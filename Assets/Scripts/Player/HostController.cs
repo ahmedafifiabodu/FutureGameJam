@@ -18,6 +18,7 @@ public class HostController : MonoBehaviour
 
     [SerializeField] private FirstPersonZoneController hostMovementController;
     [SerializeField] private WeaponManager weaponManager;
+    [SerializeField] private RangedWeaponProfile weaponProfile;
 
     [Header("Death")]
     [SerializeField] private GameObject deathEffect;
@@ -195,7 +196,11 @@ public class HostController : MonoBehaviour
 
         // Enable weapon manager
         if (weaponManager)
+        {
             weaponManager.Enable();
+            RangedWeapon weapon = weaponManager.GetPrimaryWeapon() as RangedWeapon;
+            weapon.SwitchWeaponProfile(weaponProfile);
+        }
 
         Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
         if (transferredCamera != null)
