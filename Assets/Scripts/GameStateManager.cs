@@ -210,7 +210,7 @@ public class GameStateManager : MonoBehaviour
         }
 
         // Notify state machine if available
-        _stateMachine?.SwitchToParasiteMode();
+        _stateMachine.SwitchToParasiteMode();
 
         Debug.Log("[GameState] Switched to Parasite Mode.");
     }
@@ -229,7 +229,7 @@ public class GameStateManager : MonoBehaviour
             parasiteController.enabled = true;
 
             // Set rotation if provided, otherwise keep current
-            if (parasiteRotation != default(Quaternion))
+            if (parasiteRotation != default)
             {
                 parasiteController.SetRotation(parasiteRotation);
             }
@@ -245,7 +245,7 @@ public class GameStateManager : MonoBehaviour
             _gameplayHUD.ShowParasiteUI();
 
         // Notify state machine if available
-        _stateMachine?.SwitchToParasiteMode();
+        _stateMachine.SwitchToParasiteMode();
     }
 
     #endregion Mode Switching
@@ -311,8 +311,8 @@ public class GameStateManager : MonoBehaviour
         // CRITICAL: Capture host position BEFORE any transitions or destruction
         Vector3 hostPosition = currentHost != null ? currentHost.transform.position : GetParasiteSpawnPosition();
 
-        Transform hostCameraPivot = currentHostController?.GetCameraPivot();
-        Camera transferredCamera = hostCameraPivot?.GetComponentInChildren<Camera>();
+        Transform hostCameraPivot = currentHostController.GetCameraPivot();
+        Camera transferredCamera = hostCameraPivot.GetComponentInChildren<Camera>();
 
         var transitionEffect = _possessionTransitionEffect ?? PossessionTransitionEffect.CreateInstance();
 
@@ -443,15 +443,13 @@ public class GameStateManager : MonoBehaviour
 
     private void EnableParasiteCamera()
     {
-        if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
-        {
-            fisheye.active = true;
-        }
+        // Enable fisheye effect for parasite mode
+        SetFisheyeEffect(true);
 
         if (parasiteCameraPivot != null)
         {
             // Only sync rotation if we have a host controller (during possession)
-            Transform hostCameraPivot = currentHostController?.GetCameraPivot();
+            Transform hostCameraPivot = currentHostController.GetCameraPivot();
             if (hostCameraPivot != null)
             {
                 parasiteCameraPivot.rotation = hostCameraPivot.rotation;
@@ -463,15 +461,12 @@ public class GameStateManager : MonoBehaviour
                 _parasiteCamera.enabled = true;
                 Debug.Log("[GameState] Parasite camera enabled");
             }
-            else
-            {
-                Debug.LogWarning("[GameState] Parasite camera reference is null!");
-            }
         }
     }
 
     private void SetFisheyeEffect(bool active)
     {
+        // Enable or disable fisheye effect in the volume
         if (volume != null && volume.profile.TryGet(out LensDistortion fisheye))
             fisheye.active = active;
     }
