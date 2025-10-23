@@ -53,7 +53,7 @@ MonoBehaviour:
   impactDecalPrefab: {fileID: 0}
   decalLifetime: 10
   maxDecals: 50
-  enableHitMarker: 1
+  enableHitMarker: 0
   hitMarkerColor: {r: 1, g: 1, b: 1, a: 1}
   hitMarkerSize: 22
   hitMarkerDuration: 0.2

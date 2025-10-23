@@ -449,7 +449,7 @@ public class GameStateManager : MonoBehaviour
         if (parasiteCameraPivot != null)
         {
             // Only sync rotation if we have a host controller (during possession)
-            Transform hostCameraPivot = currentHostController.GetCameraPivot();
+            Transform hostCameraPivot = currentHostController?.GetCameraPivot();
             if (hostCameraPivot != null)
             {
                 parasiteCameraPivot.rotation = hostCameraPivot.rotation;

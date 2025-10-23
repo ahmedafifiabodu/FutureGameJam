@@ -47,7 +47,7 @@ namespace AI.Enemy.Editor
             config.enemyType = EnemyType.Basic;
 
             // Stats
-            config.maxHealth = 50;
+            config.maxHealth = 50f;
             config.attackDamage = 15;
             config.moveSpeed = 3f;
 
@@ -100,7 +100,7 @@ namespace AI.Enemy.Editor
             config.enemyType = EnemyType.Tough;
 
             // Stats
-            config.maxHealth = 100;
+            config.maxHealth = 100f;
             config.attackDamage = 25;
             config.moveSpeed = 2.5f;
 
@@ -155,7 +155,7 @@ namespace AI.Enemy.Editor
             config.enemyType = EnemyType.Fast;
 
             // Stats
-            config.maxHealth = 30;
+            config.maxHealth = 30f;
             config.attackDamage = 20;
             config.moveSpeed = 5f;
 

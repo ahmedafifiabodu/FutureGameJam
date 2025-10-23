@@ -181,17 +181,21 @@ public class RangedWeapon : WeaponBase
             if (hits.Length > 0)
             {
                 int j = weaponProfile.penetration;
+                var gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
                 foreach (RaycastHit hit in hits)
                 {
+                    if (hit.collider.transform.root.gameObject == gameStateManager.CurrentHost)
                     Debug.DrawLine(ray.origin, hit.point, Color.red, 10f);
                     if (i == 0)
                         targetPoint = hit.point;
 
                     // Apply damage if target has health
-                    if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+                    if (hit.collider.GetComponent<IDamageable>() != null)
                     {
-                        damageable.TakeDamage(weaponProfile.damage);
-
+                        foreach (var damageable in hit.collider.GetComponents<IDamageable>()) {
+                            if (damageable is HostController) continue;
+                            damageable.TakeDamage(weaponProfile.damage);
+                        }
                         // Trigger hit feedback (hit marker, extra shake)
                         if (useFeedbackSystem && feedbackSystem)
                             feedbackSystem.TriggerHitFeedback(hit.point, hit.normal);

@@ -235,12 +235,12 @@ public class GameplayHUD : MonoBehaviour
 
             if (exitButtonHeld)
             {
-                hostExitHintText.text = "Release J to Exit";
+                hostExitHintText.text = "Release RMB to Exit";
                 hostExitHintText.color = successColor;
             }
             else
             {
-                hostExitHintText.text = "Hold J to Show Exit Trajectory";
+                hostExitHintText.text = "Hold RMB to Show Exit Trajectory";
                 hostExitHintText.color = warningColor;
             }
         }

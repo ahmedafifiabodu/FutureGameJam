@@ -27,11 +27,11 @@ public class GameplayHUDSetupWizard : EditorWindow
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("Gameplay HUD Setup Wizard", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox("This wizard will create a complete Canvas-based HUD system with:\n" +
-    "• Parasite UI Panel\n" +
-  "• Host UI Panel\n" +
-    "• Weapon UI Panel\n" +
-   "• Dual-Progress Lifetime Sliders\n" +
-     "• Canvas-based Crosshair", MessageType.Info);
+    "ï¿½ Parasite UI Panel\n" +
+  "ï¿½ Host UI Panel\n" +
+    "ï¿½ Weapon UI Panel\n" +
+   "ï¿½ Dual-Progress Lifetime Sliders\n" +
+     "ï¿½ Canvas-based Crosshair", MessageType.Info);
         
         EditorGUILayout.Space(10);
         
@@ -114,7 +114,7 @@ public class GameplayHUDSetupWizard : EditorWindow
         // Select the created HUD
      Selection.activeGameObject = hudObject;
         
-   EditorUtility.DisplayDialog("Success", "Gameplay HUD created successfully!\n\nPlease assign:\n• ParasiteController\n• Current Host\n• Current Weapon\n\nin the Inspector.", "OK");
+   EditorUtility.DisplayDialog("Success", "Gameplay HUD created successfully!\n\nPlease assign:\nï¿½ ParasiteController\nï¿½ Current Host\nï¿½ Current Weapon\n\nin the Inspector.", "OK");
  }
     
     private Canvas CreateCanvas()
@@ -172,14 +172,12 @@ public class GameplayHUDSetupWizard : EditorWindow
         RectTransform rect = panel.AddComponent<RectTransform>();
         SetFullScreenRect(rect);
         
-        // Create lifetime text (top-right)
-        CreateText("HostLifetimeText", panel.transform, new Vector2(-220, -10), new Vector2(200, 40), "Host Time: 30.0s", 18, TextAlignmentOptions.TopRight);
       
         // Create lifetime slider (bottom center)
         GameObject slider = CreateDualProgressSlider("HostLifetimeSlider", panel.transform, new Vector2(0, 100), new Vector2(600, 20));
         
    // Create exit hint (top-right, below lifetime)
-        CreateText("HostExitHintText", panel.transform, new Vector2(-220, -60), new Vector2(200, 30), "Hold J to Exit", 12, TextAlignmentOptions.TopRight);
+        CreateText("HostExitHintText", panel.transform, new Vector2(-220, -60), new Vector2(200, 30), "Hold RMB to Exit", 12, TextAlignmentOptions.TopRight);
         
      panel.SetActive(false); // Start disabled
         return panel;
@@ -192,25 +190,7 @@ public class GameplayHUDSetupWizard : EditorWindow
     
         RectTransform rect = panel.AddComponent<RectTransform>();
         SetFullScreenRect(rect);
-     
-   // Create ammo text (bottom-right)
-        CreateText("AmmoText", panel.transform, new Vector2(-220, 80), new Vector2(200, 40), "30/30", 20, TextAlignmentOptions.BottomRight);
-        
-        // Create reserve ammo text (bottom-right, below ammo)
-        CreateText("ReserveAmmoText", panel.transform, new Vector2(-220, 50), new Vector2(200, 30), "Reserve: 90", 16, TextAlignmentOptions.BottomRight);
-        
-   // Create aiming text (bottom-right, below reserve)
-        GameObject aimingText = CreateText("AimingText", panel.transform, new Vector2(-220, 110), new Vector2(200, 30), "AIMING", 14, TextAlignmentOptions.BottomRight);
-        aimingText.SetActive(false); // Start hidden
-        
-   // Create reload progress bar (bottom-right)
-        GameObject reloadBar = CreateProgressBar("ReloadProgressBar", panel.transform, new Vector2(-220, 140), new Vector2(200, 20));
-        reloadBar.SetActive(false); // Start hidden
-        
-        // Create reloading text
-        GameObject reloadingText = CreateText("ReloadingText", panel.transform, new Vector2(-220, 165), new Vector2(200, 20), "RELOADING...", 14, TextAlignmentOptions.BottomRight);
-        reloadingText.SetActive(false); // Start hidden
-        
+
         panel.SetActive(false); // Start disabled
      return panel;
     }

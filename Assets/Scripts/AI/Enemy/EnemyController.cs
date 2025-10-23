@@ -11,7 +11,7 @@ namespace AI.Enemy
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     [RequireComponent(typeof(Animator))]
-    public class EnemyController : MonoBehaviour
+    public class EnemyController : MonoBehaviour, IDamageable
     {
         [Header("Configuration")]
         [SerializeField] private EnemyConfigSO config;
@@ -21,6 +21,7 @@ namespace AI.Enemy
 
         [SerializeField] private Animator animator;
         [SerializeField] private Transform projectileSpawnPoint;
+        [SerializeField] private GameObject deathEffect;
 
         [Header("Patrol Points")]
         [SerializeField] private Transform[] patrolPoints;
@@ -43,7 +44,7 @@ namespace AI.Enemy
         private EnemyDeadState deadState;
 
         // Runtime data
-        private int currentHealth;
+        private float currentHealth;
 
         private bool isDead = false;
         private bool isStaggered = false;
@@ -565,8 +566,7 @@ namespace AI.Enemy
 
                     if (hitHost != null && hitHost == currentHost)
                     {
-                        // This is the possessed host - deal damage
-                        damageable.TakeDamage(config.attackDamage);
+                        hitHost.TakeDamage(config.attackDamage);
                         Debug.Log($"[EnemyController] {config.enemyName} successfully damaged possessed host for {config.attackDamage} damage!");
                     }
                     else if (debugRaycast)
@@ -596,7 +596,7 @@ namespace AI.Enemy
         /// <summary>
         /// Apply damage to enemy with pain chance system
         /// </summary>
-        public void TakeDamage(int damage, Vector3 hitPosition)
+        public void TakeDamage(float damage)
         {
             if (isDead) return;
 
@@ -680,9 +680,11 @@ namespace AI.Enemy
                 collider.enabled = false;
             }
 
+            if (deathEffect)
+                Instantiate(deathEffect, transform.position, Quaternion.identity);
             // TODO: Implement ragdoll or death animation
-            // For now, just destroy after a delay
-            Destroy(gameObject, 3f);
+            // For now, just destroy
+            Destroy(gameObject);
         }
 
         #endregion Combat System
@@ -695,7 +697,7 @@ namespace AI.Enemy
         [ContextMenu("Take 10 Damage")]
         public void TakeDamageFromInspector()
         {
-            TakeDamageFromInspector(10);
+            TakeDamageFromInspector(10f);
         }
 
         /// <summary>
@@ -704,7 +706,7 @@ namespace AI.Enemy
         [ContextMenu("Take 25 Damage")]
         public void TakeDamage25FromInspector()
         {
-            TakeDamageFromInspector(25);
+            TakeDamageFromInspector(25f);
         }
 
         /// <summary>
@@ -713,7 +715,7 @@ namespace AI.Enemy
         [ContextMenu("Take Half Health Damage")]
         public void TakeHalfHealthDamage()
         {
-            int halfHealth = Mathf.Max(1, currentHealth / 2);
+            float halfHealth = Mathf.Max(1, currentHealth / 2);
             TakeDamageFromInspector(halfHealth);
         }
 
@@ -729,7 +731,7 @@ namespace AI.Enemy
         /// <summary>
         /// Internal function to handle inspector damage calls
         /// </summary>
-        private void TakeDamageFromInspector(int damage)
+        private void TakeDamageFromInspector(float damage)
         {
             if (isDead)
             {
@@ -740,7 +742,7 @@ namespace AI.Enemy
             Debug.Log($"[EnemyController] {config.enemyName ?? gameObject.name} taking {damage} damage from inspector. Health: {currentHealth} -> {currentHealth - damage}");
 
             // Use the existing TakeDamage function with enemy's current position as hit point
-            TakeDamage(damage, transform.position);
+            TakeDamage(damage);
         }
 
         /// <summary>

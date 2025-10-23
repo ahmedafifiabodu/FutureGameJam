@@ -23,7 +23,7 @@ namespace AI.Enemy.Configuration
         [Header("Stats")]
         [Tooltip("Maximum health of the enemy")]
         [Range(1, 1000)]
-        public int maxHealth = 100;
+        public float maxHealth = 100f;
 
         [Tooltip("Damage dealt to player")]
         [Range(1, 100)]

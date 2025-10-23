@@ -42,6 +42,7 @@ public class HostController : MonoBehaviour, IDamageable
     private bool isShowingExitTrajectory = false;
     private float timeSinceAttached;
     private float gravity;
+    private bool dead = false;
 
     private ParasiteController attachedParasite;
     private InputManager _inputManager;
@@ -247,6 +248,9 @@ public class HostController : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        if (dead)
+            return;
+        dead = true;
         Debug.Log($"[Host] Host died! Survived: {timeSinceAttached:F1}s");
 
         // Hide trajectory if showing
@@ -341,12 +345,15 @@ public class HostController : MonoBehaviour, IDamageable
             return;
         }
 
-        remainingLifetime -= damage;
+        //remainingLifetime -= damage;
 
         Debug.Log($"[Host] Took {damage} damage! Remaining lifetime: {remainingLifetime:F1}s");
 
         if (remainingLifetime <= 0f)
+        {
+            remainingLifetime = 0f;
             Die();
+        }
     }
 
     #endregion IDamageable Implementation
