@@ -15,14 +15,19 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     [Header("Settings")]
     [Range(0.1f, 4f)] public float pitchMax = 3f;
     public float crossfadeDuration = 2f;
-    public float rampDuration = 60f; // Stage 1 ramp time (seconds)
 
     [Header("Music4 behavior")]
     public bool quickSkipMusic4 = true;     // true = touch M4 briefly then move on
-    public float music4HoldSeconds = 0.75f; // how long to hold M4 when quickSkipMusic4 is true
+    public float music4HoldSeconds = 0.75f; // hold time when skipping
 
     [Header("Master Volume")]
     [Range(0f, 1f)] public float masterVolume = 1f; // overall volume multiplier
+
+    [Header("Clock / Timer")]
+    public ClockMode clockMode = ClockMode.DSP;     // DSP or Realtime
+    public bool autoCalibrateClock = true;          // measure DSP vs realtime at start
+    [Range(0.5f, 5f)] public float calibrateSeconds = 1.5f;
+    [Range(0.0f, 0.5f)] public float ratioTolerance = 0.1f; // if |ratio - 1| > tolerance, switch to Realtime
 
     [Header("Robustness")]
     public bool force2D = true;
@@ -33,22 +38,22 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     public bool showHUD = true;           // F1 toggle
     public bool enableShortcuts = true;   // [ prev, ] next, R reset
     public bool logStages = false;
-    public bool skipRampOnPlay = false;   // start right after ramp (Music1+Music2) for testing
     public KeyCode toggleHUDKey = KeyCode.F1;
 
-    private enum Stage
+    public enum Stage
     {
-        RampM1 = 1,         // 1) Music1 pitch 1->max over rampDuration
-        M1withM2,           // 2) Music1 @ max + Music2
-        M1withM3,           // 3) Music1 @ max + Music3 (forward)
-        ToM4,               // 4) Turn off M1 and switch to Music4 (brief if quickSkip)
-        ToM3Reversed,       // 5) Drop M4 and go to Music3 reversed (solo)
-        Rev3PlusRev1,       // 6) Reversed Music3 + Reversed Music1
-        Rev3Only,           // 7) Reversed Music3 only
-        Rev3PlusRev1_2,     // 8) Reversed Music3 + Reversed Music1 again
-        Fwd3PlusM1,         // 9) Music3 forward + Music1 @ max
-        Rev3PlusRev1_End    // 10) Reversed Music3 + Reversed Music1, then loop to Stage 3
+        M2Only = 2,          // 2) Music2 only
+        M1withM3 = 3,        // 3) Music1 @ max + Music3 (forward)
+        ToM4 = 4,            // 4) Turn off M1 and switch to Music4 (brief if quickSkip)
+        ToM3Reversed = 5,    // 5) Music3 reversed (solo)
+        Rev3PlusRev1 = 6,    // 6) Reversed Music3 + Reversed Music1
+        Rev3Only = 7,        // 7) Reversed Music3 only
+        Rev3PlusRev1_2 = 8,  // 8) Reversed Music3 + Reversed Music1 again
+        Fwd3PlusM1 = 9,      // 9) Music3 forward + Music1 @ max
+        Rev3PlusRev1_End = 10// 10) Reversed Music3 + Reversed Music1, then loop to Stage 3
     }
+
+    public enum ClockMode { DSP, Realtime }
 
     // Loop cycle (3 → 10)
     private static readonly Stage[] LoopCycle = new Stage[]
@@ -64,16 +69,25 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     [SerializeField] private float debugStageTarget;
     [SerializeField] private float debugTotalTime;
 
+    // Clock debug
+    [SerializeField] private string activeClockLabel = "DSP";
+    [SerializeField] private float dspToRealRatio = 1f;
+
     private Stage currentStage;
     private Coroutine sequenceCo;
     private readonly Dictionary<AudioSource, Coroutine> fadeMap = new Dictionary<AudioSource, Coroutine>();
 
-    // Master volume support: keep base volumes separate from master multiplier
+    // Master volume: base volumes separate from master multiplier
     private readonly Dictionary<AudioSource, float> baseVolumeMap = new Dictionary<AudioSource, float>();
     private float lastAppliedMasterVolume = 1f;
     private AudioSource[] allSources;
 
+    private double totalStartClock;            // start time on the active clock
     private double totalStartDSP;
+    private double totalStartReal;
+
+    private bool didInitialSegment = false;    // after M2Only and inserted Fwd3PlusM1
+    private bool useRealtimeClock = false;     // true if forced or auto-switched
 
     void Awake()
     {
@@ -85,7 +99,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     void OnEnable()
     {
         SetupSources();
-        StartFrom(currentStage);
+        StartCoroutine(BootAndStart());
     }
 
     void OnDisable()
@@ -94,6 +108,18 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         foreach (var kv in fadeMap)
             if (kv.Value != null) StopCoroutine(kv.Value);
         fadeMap.Clear();
+    }
+
+    private IEnumerator BootAndStart()
+    {
+        // Initial clock selection
+        useRealtimeClock = (clockMode == ClockMode.Realtime);
+
+        if (autoCalibrateClock && clockMode == ClockMode.DSP)
+            yield return CalibrateClockAndMaybeSwitch();
+
+        totalStartClock = Now();
+        StartFrom(currentStage);
     }
 
     private void SetupSources()
@@ -106,8 +132,8 @@ public class PitchAwareMusicPlayer : MonoBehaviour
             if (src == null) continue;
             if (force2D) src.spatialBlend = 0f;
             src.loop = true;
-            src.pitch = 1f;   // reset pitch
-            baseVolumeMap[src] = 0f; // start silent (base volume)
+            src.pitch = 1f;         // reset pitch
+            baseVolumeMap[src] = 0f;// start silent (base volume)
         }
 
         if (preloadAudio)
@@ -124,45 +150,71 @@ public class PitchAwareMusicPlayer : MonoBehaviour
             if (!src.isPlaying) src.Play();
         }
 
-        if (music1Forward != null)
-        {
-            baseVolumeMap[music1Forward] = 1f; // audible at start
-            music1Forward.pitch = 1f;          // will ramp in Stage 1
-        }
+        // Start at Stage 2: Music2 only
+        totalStartDSP  = AudioSettings.dspTime;
+        totalStartReal = Time.realtimeSinceStartup;
+        totalStartClock = Now();
 
-        totalStartDSP = AudioSettings.dspTime;
-        currentStage = skipRampOnPlay ? Stage.M1withM2 : Stage.RampM1;
+        currentStage = Stage.M2Only;
+        didInitialSegment = false;
 
-        // Ensure initial application of masterVolume
+        // Initialize master volume
         lastAppliedMasterVolume = -1f; // force apply
         ApplyMasterVolumeToAll();
 
         SetDebugStage(currentStage, 0f, 0f);
     }
 
+    private IEnumerator CalibrateClockAndMaybeSwitch()
+    {
+        // Measure how much dspTime advances vs real time over a small period
+        double r0 = Time.realtimeSinceStartup;
+        double d0 = AudioSettings.dspTime;
+        double end = r0 + calibrateSeconds;
+
+        while (Time.realtimeSinceStartup < end)
+            yield return null;
+
+        double r1 = Time.realtimeSinceStartup;
+        double d1 = AudioSettings.dspTime;
+
+        double realDelta = Mathf.Max(0.0001f, (float)(r1 - r0));
+        double dspDelta  = Mathf.Max(0.0001f, (float)(d1 - d0));
+        dspToRealRatio = (float)(dspDelta / realDelta);
+
+        bool ratioOK = Mathf.Abs(dspToRealRatio - 1f) <= ratioTolerance;
+        if (!ratioOK)
+        {
+            // Switch to realtime clock if DSP is off-speed
+            useRealtimeClock = true;
+        }
+
+        activeClockLabel = useRealtimeClock ? "Realtime" : "DSP";
+        if (logStages)
+            Debug.Log($"[{name}] Clock calibration: ratio dsp/real = {dspToRealRatio:F3}, using {activeClockLabel} clock.");
+    }
+
     // Entry to start sequence from any stage, then loop Stage 3..10 forever
     private void StartFrom(Stage s)
     {
         if (sequenceCo != null) StopCoroutine(sequenceCo);
+        // If starting from M2Only, we haven't finished initial segment yet
+        didInitialSegment = (s != Stage.M2Only);
         sequenceCo = StartCoroutine(PlayFrom(s));
     }
 
     private IEnumerator PlayFrom(Stage s)
     {
-        // Handle Stage 1 and Stage 2 (one-time)
-        if (s == Stage.RampM1)
+        // Initial segment: Stage 2 -> Stage 9 -> Stage 3
+        if (s == Stage.M2Only)
         {
-            if (!skipRampOnPlay)
-                yield return Stage_RampM1();
-            s = Stage.M1withM2;
-        }
-        if (s == Stage.M1withM2)
-        {
-            yield return Stage_M1withM2();
-            s = Stage.M1withM3;
+            yield return Stage_M2Only();         // 2) Music2 only
+            didInitialSegment = true;
+            yield return Stage_Fwd3PlusM1();     // 9) INSERTED here
+            s = Stage.M1withM3;                  // then continue with 3
         }
 
-        // Finish current loop cycle from s (if s is within the cycle)
+        // Finish current loop segment from s (if s belongs to the cycle)
         yield return PlaySegmentFromStage3(s);
 
         // Loop Stage 3..10 forever
@@ -186,38 +238,36 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     {
         switch (s)
         {
-            case Stage.M1withM3:            yield return Stage_M1withM3(); break;
-            case Stage.ToM4:                 yield return Stage_ToM4(); break;
-            case Stage.ToM3Reversed:         yield return Stage_ToM3Reversed(); break;
-            case Stage.Rev3PlusRev1:         yield return Stage_Rev3PlusRev1(); break;
-            case Stage.Rev3Only:             yield return Stage_Rev3Only(); break;
-            case Stage.Rev3PlusRev1_2:       yield return Stage_Rev3PlusRev1_2(); break;
-            case Stage.Fwd3PlusM1:           yield return Stage_Fwd3PlusM1(); break;
-            case Stage.Rev3PlusRev1_End:     yield return Stage_Rev3PlusRev1_End(); break;
+            case Stage.M2Only:                yield return Stage_M2Only(); break;
+            case Stage.M1withM3:              yield return Stage_M1withM3(); break;
+            case Stage.ToM4:                  yield return Stage_ToM4(); break;
+            case Stage.ToM3Reversed:          yield return Stage_ToM3Reversed(); break;
+            case Stage.Rev3PlusRev1:          yield return Stage_Rev3PlusRev1(); break;
+            case Stage.Rev3Only:              yield return Stage_Rev3Only(); break;
+            case Stage.Rev3PlusRev1_2:        yield return Stage_Rev3PlusRev1_2(); break;
+            case Stage.Fwd3PlusM1:            yield return Stage_Fwd3PlusM1(); break;
+            case Stage.Rev3PlusRev1_End:      yield return Stage_Rev3PlusRev1_End(); break;
         }
     }
 
     // ===== STAGES =====
 
-    // 1) Music1 ramps 1 -> pitchMax over rampDuration
-    private IEnumerator Stage_RampM1()
+    // 2) Music2 only
+    private IEnumerator Stage_M2Only()
     {
-        EnterStage(Stage.RampM1);
-        yield return WaitDSPSeconds(rampDuration, t =>
-        {
-            if (music1Forward != null)
-                music1Forward.pitch = Mathf.Lerp(1f, pitchMax, t);
-        });
-        if (music1Forward != null) music1Forward.pitch = pitchMax; // lock at max
-    }
-
-    // 2) Music1 @ max + Music2
-    private IEnumerator Stage_M1withM2()
-    {
-        EnterStage(Stage.M1withM2);
+        EnterStage(Stage.M2Only);
         yield return WaitForClipReady(music2);
         float dur = ComputeDurationOrFallback(music2);
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
+    }
+
+    // 9) Music3 forward + Music1 @ max (inserted after 2 on first pass, also in loop)
+    private IEnumerator Stage_Fwd3PlusM1()
+    {
+        EnterStage(Stage.Fwd3PlusM1);
+        yield return WaitForClipReady(music3Forward);
+        float dur = ComputeDurationOrFallback(music3Forward);
+        yield return WaitClockSeconds(dur);
     }
 
     // 3) Music1 @ max + Music3 forward
@@ -226,10 +276,10 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         EnterStage(Stage.M1withM3);
         yield return WaitForClipReady(music3Forward);
         float dur = ComputeDurationOrFallback(music3Forward);
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
-    // 4) Turn off Music1 (simultaneous) and switch to Music4 (brief if quickSkip)
+    // 4) Turn off Music1 and switch to Music4 (brief if quickSkip)
     private IEnumerator Stage_ToM4()
     {
         EnterStage(Stage.ToM4);
@@ -239,7 +289,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
             ? Mathf.Max(music4HoldSeconds, crossfadeDuration)
             : ComputeDurationOrFallback(music4);
 
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
     // 5) Music3 reversed (solo)
@@ -248,7 +298,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         EnterStage(Stage.ToM3Reversed);
         yield return WaitForClipReady(music3Reverse);
         float dur = ComputeDurationOrFallback(music3Reverse);
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
     // 6) Reversed Music3 + Reversed Music1
@@ -258,16 +308,16 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         yield return WaitForClipReady(music3Reverse);
         yield return WaitForClipReady(music1Reverse);
         float dur = Mathf.Max(ComputeDurationOrFallback(music3Reverse), ComputeDurationOrFallback(music1Reverse));
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
-    // 7) Reversed Music3 (solo)
+    // 7) Reversed Music3 only
     private IEnumerator Stage_Rev3Only()
     {
         EnterStage(Stage.Rev3Only);
         yield return WaitForClipReady(music3Reverse);
         float dur = ComputeDurationOrFallback(music3Reverse);
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
     // 8) Reversed Music3 + Reversed Music1 (again)
@@ -277,16 +327,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         yield return WaitForClipReady(music3Reverse);
         yield return WaitForClipReady(music1Reverse);
         float dur = Mathf.Max(ComputeDurationOrFallback(music3Reverse), ComputeDurationOrFallback(music1Reverse));
-        yield return WaitDSPSeconds(dur);
-    }
-
-    // 9) Music3 forward + Music1 @ max pitch
-    private IEnumerator Stage_Fwd3PlusM1()
-    {
-        EnterStage(Stage.Fwd3PlusM1);
-        yield return WaitForClipReady(music3Forward);
-        float dur = ComputeDurationOrFallback(music3Forward);
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
     // 10) Reversed Music3 + Reversed Music1, then loop to Stage 3
@@ -296,7 +337,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         yield return WaitForClipReady(music3Reverse);
         yield return WaitForClipReady(music1Reverse);
         float dur = Mathf.Max(ComputeDurationOrFallback(music3Reverse), ComputeDurationOrFallback(music1Reverse));
-        yield return WaitDSPSeconds(dur);
+        yield return WaitClockSeconds(dur);
     }
 
     // ===== ENTER STAGE: fades + pitch reset per stage =====
@@ -313,17 +354,17 @@ public class PitchAwareMusicPlayer : MonoBehaviour
 
         switch (s)
         {
-            case Stage.RampM1:
-                if (music1Forward != null) music1Forward.pitch = 1f;
-                Full(music1Forward);
-                Kill(music2); Kill(music3Forward); Kill(music4); Kill(music3Reverse); Kill(music1Reverse);
+            case Stage.M2Only:
+                Pitch1(music2);
+                Full(music2);
+                Kill(music1Forward); Kill(music3Forward); Kill(music4); Kill(music3Reverse); Kill(music1Reverse);
                 break;
 
-            case Stage.M1withM2:
-                Pitch1(music2);
+            case Stage.Fwd3PlusM1:
+                Pitch1(music3Forward);
+                Full(music3Forward);
                 Full(music1Forward); if (music1Forward != null) music1Forward.pitch = pitchMax;
-                Full(music2);
-                Kill(music3Forward); Kill(music4); Kill(music3Reverse); Kill(music1Reverse);
+                Kill(music1Reverse); Kill(music3Reverse); Kill(music4); Kill(music2);
                 break;
 
             case Stage.M1withM3:
@@ -366,13 +407,6 @@ public class PitchAwareMusicPlayer : MonoBehaviour
                 Kill(music1Forward); Kill(music3Forward); Kill(music4); Kill(music2);
                 break;
 
-            case Stage.Fwd3PlusM1:
-                Pitch1(music3Forward);
-                Full(music3Forward);
-                Full(music1Forward); if (music1Forward != null) music1Forward.pitch = pitchMax;
-                Kill(music1Reverse); Kill(music3Reverse); Kill(music4); Kill(music2);
-                break;
-
             case Stage.Rev3PlusRev1_End:
                 Pitch1(music3Reverse); Pitch1(music1Reverse);
                 Full(music3Reverse); Full(music1Reverse);
@@ -381,9 +415,14 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         }
     }
 
-    // ===== TIMING / FADES (DSP-driven) =====
+    // ===== CLOCKED TIMING / FADES =====
 
-    private IEnumerator WaitDSPSeconds(float seconds, System.Action<float> onProgress = null)
+    private double Now()
+    {
+        return useRealtimeClock ? (double)Time.realtimeSinceStartup : AudioSettings.dspTime;
+    }
+
+    private IEnumerator WaitClockSeconds(float seconds, System.Action<float> onProgress = null)
     {
         if (seconds <= 0f)
         {
@@ -392,15 +431,15 @@ public class PitchAwareMusicPlayer : MonoBehaviour
             yield break;
         }
 
-        double t0 = AudioSettings.dspTime;
+        double t0 = Now();
         debugStageTarget = seconds;
 
         while (true)
         {
-            double now = AudioSettings.dspTime;
+            double now = Now();
             float elapsed = (float)(now - t0);
             debugStageTime = Mathf.Min(elapsed, seconds);
-            debugTotalTime = (float)(now - totalStartDSP);
+            debugTotalTime = (float)(now - totalStartClock);
 
             float t = Mathf.Clamp01(seconds > 0f ? elapsed / seconds : 1f);
             onProgress?.Invoke(t);
@@ -420,7 +459,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         if (clip.loadState == AudioDataLoadState.Unloaded && preloadAudio)
             clip.LoadAudioData();
 
-        double t0 = AudioSettings.dspTime;
+        double t0 = Now();
         const double timeout = 10.0;
 
         while (true)
@@ -432,14 +471,14 @@ public class PitchAwareMusicPlayer : MonoBehaviour
                 Debug.LogError($"[{name}] {src.name} failed to load audio data. Will use fallback duration.");
                 break;
             }
-            if (AudioSettings.dspTime - t0 > timeout)
+            if (Now() - t0 > timeout)
             {
                 Debug.LogWarning($"[{name}] Timeout waiting for {src.name} to load. Using fallback.");
                 break;
             }
             // Keep Inspector/HUD updated while waiting
-            debugStageTime = (float)(AudioSettings.dspTime - t0);
-            debugTotalTime = (float)(AudioSettings.dspTime - totalStartDSP);
+            debugStageTime = (float)(Now() - t0);
+            debugTotalTime = (float)(Now() - totalStartClock);
             yield return null;
         }
     }
@@ -463,12 +502,12 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         if (fadeMap.TryGetValue(src, out var running) && running != null)
             StopCoroutine(running);
 
-        fadeMap[src] = StartCoroutine(FadeBaseCoroutineDSP(src, targetBase, duration));
+        fadeMap[src] = StartCoroutine(FadeBaseCoroutineClock(src, targetBase, duration));
     }
 
-    private IEnumerator FadeBaseCoroutineDSP(AudioSource src, float targetBase, float duration)
+    private IEnumerator FadeBaseCoroutineClock(AudioSource src, float targetBase, float duration)
     {
-        double start = AudioSettings.dspTime;
+        double start = Now();
         float startBase = baseVolumeMap.TryGetValue(src, out var b) ? b : src.volume / Mathf.Max(0.0001f, lastAppliedMasterVolume);
         targetBase = Mathf.Clamp01(targetBase);
 
@@ -482,7 +521,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
 
         while (true)
         {
-            double now = AudioSettings.dspTime;
+            double now = Now();
             float t = Mathf.Clamp01((float)((now - start) / duration));
             float curBase = Mathf.Lerp(startBase, targetBase, t);
             baseVolumeMap[src] = curBase;
@@ -514,7 +553,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         debugStageName = s.ToString();
         debugStageTime = elapsed;
         debugStageTarget = target;
-        debugTotalTime = (float)(AudioSettings.dspTime - totalStartDSP);
+        debugTotalTime = (float)(Now() - totalStartClock);
     }
 
     // ===== Debug controls + master volume reapply =====
@@ -532,20 +571,42 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             SetupSources();
-            StartFrom(currentStage);
+            StartCoroutine(BootAndStart());
         }
     }
 
     private Stage NextStage(Stage s)
     {
-        if (s == Stage.Rev3PlusRev1_End) return Stage.M1withM3; // loop to Stage 3
-        return (Stage)Mathf.Clamp(((int)s) + 1, (int)Stage.RampM1, (int)Stage.Rev3PlusRev1_End);
+        // Initial: 2 -> 9 -> 3 -> 4 -> ... -> 10 -> 3...
+        if (!didInitialSegment)
+        {
+            if (s == Stage.M2Only)            return Stage.Fwd3PlusM1;
+            if (s == Stage.Fwd3PlusM1)        return Stage.M1withM3;
+            if (s == Stage.Rev3PlusRev1_End)  return Stage.M1withM3;
+            return (Stage)Mathf.Clamp(((int)s) + 1, (int)Stage.M2Only, (int)Stage.Rev3PlusRev1_End);
+        }
+        else
+        {
+            if (s == Stage.Rev3PlusRev1_End)  return Stage.M1withM3; // loop to Stage 3
+            return (Stage)Mathf.Clamp(((int)s) + 1, (int)Stage.M1withM3, (int)Stage.Rev3PlusRev1_End);
+        }
     }
 
     private Stage PrevStage(Stage s)
     {
-        if (s == Stage.M1withM3) return Stage.Rev3PlusRev1_End; // wrap back
-        return (Stage)Mathf.Clamp(((int)s) - 1, (int)Stage.RampM1, (int)Stage.Rev3PlusRev1_End);
+        if (!didInitialSegment)
+        {
+            // Reverse of the initial ordering
+            if (s == Stage.M2Only)            return Stage.Rev3PlusRev1_End; // wrap
+            if (s == Stage.Fwd3PlusM1)        return Stage.M2Only;
+            if (s == Stage.M1withM3)          return Stage.Fwd3PlusM1;
+            return (Stage)Mathf.Clamp(((int)s) - 1, (int)Stage.M2Only, (int)Stage.Rev3PlusRev1_End);
+        }
+        else
+        {
+            if (s == Stage.M1withM3)          return Stage.Rev3PlusRev1_End; // wrap within loop
+            return (Stage)Mathf.Clamp(((int)s) - 1, (int)Stage.M1withM3, (int)Stage.Rev3PlusRev1_End);
+        }
     }
 
     // ===== HUD =====
@@ -554,10 +615,10 @@ public class PitchAwareMusicPlayer : MonoBehaviour
     {
         if (!showHUD) return;
 
-        float w = 520f;
-        float h = 260f;
+        float w = 560f;
+        float h = 300f;
         Rect r = new Rect(10, 10, w, h);
-        GUI.Box(r, "Pitch Aware Music Player (DSP-driven)");
+        GUI.Box(r, "Pitch Aware Music Player");
 
         float line = 22f;
         float y = r.y + 25f;
@@ -571,7 +632,13 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         y += line;
         GUI.Label(new Rect(x, y, w - 20, 20), $"Stage Time: {debugStageTime:F2}s / {(float.IsInfinity(debugStageTarget) ? "waiting…" : debugStageTarget.ToString("F2")+"s")}  ({progress * 100f:F0}%)");
         y += line;
-        GUI.Label(new Rect(x, y, w - 20, 20), $"Total Time: {debugTotalTime:F2}s   TimeScale: {Time.timeScale:F2}  dspTime: {AudioSettings.dspTime:F2}");
+
+        // Clock info
+        GUI.Label(new Rect(x, y, w - 20, 20), $"Clock: {activeClockLabel}  |  dsp/real ratio: {dspToRealRatio:F3}  |  TimeScale: {Time.timeScale:F2}");
+        y += line;
+
+        // Raw times
+        GUI.Label(new Rect(x, y, w - 20, 20), $"dspTime: {AudioSettings.dspTime:F2}  realtime: {Time.realtimeSinceStartup:F2}");
         y += line;
 
         // Progress bar
@@ -582,8 +649,8 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         y += 26f;
 
         // Master volume slider
-        GUI.Label(new Rect(x, y, 120, 20), $"Master Volume: {masterVolume:F2}");
-        float newMV = GUI.HorizontalSlider(new Rect(x + 120, y + 5, w - 150, 20), masterVolume, 0f, 1f);
+        GUI.Label(new Rect(x, y, 140, 20), $"Master Volume: {masterVolume:F2}");
+        float newMV = GUI.HorizontalSlider(new Rect(x + 140, y + 5, w - 170, 20), masterVolume, 0f, 1f);
         if (!Mathf.Approximately(newMV, masterVolume))
         {
             masterVolume = newMV;
@@ -597,7 +664,7 @@ public class PitchAwareMusicPlayer : MonoBehaviour
         if (GUI.Button(new Rect(x + 140, btnY, 60, 20), "Reset"))
         {
             SetupSources();
-            StartFrom(currentStage);
+            StartCoroutine(BootAndStart());
         }
         GUI.Label(new Rect(x + 210, btnY, w - 230, 20), "[ / ] next/prev, R reset, F1 HUD");
     }
