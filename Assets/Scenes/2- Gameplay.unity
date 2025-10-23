@@ -2274,7 +2274,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Reserve: 90'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a29e589d509c54ab181f8f6855d3fefa, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -2340,7 +2340,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &947228793
@@ -2495,7 +2495,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 981524494}
-  m_Layer: 6
+  m_Layer: 21
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2622,7 +2622,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: RELOADING...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a29e589d509c54ab181f8f6855d3fefa, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -2688,7 +2688,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1021828428
@@ -4500,7 +4500,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Host Time: 30.0s'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a29e589d509c54ab181f8f6855d3fefa, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -4566,7 +4566,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1684890453
@@ -5830,7 +5830,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 30/30
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a29e589d509c54ab181f8f6855d3fefa, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -5896,7 +5896,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &2117546382
@@ -6078,13 +6078,70 @@ GameObject:
   - component: {fileID: 3074205646608133747}
   - component: {fileID: 7774615909368738051}
   - component: {fileID: 5045198081280610569}
-  m_Layer: 6
+  m_Layer: 21
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1001 &2644971168809806437
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3390270316652399, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_Name
+      value: ScoreManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -5382.5107
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 59543.086
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000581249171901717, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2611354ab9e1c455cbf178459a90ab96, type: 3}
 --- !u!23 &2844161752470046266
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6397,7 +6454,7 @@ GameObject:
   - component: {fileID: 487222673177253200}
   - component: {fileID: 541752861679184650}
   - component: {fileID: 5475289690071473843}
-  m_Layer: 6
+  m_Layer: 21
   m_Name: Parasite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6474,3 +6531,4 @@ SceneRoots:
   - {fileID: 1587194351}
   - {fileID: 1622280298}
   - {fileID: 945228157}
+  - {fileID: 2644971168809806437}
