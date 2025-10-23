@@ -254,10 +254,7 @@ public class ShootingFeedbackSystem : MonoBehaviour
         }
 
         if (feedbackProfile.hitstopTime != 0f)
-        {
-            GameStateManager.Instance.Hitstop(feedbackProfile.hitstopSlow, feedbackProfile.hitstopTime);
-        }
-
+            ServiceLocator.Instance.GetService<GameStateManager>().Hitstop(feedbackProfile.hitstopSlow, feedbackProfile.hitstopTime);
     }
 
     /// <summary>

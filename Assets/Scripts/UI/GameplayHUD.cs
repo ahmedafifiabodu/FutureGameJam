@@ -30,11 +30,7 @@ public class GameplayHUD : MonoBehaviour
     [Header("Weapon UI")]
     [SerializeField] private GameObject weaponPanel;
 
-    [SerializeField] private TextMeshProUGUI ammoText;
-    [SerializeField] private TextMeshProUGUI reserveAmmoText;
     [SerializeField] private TextMeshProUGUI aimingText;
-    [SerializeField] private Image reloadProgressBar;
-    [SerializeField] private TextMeshProUGUI reloadingText;
 
     [Header("Crosshair")]
     [SerializeField] private CanvasCrosshair crosshair;
@@ -127,16 +123,16 @@ public class GameplayHUD : MonoBehaviour
         currentHost = host;
         parasitePanel.SetActive(false);
         hostPanel.SetActive(true);
-        
+
         // Don't show weapon panel yet - wait for weapon to be equipped
         // Only hide if no weapon is equipped
         if (currentWeapon == null)
         {
             weaponPanel.SetActive(false);
-            
-    // Don't show crosshair yet - wait for weapon to be equipped
-    if (crosshair)
-         crosshair.Hide();
+
+            // Don't show crosshair yet - wait for weapon to be equipped
+            if (crosshair)
+                crosshair.Hide();
         }
         // If weapon already equipped, keep panel and crosshair visible
     }
@@ -263,7 +259,7 @@ public class GameplayHUD : MonoBehaviour
         {
             // Weapon equipped - show UI
             weaponPanel.SetActive(true);
-            
+
             if (crosshair)
             {
                 Debug.Log($"[GameplayHUD] SetCurrentWeapon - Showing crosshair for weapon: {weapon.gameObject.name}");
@@ -279,7 +275,7 @@ public class GameplayHUD : MonoBehaviour
         {
             // No weapon - hide UI
             weaponPanel.SetActive(false);
-            
+
             if (crosshair)
             {
                 Debug.Log("[GameplayHUD] SetCurrentWeapon - Hiding crosshair (weapon cleared)");
@@ -293,21 +289,6 @@ public class GameplayHUD : MonoBehaviour
     {
         if (!currentWeapon) return;
 
-        // Update ammo display
-        if (ammoText)
-        {
-            int currentAmmo = currentWeapon.GetCurrentAmmo();
-            int magazineSize = currentWeapon.GetMagazineSize();
-            ammoText.text = $"{currentAmmo}/{magazineSize}";
-            ammoText.color = currentAmmo <= magazineSize * 0.2f ? dangerColor : normalColor;
-        }
-
-        if (reserveAmmoText)
-        {
-            reserveAmmoText.text = $"Reserve: {currentWeapon.GetReserveAmmo()}";
-            reserveAmmoText.color = Color.gray;
-        }
-
         // Update aiming indicator
         if (aimingText)
         {
@@ -315,43 +296,7 @@ public class GameplayHUD : MonoBehaviour
             aimingText.text = "AIMING";
             aimingText.color = warningColor;
         }
-
-        // Update reload progress
-        bool isReloading = currentWeapon.IsReloading();
-
-        if (reloadProgressBar)
-            reloadProgressBar.gameObject.SetActive(isReloading);
-
-        if (reloadingText)
-            reloadingText.gameObject.SetActive(isReloading);
-
-        if (isReloading)
-        {
-            float progress = currentWeapon.GetReloadProgress();
-            if (reloadProgressBar)
-                reloadProgressBar.fillAmount = progress;
-
-            if (reloadingText)
-            {
-                reloadingText.text = "RELOADING...";
-                reloadingText.color = warningColor;
-            }
-        }
     }
 
     #endregion Weapon UI Updates
-
-    #region Public Interface
-
-    public void ShowCrosshair() => crosshair?.Show();
-
-    public void HideCrosshair() => crosshair?.Hide();
-
-    public void SetCrosshairColor(Color color) => crosshair?.SetColor(color);
-
-    public DualProgressSlider GetParasiteLifetimeSlider() => parasiteLifetimeSlider;
-
-    public DualProgressSlider GetHostLifetimeSlider() => hostLifetimeSlider;
-
-    #endregion Public Interface
 }
