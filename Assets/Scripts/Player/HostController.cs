@@ -18,6 +18,7 @@ public class HostController : MonoBehaviour, IDamageable
 
     [SerializeField] private FirstPersonZoneController hostMovementController;
     [SerializeField] private WeaponManager weaponManager;
+    [SerializeField] private RangedWeaponProfile weaponProfile;
 
     [Header("Death")]
     [SerializeField] private GameObject deathEffect;
@@ -112,8 +113,10 @@ public class HostController : MonoBehaviour, IDamageable
         remainingLifetime -= Time.deltaTime;
 
         if (remainingLifetime <= 0f)
+        {
+            remainingLifetime = 0f;
             Die();
-
+        }
         // Check for voluntary exit input
         if (allowVoluntaryExit && _inputManager != null && Time.time - lastExitAttemptTime >= exitCooldown)
         {
@@ -181,7 +184,11 @@ public class HostController : MonoBehaviour, IDamageable
 
         // Enable weapon manager
         if (weaponManager)
+        {
             weaponManager.Enable();
+            RangedWeapon weapon = weaponManager.GetPrimaryWeapon() as RangedWeapon;
+            weapon.SwitchWeaponProfile(weaponProfile);
+        }
 
         Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
         if (transferredCamera != null)
@@ -238,11 +245,6 @@ public class HostController : MonoBehaviour, IDamageable
         {
             trajectorySystem.HideTrajectory();
         }
-
-        // Get camera to disable it
-        Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
-        if (transferredCamera != null)
-            transferredCamera.enabled = false;
 
         // Disable movement
         if (hostMovementController)

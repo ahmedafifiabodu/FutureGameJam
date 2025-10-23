@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -55,6 +56,7 @@ public class GameStateManager : MonoBehaviour
     public HostController CurrentHostController => currentHostController;
     public GameObject ParasitePlayer => parasitePlayer;
     public ParasiteController ParasiteController => parasiteController;
+    private Coroutine hitstopCoroutine;
 
     public int GetHostsConsumed() => hostsConsumed;
 
@@ -217,19 +219,19 @@ public class GameStateManager : MonoBehaviour
             parasiteController.ExitLaunch(launchDirection * launchForce);
         }
 
+        parasiteController.SetRotation(currentHostController.transform.rotation);
+        // Trigger a launch with the exit trajectory
+        parasiteController.ExitLaunch(launchDirection * launchForce);
+
         EnableParasiteCamera();
         _inputManager.EnableParasiteActions();
 
         // Update HUD to show parasite UI
         if (_gameplayHUD != null)
-        {
             _gameplayHUD.ShowParasiteUI();
-        }
 
         // Notify state machine if available
         _stateMachine.SwitchToParasiteMode();
-
-        Debug.Log("[GameState] Switched to Parasite Mode with launch exit.");
     }
 
     #endregion Mode Switching
@@ -421,8 +423,16 @@ public class GameStateManager : MonoBehaviour
 
     private void EnableParasiteCamera()
     {
+        volume.profile.TryGet(out LensDistortion fisheye);
+        {
+            fisheye.active = true;
+        }
+
         if (parasiteCameraPivot != null)
         {
+            Transform hostCameraPivot = currentHostController.GetCameraPivot();
+            if (hostCameraPivot != null)
+                parasiteCameraPivot.rotation = hostCameraPivot.rotation;
             Camera camera = parasiteCameraPivot.GetComponentInChildren<Camera>();
             if (camera != null)
             {
@@ -438,7 +448,25 @@ public class GameStateManager : MonoBehaviour
             fisheye.active = active;
     }
 
-    public static void ResetHostCount() => HostController.ResetHostCount();
+    public void Hitstop(float timeScale = 1f, float duration = 1f)
+    {
+        if (hitstopCoroutine != null)
+        {
+            StopCoroutine(hitstopCoroutine);
+        }
+        Time.timeScale = timeScale;
+        hitstopCoroutine = StartCoroutine(SlowTime(duration));
+    }
+
+    private IEnumerator SlowTime(float duration = 1f)
+    {
+        float startTime = Time.unscaledTime;
+        while (Time.unscaledTime <= startTime + duration)
+        {
+            yield return null;
+        }
+        Time.timeScale = 1f;
+    }
 
     #endregion Helper Methods
 }

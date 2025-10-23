@@ -11,8 +11,6 @@ public class RangedWeapon : WeaponBase
     [SerializeField] private RangedWeaponProfile weaponProfile;
 
     [Header("Visual Effects (Instance References)")]
-    [SerializeField] private ParticleSystem muzzleFlash;
-
     [SerializeField] private Transform muzzlePoint; // Where bullets spawn from
 
     [Header("Shooting Feedback")]
@@ -35,11 +33,9 @@ public class RangedWeapon : WeaponBase
 
     [SerializeField] private float aimingMoveSpeedMultiplier = 0.5f; // Slow movement when aiming
 
-    [SerializeField]
-    private int currentAmmo;
-
-    private int reserveAmmo;
+    // Runtime state only (not serialized)
     private float nextFireTime;
+
     private bool isReloading;
     private float reloadTimer;
 
@@ -53,6 +49,8 @@ public class RangedWeapon : WeaponBase
     // Sway tracking
     private Vector3 swayPosition;
 
+    private float bobTimer = Mathf.PI / 2;
+
     // Store base positions (set from prefab)
     private Vector3 weaponHolderBasePosition;
 
@@ -61,15 +59,6 @@ public class RangedWeapon : WeaponBase
 
     // ADS (Aim Down Sights) tracking
     private bool isAiming = false;
-
-    private float defaultFOV;
-    private float currentFOV;
-    private Vector3 defaultWeaponPosition;
-    private Vector3 aimWeaponPosition;
-    private bool hasStoredDefaultFOV = false;
-
-    // Animation parameter hashes (cached for performance)
-    private int reloadingHash;
 
     private int aimingHash;
 
@@ -83,10 +72,6 @@ public class RangedWeapon : WeaponBase
             Debug.LogError("[RangedWeapon] No weapon profile assigned! Weapon will not work properly.");
             return;
         }
-
-        // Initialize ammo from profile
-        currentAmmo = weaponProfile.startingAmmo;
-        reserveAmmo = weaponProfile.reserveAmmo;
 
         if (!audioSource)
             audioSource = GetComponent<AudioSource>();
@@ -118,10 +103,6 @@ public class RangedWeapon : WeaponBase
             weaponHolderBaseRotation = weaponHolder.localRotation;
             hasStoredBaseTransform = true;
 
-            // Calculate aim position
-            defaultWeaponPosition = weaponHolderBasePosition;
-            aimWeaponPosition = weaponHolderBasePosition + weaponProfile.aimPositionOffset;
-
             // Update WeaponRecoilController's base position to match
             if (weaponRecoilController)
             {
@@ -129,16 +110,7 @@ public class RangedWeapon : WeaponBase
             }
         }
 
-        // Store default camera FOV
-        if (playerCamera && !hasStoredDefaultFOV)
-        {
-            defaultFOV = playerCamera.fieldOfView;
-            currentFOV = defaultFOV;
-            hasStoredDefaultFOV = true;
-        }
-
         // Cache animation parameter hashes
-        reloadingHash = Animator.StringToHash(GameConstant.AnimationParameters.Reloading);
         aimingHash = Animator.StringToHash(GameConstant.AnimationParameters.Aiming);
     }
 
@@ -152,41 +124,7 @@ public class RangedWeapon : WeaponBase
         if (!isEquipped || !weaponProfile) return;
 
         HandleShooting();
-        HandleReload();
-        HandleADS(); // Handle zoom before recoil/sway
-
-        // Coordinate with WeaponRecoilController
-        if (weaponRecoilController)
-        {
-            // Toggle bob based on aiming state (disable when aiming for stability)
-            bool shouldEnableBob = !isAiming;
-
-            if (weaponRecoilController.enabled != shouldEnableBob)
-            {
-                weaponRecoilController.enabled = shouldEnableBob;
-            }
-
-            // Choose which recoil handler to use based on whether bob is active
-            if (weaponRecoilController.enabled)
-            {
-                // WeaponRecoilController handles camera recoil and weapon bob
-                // RangedWeapon handles only shooting recoil (rotation)
-                HandleRecoilRotationOnly();
-            }
-            else
-            {
-                // WeaponRecoilController is disabled (aiming)
-                // RangedWeapon handles everything (full control)
-                HandleRecoil();
-                HandleSway();
-            }
-        }
-        else
-        {
-            // No WeaponRecoilController - RangedWeapon handles everything
-            HandleRecoil();
-            HandleSway();
-        }
+        HandleRecoil();
     }
 
     private void HandleShooting()
@@ -196,7 +134,7 @@ public class RangedWeapon : WeaponBase
         // Check for fire input
         bool firePressed = inputManager.PlayerActions.Attack.IsPressed();
         bool aimPressed = inputManager.PlayerActions.Aim.IsPressed();
-        bool sprintPressed = inputManager.PlayerActions.Sprint.IsPressed();
+        bool sprintPressed = false;
 
         // Prevent sprint while aiming (balance)
         if (disableSprintWhileAiming && aimPressed && sprintPressed)
@@ -212,57 +150,80 @@ public class RangedWeapon : WeaponBase
 
         if (firePressed && Time.time >= nextFireTime)
         {
-            if (currentAmmo > 0)
-            {
-                Shoot();
-                nextFireTime = Time.time + weaponProfile.fireRate;
-            }
-            else
-            {
-                // Play empty sound
-                PlaySound(weaponProfile.emptySound);
-                nextFireTime = Time.time + 0.3f; // Prevent spam
-            }
+            Shoot();
+            nextFireTime = Time.time + weaponProfile.fireRate;
         }
-    }
-
-    private void HandleADS()
-    {
-        if (!weaponProfile.enableADS || !playerCamera) return;
-
-        // Smoothly interpolate FOV
-        float targetFOV = isAiming ? weaponProfile.aimFOV : defaultFOV;
-        currentFOV = Mathf.Lerp(currentFOV, targetFOV, Time.deltaTime * weaponProfile.aimSpeed);
-        playerCamera.fieldOfView = currentFOV;
-
-        // Smoothly interpolate weapon position
-        if (weaponHolder)
-        {
-            // Update base position for aim offset
-            Vector3 targetPosition = isAiming ? aimWeaponPosition : defaultWeaponPosition;
-            weaponHolderBasePosition = Vector3.Lerp(weaponHolderBasePosition, targetPosition, Time.deltaTime * weaponProfile.aimSpeed);
-
-            // Sync with WeaponRecoilController if active
-            if (weaponRecoilController && weaponRecoilController.enabled)
-            {
-                weaponRecoilController.SetBasePosition(weaponHolderBasePosition);
-            }
-        }
-
-        // Update animation
-        SetAiming(isAiming);
     }
 
     private void Shoot()
     {
-        currentAmmo--;
+        if (weaponProfile.shootSounds.Length > 0)
+            PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)]);
 
-        // Play shoot sound
-        PlaySound(weaponProfile.shootSound);
+        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        Vector3 targetPoint = ray.GetPoint(weaponProfile.range);
+        for (int i = 0; i < weaponProfile.shots; i++)
+        {
+            Ray offset_ray = ray;
+            if (weaponProfile.shotDistance > 0f)
+            {
+                float angle = Random.Range(0, 360) * Mathf.Deg2Rad;
+                float distance = Random.Range(1, 100) / 100f;
+                Vector3 offsetDir = Quaternion.AngleAxis(weaponProfile.shotDistance * distance * Mathf.Cos(angle), playerCamera.transform.up) *
+                                    Quaternion.AngleAxis(weaponProfile.shotDistance * distance * Mathf.Sin(angle), playerCamera.transform.right) *
+                                    ray.direction;
+
+                offset_ray = new Ray(ray.origin, offsetDir.normalized);
+            }
+
+            RaycastHit[] hits = Physics.RaycastAll(offset_ray, weaponProfile.range, weaponProfile.hitLayers);
+            System.Array.Sort(hits, (x, y) => x.distance.CompareTo(y.distance));
+            if (hits.Length > 0)
+            {
+                int j = weaponProfile.penetration;
+                foreach (RaycastHit hit in hits)
+                {
+                    Debug.DrawLine(ray.origin, hit.point, Color.red, 10f);
+                    if (i == 0)
+                        targetPoint = hit.point;
+
+                    // Apply damage if target has health
+                    if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+                    {
+                        damageable.TakeDamage(weaponProfile.damage);
+
+                        // Trigger hit feedback (hit marker, extra shake)
+                        if (useFeedbackSystem && feedbackSystem)
+                            feedbackSystem.TriggerHitFeedback(hit.point, hit.normal);
+                    }
+
+                    // Spawn impact effect
+                    if (weaponProfile.impactEffectPrefab)
+                    {
+                        GameObject impact = Instantiate(weaponProfile.impactEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                        Destroy(impact, 2f);
+                    }
+                    if (j == 0 || hit.collider.GetComponent<IDamageable>() == null)
+                        break;
+                    j--;
+                }
+            }
+        }
 
         // Play muzzle flash
-        if (muzzleFlash)
-            muzzleFlash.Play();
+        if (weaponProfile.muzzleFlash)
+            Instantiate(weaponProfile.muzzleFlash, muzzlePoint.position, Quaternion.LookRotation(muzzlePoint.transform.position - targetPoint));
+
+        // Spawn bullet trail
+        if (weaponProfile.bulletTrailPrefab && muzzlePoint)
+        {
+            TrailRenderer trail = Instantiate(weaponProfile.bulletTrailPrefab, muzzlePoint.position, Quaternion.identity).GetComponent<TrailRenderer>();
+            StartCoroutine(SpawnTrail(trail, targetPoint, 50f));
+        }
+
+        // Eject shell casing
+        if (shellEjector)
+            shellEjector.EjectShell();
 
         // Add recoil (with ADS modifier if aiming)
         ApplyRecoil();
@@ -277,120 +238,30 @@ public class RangedWeapon : WeaponBase
         // Trigger shooting feedback (camera shake, screen flash, etc.)
         if (useFeedbackSystem && feedbackSystem)
             feedbackSystem.TriggerShootFeedback();
-
-        // Raycast for hit detection
-        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-
-        Vector3 targetPoint;
-        if (Physics.Raycast(ray, out RaycastHit hit, weaponProfile.range, weaponProfile.hitLayers))
-        {
-            targetPoint = hit.point;
-
-            // Apply damage if target has health
-            if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
-            {
-                damageable.TakeDamage(weaponProfile.damage);
-
-                // Trigger hit feedback (hit marker, extra shake)
-                if (useFeedbackSystem && feedbackSystem)
-                    feedbackSystem.TriggerHitFeedback(hit.point, hit.normal);
-            }
-
-            // Spawn impact effect
-            if (weaponProfile.impactEffectPrefab)
-            {
-                GameObject impact = Instantiate(weaponProfile.impactEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
-                Destroy(impact, 2f);
-            }
-        }
-        else
-        {
-            targetPoint = ray.GetPoint(weaponProfile.range);
-        }
-
-        // Spawn bullet trail
-        if (weaponProfile.bulletTrailPrefab && muzzlePoint)
-        {
-            TrailRenderer trail = Instantiate(weaponProfile.bulletTrailPrefab, muzzlePoint.position, Quaternion.identity);
-            StartCoroutine(SpawnTrail(trail, targetPoint));
-        }
-
-        // Eject shell casing
-        if (shellEjector)
-            shellEjector.EjectShell();
     }
 
-    private System.Collections.IEnumerator SpawnTrail(TrailRenderer trail, Vector3 targetPoint)
+    private System.Collections.IEnumerator SpawnTrail(TrailRenderer trail, Vector3 targetPoint, float speed)
     {
-        float time = 0;
         Vector3 startPosition = trail.transform.position;
+        float distance = Vector3.Distance(startPosition, targetPoint);
+        float duration = distance / speed; // time = distance / speed
+        float time = 0f;
 
-        while (time < 1f)
+        while (time < duration)
         {
-            trail.transform.position = Vector3.Lerp(startPosition, targetPoint, time);
-            time += Time.deltaTime / trail.time;
+            float t = time / duration;
+            trail.transform.position = Vector3.Lerp(startPosition, targetPoint, t);
+            time += Time.deltaTime;
             yield return null;
         }
 
         trail.transform.position = targetPoint;
-        Destroy(trail.gameObject, trail.time);
+        Destroy(trail.gameObject, trail.time); // still use trail.time for how long the trail stays
     }
 
-    private void HandleReload()
+    public override void Attack()
     {
-        // Auto reload when empty
-        if (currentAmmo == 0 && reserveAmmo > 0 && !isReloading)
-        {
-            StartReload();
-        }
-
-        // Manual reload
-        if (inputManager.PlayerActions.Interact.triggered && currentAmmo < weaponProfile.magazineSize && reserveAmmo > 0 && !isReloading)
-        {
-            StartReload();
-        }
-
-        // Process reload timer
-        if (isReloading)
-        {
-            reloadTimer -= Time.deltaTime;
-            if (reloadTimer <= 0f)
-            {
-                CompleteReload();
-            }
-        }
-    }
-
-    private void StartReload()
-    {
-        isReloading = true;
-        reloadTimer = weaponProfile.reloadTime;
-
-        // Play reload sound
-        PlaySound(weaponProfile.reloadSound);
-
-        // Set animation parameter using cached hash
-        if (weaponAnimator)
-            weaponAnimator.SetBool(reloadingHash, true);
-
-        Debug.Log($"[Weapon] Reloading... ({reserveAmmo} reserve ammo)");
-    }
-
-    private void CompleteReload()
-    {
-        int ammoNeeded = weaponProfile.magazineSize - currentAmmo;
-        int ammoToReload = Mathf.Min(ammoNeeded, reserveAmmo);
-
-        currentAmmo += ammoToReload;
-        reserveAmmo -= ammoToReload;
-
-        isReloading = false;
-
-        // Reset animation parameter using cached hash
-        if (weaponAnimator)
-            weaponAnimator.SetBool(reloadingHash, false);
-
-        Debug.Log($"[Weapon] Reload complete! {currentAmmo}/{weaponProfile.magazineSize} (Reserve: {reserveAmmo})");
+        return;
     }
 
     private void ApplyRecoil()
@@ -423,9 +294,21 @@ public class RangedWeapon : WeaponBase
         swayPosition = Vector3.Lerp(swayPosition, targetSwayPosition, weaponProfile.swaySpeed * Time.deltaTime);
         swayPosition = Vector3.Lerp(swayPosition, Vector3.zero, weaponProfile.swayResetSpeed * Time.deltaTime);
 
+        Vector2 moveInput = inputManager.PlayerActions.Move.ReadValue<Vector2>();
+        if (moveInput != Vector2.zero)
+        {
+            bobTimer += weaponProfile.bobSpeed * Time.deltaTime;
+        }
+
+        if (bobTimer > Mathf.PI * 2)
+        {
+            bobTimer -= Mathf.PI * 2;
+        }
+
         // Apply rotation and position
         weaponHolder.SetLocalPositionAndRotation(
-            weaponHolderBasePosition + currentRecoilPosition + swayPosition,
+            weaponHolderBasePosition + currentRecoilPosition + swayPosition + new Vector3(Mathf.Sin(bobTimer) * weaponProfile.bobAmount * 0.1f, 0,
+                Mathf.Sin(bobTimer * 2f) * weaponProfile.bobAmount),
             weaponHolderBaseRotation * Quaternion.Euler(currentRecoilRotation)
         );
     }
@@ -447,38 +330,11 @@ public class RangedWeapon : WeaponBase
         weaponHolder.localRotation = weaponHolderBaseRotation * Quaternion.Euler(currentRecoilRotation);
     }
 
-    private void HandleSway()
-    {
-        if (!weaponHolder) return;
-
-        // Get mouse input for sway
-        Vector2 look = inputManager.PlayerActions.Look.ReadValue<Vector2>();
-
-        // Calculate sway with ADS modifier
-        float swayMultiplier = isAiming ? weaponProfile.aimSwayMultiplier : 1f;
-        float swayX = -look.x * weaponProfile.swayAmount * swayMultiplier;
-        float swayY = -look.y * weaponProfile.swayAmount * swayMultiplier;
-
-        Vector3 targetSwayPosition = new(swayX, swayY, 0);
-        swayPosition = Vector3.Lerp(swayPosition, targetSwayPosition, weaponProfile.swaySpeed * Time.deltaTime);
-
-        // Reset sway when not moving mouse
-        swayPosition = Vector3.Lerp(swayPosition, Vector3.zero, weaponProfile.swayResetSpeed * Time.deltaTime);
-    }
-
     private void PlaySound(AudioClip clip)
     {
         if (audioSource && clip)
         {
             audioSource.PlayOneShot(clip);
-        }
-    }
-
-    public override void Attack()
-    {
-        if (!isReloading && currentAmmo > 0)
-        {
-            Shoot();
         }
     }
 
@@ -498,22 +354,9 @@ public class RangedWeapon : WeaponBase
     {
         weaponProfile = newProfile;
 
-        // Reinitialize ammo
-        currentAmmo = weaponProfile.startingAmmo;
-        reserveAmmo = weaponProfile.reserveAmmo;
-
-        // Update aim positions
-        if (weaponHolder)
-        {
-            defaultWeaponPosition = weaponHolderBasePosition;
-            aimWeaponPosition = weaponHolderBasePosition + weaponProfile.aimPositionOffset;
-        }
-
         // Switch feedback profile if specified
         if (weaponProfile.feedbackProfile && feedbackSystem)
-        {
             feedbackSystem.SwitchProfile(weaponProfile.feedbackProfile);
-        }
 
         Debug.Log($"[RangedWeapon] Switched to profile: {weaponProfile?.weaponName ?? "None"}");
     }
@@ -522,13 +365,6 @@ public class RangedWeapon : WeaponBase
     {
         base.Equip();
 
-        // Reset FOV when equipping
-        if (playerCamera && hasStoredDefaultFOV)
-        {
-            currentFOV = defaultFOV;
-            playerCamera.fieldOfView = defaultFOV;
-        }
-
         isAiming = false;
 
         // Notify HUD (find if not cached)
@@ -536,24 +372,12 @@ public class RangedWeapon : WeaponBase
             gameplayHUD = ServiceLocator.Instance.GetService<GameplayHUD>();
 
         if (gameplayHUD)
-        {
             gameplayHUD.SetCurrentWeapon(this);
-        }
-        else
-        {
-            Debug.LogWarning("[RangedWeapon] GameplayHUD not found! Crosshair may not update correctly.");
-        }
     }
 
     public override void Unequip()
     {
         base.Unequip();
-
-        // Reset FOV when unequipping
-        if (playerCamera && hasStoredDefaultFOV)
-        {
-            playerCamera.fieldOfView = defaultFOV;
-        }
 
         // Re-enable WeaponRecoilController if it was disabled
         if (weaponRecoilController)
@@ -569,13 +393,6 @@ public class RangedWeapon : WeaponBase
             gameplayHUD.SetCurrentWeapon(null);
         }
     }
-
-    // Public getters for UI
-    public int GetCurrentAmmo() => currentAmmo;
-
-    public int GetMagazineSize() => weaponProfile ? weaponProfile.magazineSize : 0;
-
-    public int GetReserveAmmo() => reserveAmmo;
 
     public bool IsReloading() => isReloading;
 

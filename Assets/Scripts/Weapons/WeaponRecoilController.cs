@@ -128,7 +128,7 @@ public class WeaponRecoilController : MonoBehaviour
         if (inputManager == null) return;
 
         Vector2 moveInput = inputManager.PlayerActions.Move.ReadValue<Vector2>();
-        bool isSprinting = inputManager.PlayerActions.Sprint.IsPressed();
+        bool isSprinting = false;
         
         if (moveInput.magnitude > 0.1f)
         {

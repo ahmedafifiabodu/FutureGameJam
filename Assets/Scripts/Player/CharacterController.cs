@@ -11,11 +11,15 @@ public class FirstPersonZoneController : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float airSpeedMultiplier = 1.15f;
 
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float gravity = -30f;             // Keep negative
     [SerializeField] private bool sprintAlwaysOn = false;      // No sprint input; set true to always sprint
     [SerializeField] private float sprintMultiplier = 1.6f;
+    [SerializeField] private float cameraTilt = 5f;
+    [SerializeField] private float tiltTimeChange = 50f;
+    [SerializeField] private float airControl = 0.5f;
 
     [Header("Zones")]
     [SerializeField] private BoxCollider[] allowedZones;
@@ -32,6 +36,12 @@ public class FirstPersonZoneController : MonoBehaviour
     [SerializeField] private bool debugOverlaps = true;
     [SerializeField] private int overlapDebugFrames = 90;
 
+    [Header("Bobbing")]
+
+    [SerializeField] private float bobSpeed = 4.8f;
+    [SerializeField] private float bobAmount = 0.05f;
+    [SerializeField] private float bobTimer = Mathf.PI / 2;
+
     [Header("Controller Tuning (optional)")]
     [SerializeField] private bool overrideControllerTuning = false;
 
@@ -45,8 +55,10 @@ public class FirstPersonZoneController : MonoBehaviour
 
     private CharacterController controller;
     private InputManager inputManager;
-    private float yaw, pitch, yVel;
+    private float yaw, pitch, roll, yVel;
     private int overlapFramesLeft;
+    private Vector3 hDelta;
+    private Vector3 restPosition;
 
     // Public properties for sharing with other controllers
     public Transform CameraPivot => cameraPivot;
@@ -62,6 +74,7 @@ public class FirstPersonZoneController : MonoBehaviour
 
         overlapFramesLeft = overlapDebugFrames;
         if (gravity > 0) gravity = -Mathf.Abs(gravity);
+        restPosition = cameraPivot.localPosition;
     }
 
     private void OnValidate()
@@ -114,7 +127,7 @@ public class FirstPersonZoneController : MonoBehaviour
         Vector3 center = GetControllerWorldCenter();
 
         // Hard zone constraints (no slowdown)
-        Vector3 hDelta = ConstrainHorizontal(center, desiredH * Time.deltaTime);
+        hDelta = Vector3.Lerp(hDelta, ConstrainHorizontal(center, desiredH * Time.deltaTime), controller.isGrounded ? 1f : airControl * Time.deltaTime);
         Vector3 afterHCenter = center + hDelta;
 
         float yDelta = restrictVertical
@@ -127,6 +140,18 @@ public class FirstPersonZoneController : MonoBehaviour
         controller.Move(hDelta + new Vector3(0f, yDelta, 0f));
 
         if (debugOverlaps && overlapFramesLeft-- > 0) DebugOverlaps();
+
+        if (!cameraPivot) return;
+        if (desiredH != Vector3.zero && controller.isGrounded)
+        {
+            bobTimer += bobSpeed * Time.deltaTime;
+        }
+
+        if (bobTimer > Mathf.PI * 2)
+        {
+            bobTimer -= Mathf.PI * 2;
+        }
+        cameraPivot.localPosition = new Vector3(restPosition.x, restPosition.y + Mathf.Sin(bobTimer * 2f) * bobAmount, restPosition.z);
     }
 
     private void Look()
@@ -139,7 +164,9 @@ public class FirstPersonZoneController : MonoBehaviour
         pitch = Mathf.Clamp(pitch - my, -85f, 85f);
 
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-        if (cameraPivot) cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        Vector2 moveInput = inputManager.PlayerActions.Move.ReadValue<Vector2>();
+        roll = Mathf.MoveTowards(roll, moveInput.x != 0f ? Mathf.Sign(moveInput.x) * cameraTilt : 0f, tiltTimeChange * Time.deltaTime);
+        if (cameraPivot) cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, roll);
     }
 
     private Vector3 GetHorizontalMove()
@@ -147,9 +174,7 @@ public class FirstPersonZoneController : MonoBehaviour
         Vector2 mv = inputManager.PlayerActions.Move.ReadValue<Vector2>();
         if (mv.sqrMagnitude > 1f) mv.Normalize();
 
-        // Check for sprint input if not always on
-        bool isSprinting = sprintAlwaysOn || inputManager.PlayerActions.Sprint.IsPressed();
-        float speed = moveSpeed * (isSprinting ? sprintMultiplier : 1f);
+        float speed = moveSpeed * (controller.isGrounded ? 1f : airSpeedMultiplier);
 
         Vector3 dir = (transform.right * mv.x + transform.forward * mv.y);
         return new Vector3(dir.x, 0f, dir.z) * speed;
@@ -162,6 +187,9 @@ public class FirstPersonZoneController : MonoBehaviour
 
         if (controller.isGrounded && inputManager.PlayerActions.Jump.triggered)
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+        if (!controller.isGrounded && yVel > 0.1f && inputManager.PlayerActions.Jump.WasReleasedThisFrame())
+            yVel *= 0.5f;
 
         yVel += gravity * Time.deltaTime;
         return new Vector3(0f, yVel, 0f);

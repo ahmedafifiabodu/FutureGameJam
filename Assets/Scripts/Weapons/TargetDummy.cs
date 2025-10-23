@@ -113,7 +113,6 @@ public class TargetDummy : MonoBehaviour, IDamageable
         if (destroyEffectPrefab)
         {
             GameObject effect = Instantiate(destroyEffectPrefab, transform.position, Quaternion.identity);
-            Destroy(effect, 3f);
         }
 
         if (respawnOnDeath)

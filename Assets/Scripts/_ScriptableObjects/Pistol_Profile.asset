@@ -17,6 +17,9 @@ MonoBehaviour:
   fireRate: 0.2
   damage: 15
   range: 50
+  shots: 1
+  shotDistance: 0
+  penetration: 0
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -32,16 +35,18 @@ MonoBehaviour:
   swayAmount: 0.02
   swaySpeed: 2
   swayResetSpeed: 2
+  bobSpeed: 5
+  bobAmount: 0.05
   enableADS: 1
   aimFOV: 50
   aimSpeed: 10
   aimPositionOffset: {x: 0, y: -0.05, z: 0.15}
   aimSwayMultiplier: 0.3
   aimRecoilMultiplier: 0.7
-  muzzleFlashPrefab: {fileID: 0}
+  muzzleFlash: {fileID: 0}
   impactEffectPrefab: {fileID: 0}
   bulletTrailPrefab: {fileID: 0}
-  shootSound: {fileID: 0}
+  shootSounds: []
   reloadSound: {fileID: 0}
   emptySound: {fileID: 0}
   feedbackProfile: {fileID: 11400000, guid: dca45263f2d8c154e861e1b657c21d47, type: 2}

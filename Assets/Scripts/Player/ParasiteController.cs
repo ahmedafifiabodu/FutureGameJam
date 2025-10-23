@@ -6,6 +6,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
     [Header("Crawling Movement")]
     [SerializeField] private float crawlSpeed = 2.5f;
 
+    [SerializeField] private float airSpeed = 4f;
+
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float airControl = 2.5f;
     [SerializeField] private float slideControl = 2f;
@@ -257,17 +259,14 @@ public class ParasiteController : MonoBehaviour, IDamageable
         else if (Time.time < lastLandTime + slideTime)
             moveControl = slideControl * Time.deltaTime;
 
-        move = Vector3.Lerp(move, moveDir * crawlSpeed, moveControl);
+        move = Vector3.Lerp(move, moveDir * (_controller.isGrounded ? crawlSpeed : airSpeed), moveControl);
 
         if (_controller.isGrounded && yVel < 0f)
-        {
             yVel = -2f;
-        }
 
-        if (_controller.isGrounded && _inputManager.ParasiteActions.Jump.IsPressed())
-        {
+        if (_controller.isGrounded && _inputManager.ParasiteActions.Jump.triggered)
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
-        }
+
         yVel += gravity * Time.deltaTime;
         move.y = yVel;
 
@@ -691,7 +690,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
     //    GUI.Label(new Rect(8, 28, 300, 20), $"Crawl input: {mv}");
 
     //    GUI.Label(new Rect(8, 48, 300, 20), $"Grounded: {_controller.isGrounded} | Velocity: {launchVelocity.magnitude:F1} | Gravity: {gravity:F1}");
-    //    GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}° | Pitch: {pitch:F1}°");
+    //    GUI.Label(new Rect(8, 68, 300, 20), $"Yaw: {yaw:F1}Â° | Pitch: {pitch:F1}Â°");
 
     //    // Show parasite lifetime
     //    Color lifetimeColor = currentParasiteLifetime <= lifetimeWarningThreshold ? Color.red : Color.yellow;
@@ -740,6 +739,12 @@ public class ParasiteController : MonoBehaviour, IDamageable
 
         if (showDebug)
             Debug.Log($"[Parasite] Lifetime reset to {maxParasiteLifetime}s");
+    }
+
+    public void SetRotation(Quaternion rotation)
+    {
+        yaw = rotation.eulerAngles.y;
+        transform.rotation = rotation;
     }
 
     /// <summary>

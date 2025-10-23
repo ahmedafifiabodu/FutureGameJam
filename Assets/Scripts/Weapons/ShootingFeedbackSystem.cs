@@ -253,11 +253,11 @@ public class ShootingFeedbackSystem : MonoBehaviour
             feedbackAudioSource.PlayOneShot(clip, feedbackProfile.impactSoundVolume);
         }
 
-        // Extra shake on hit
-        if (feedbackProfile.enableCameraShake && cameraShake)
+        if (feedbackProfile.hitstopTime != 0f)
         {
-            cameraShake.AddTrauma(feedbackProfile.shakeIntensity * 0.5f);
+            GameStateManager.Instance.Hitstop(feedbackProfile.hitstopSlow, feedbackProfile.hitstopTime);
         }
+
     }
 
     /// <summary>

@@ -23,6 +23,12 @@ public class RangedWeaponProfile : ScriptableObject
 
     [Tooltip("Maximum effective range")]
     public float range = 100f;
+    [Tooltip("How many shots it fires")]
+    public int shots = 1;
+    [Tooltip("Distance from center on shots.")]
+    public float shotDistance = 0f;
+    [Tooltip("How many enemies it penetrates with shots")]
+    public int penetration = 0;
 
     [Tooltip("What layers can be hit by bullets")]
     public LayerMask hitLayers = ~0;
@@ -50,6 +56,8 @@ public class RangedWeaponProfile : ScriptableObject
 
     public float swaySpeed = 2f;
     public float swayResetSpeed = 2f;
+    public float bobSpeed = 5f;
+    public float bobAmount = 0.05f;
 
     [Header("Aim Down Sights (ADS)")]
     [Tooltip("Enable ADS zoom feature")]
@@ -74,13 +82,13 @@ public class RangedWeaponProfile : ScriptableObject
     public float aimRecoilMultiplier = 0.7f;
 
     [Header("Visual Effects")]
-    public ParticleSystem muzzleFlashPrefab;
+    public GameObject muzzleFlash;
 
     public GameObject impactEffectPrefab;
-    public TrailRenderer bulletTrailPrefab;
+    public GameObject bulletTrailPrefab;
 
     [Header("Audio")]
-    public AudioClip shootSound;
+    public AudioClip[] shootSounds;
 
     public AudioClip reloadSound;
     public AudioClip emptySound;
