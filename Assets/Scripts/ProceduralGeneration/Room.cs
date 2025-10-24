@@ -344,6 +344,38 @@ namespace ProceduralGeneration
             OpenExitDoor();
         }
 
+        /// <summary>
+        /// Called when an enemy in this room is destroyed (either by death or possession)
+        /// Forces an immediate check of enemy status instead of waiting for periodic check
+        /// </summary>
+        public void OnEnemyDestroyed()
+        {
+            if (!enemiesSpawned)
+            {
+                if (showDebugLogs)
+                    Debug.Log($"[Room] {roomName} - OnEnemyDestroyed called but enemies not yet spawned, ignoring");
+                return;
+            }
+
+            // The base class OnEnemyPossessed already handles this properly
+            // No need for additional logic here
+            if (showDebugLogs)
+                Debug.Log($"[Room] {roomName} - Enemy destroyed, room status will be checked by base class");
+        }
+
+        /// <summary>
+        /// Override to handle enemy possession - base class handles the door opening logic
+        /// </summary>
+        public override void OnEnemyPossessed(AI.Enemy.EnemyController enemy)
+        {
+            if (showDebugLogs)
+                Debug.Log($"[Room] {roomName} - Enemy {enemy.name} was possessed by parasite");
+
+            // Call base implementation which handles removal from activeEnemies list
+            // and opens the door if this was the last enemy
+            base.OnEnemyPossessed(enemy);
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = startingRoom ? Color.yellow : Color.blue;

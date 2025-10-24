@@ -14,19 +14,9 @@ public class WeaponManager : MonoBehaviour
     [Header("Weapon Holder")]
     [SerializeField] private Transform weaponHolder; // Where weapons are parented
 
-    [Header("Animation")]
-    [SerializeField] private Animator weaponAnimator; // Character animator for weapon switching
-
     private WeaponBase currentWeapon;
     private InputManager inputManager;
     private bool isEnabled = false;
-    private int changingWeaponHash;
-
-    private void Awake()
-    {
-        // Cache animation parameter hash
-        changingWeaponHash = Animator.StringToHash(GameConstant.AnimationParameters.ChangingWeapon);
-    }
 
     public void Initialize(InputManager input)
     {
@@ -112,12 +102,6 @@ public class WeaponManager : MonoBehaviour
     private void SwitchToWeapon(WeaponBase weapon)
     {
         if (weapon == null || weapon == currentWeapon) return;
-
-        // Trigger weapon change animation if character animator exists
-        if (weaponAnimator)
-        {
-            weaponAnimator.SetTrigger(changingWeaponHash);
-        }
 
         EquipWeapon(weapon);
     }

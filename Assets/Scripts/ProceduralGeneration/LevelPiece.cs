@@ -54,7 +54,7 @@ namespace ProceduralGeneration
         [SerializeField] protected bool showEnemyDebug = false;
 
         // Enemy tracking
-        private List<AI.Enemy.EnemyController> activeEnemies = new List<AI.Enemy.EnemyController>();
+        protected List<AI.Enemy.EnemyController> activeEnemies = new List<AI.Enemy.EnemyController>();
 
         protected bool enemiesSpawned = false;
         private bool exitDoorOpened = false;
@@ -67,6 +67,7 @@ namespace ProceduralGeneration
 
         // Public properties for spawn settings
         public int BaseEnemiesPerPiece => baseEnemiesPerPiece;
+
         public float EnemiesPerIteration => enemiesPerIteration;
         public int MaxEnemiesPerPiece => maxEnemiesPerPiece;
         public float SpawnChance => spawnChance;
@@ -289,6 +290,83 @@ namespace ProceduralGeneration
         public bool HasEnemies()
         {
             return GetActiveEnemyCount() > 0;
+        }
+
+        /// <summary>
+        /// Called when an enemy in this level piece is possessed by the parasite
+        /// Treats possession as equivalent to enemy defeat for door logic
+        /// </summary>
+        public virtual void OnEnemyPossessed(AI.Enemy.EnemyController enemy)
+        {
+            if (!enemiesSpawned)
+            {
+                if (showEnemyDebug)
+                    Debug.Log($"[LevelPiece] {gameObject.name} - OnEnemyPossessed called but enemies not yet spawned, ignoring");
+                return;
+            }
+
+            if (showEnemyDebug)
+                Debug.Log($"[LevelPiece] {gameObject.name} - Enemy {enemy.name} was possessed by parasite");
+
+            // Remove the possessed enemy from active tracking
+            if (activeEnemies.Contains(enemy))
+            {
+                activeEnemies.Remove(enemy);
+
+                if (showEnemyDebug)
+                    Debug.Log($"[LevelPiece] {gameObject.name} - Removed possessed enemy from tracking. Remaining: {activeEnemies.Count}");
+
+                // Check if this was the last enemy
+                if (activeEnemies.Count == 0 && !exitDoorOpened)
+                {
+                    if (showEnemyDebug)
+                        Debug.Log($"[LevelPiece] {gameObject.name} - Last enemy possessed! Opening exit door");
+
+                    OpenExitDoor();
+                    CancelInvoke(nameof(CheckEnemyStatus));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when an enemy leaves this level piece (moves to another room/corridor)
+        /// Treats the enemy leaving as if it was defeated for door logic purposes
+        /// </summary>
+        public virtual void OnEnemyLeftPiece(AI.Enemy.EnemyController enemy)
+        {
+            if (!enemiesSpawned)
+            {
+                if (showEnemyDebug)
+                    Debug.Log($"[LevelPiece] {gameObject.name} - OnEnemyLeftPiece called but enemies not yet spawned, ignoring");
+                return;
+            }
+
+            if (showEnemyDebug)
+                Debug.Log($"[LevelPiece] {gameObject.name} - Enemy {enemy.name} left this piece");
+
+            // Remove the enemy from active tracking since it's no longer in this piece
+            if (activeEnemies.Contains(enemy))
+            {
+                activeEnemies.Remove(enemy);
+
+                if (showEnemyDebug)
+                    Debug.Log($"[LevelPiece] {gameObject.name} - Removed enemy that left from tracking. Remaining: {activeEnemies.Count}");
+
+                // Check if this was the last enemy in this piece
+                if (activeEnemies.Count == 0 && !exitDoorOpened)
+                {
+                    if (showEnemyDebug)
+                        Debug.Log($"[LevelPiece] {gameObject.name} - Last enemy left piece! Opening exit door");
+
+                    OpenExitDoor();
+                    CancelInvoke(nameof(CheckEnemyStatus));
+                }
+            }
+            else
+            {
+                if (showEnemyDebug)
+                    Debug.Log($"[LevelPiece] {gameObject.name} - Enemy {enemy.name} was not in tracking list (may have been spawned elsewhere)");
+            }
         }
     }
 }

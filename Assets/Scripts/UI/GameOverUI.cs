@@ -138,6 +138,13 @@ public class GameOverUI : MonoBehaviour
             return;
         }
 
+        // Prevent multiple calls from overwriting stats
+        if (gameOverPanel.activeSelf)
+        {
+            Debug.LogWarning($"[GameOverUI] Game Over screen already showing. Ignoring duplicate call.");
+            return;
+        }
+
         // Calculate final score (simple formula - can be adjusted)
         int finalScore = CalculateScore(hostsConsumed, survivalTime);
 

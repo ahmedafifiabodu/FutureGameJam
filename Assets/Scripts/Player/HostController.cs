@@ -20,6 +20,7 @@ public class HostController : MonoBehaviour, IDamageable
     [SerializeField] private FirstPersonZoneController hostMovementController;
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private RangedWeaponProfile weaponProfile;
+    [SerializeField] private ShootingFeedbackProfile weaponFeedbackProfile;
 
     [Header("Death")]
     [SerializeField] private GameObject deathEffect;
@@ -61,14 +62,17 @@ public class HostController : MonoBehaviour, IDamageable
     private float lastExitAttemptTime = -10f;
     private bool isShowingExitTrajectory = false;
     private float timeSinceAttached;
-    private float gravity;
     private bool dead = false;
     private bool exitingHost = false;
+
+    // Public property to check if host is controlled by parasite
+    public bool IsControlled => isControlled;
 
     private ParasiteController attachedParasite;
     private InputManager _inputManager;
     private FirstPersonZoneController zoneController;
     private GameStateManager _gameStateManager;
+    private ShootingFeedbackSystem feedbackSystem;
 
     // Enemy component references
     private EnemyController enemyController;
@@ -91,15 +95,12 @@ public class HostController : MonoBehaviour, IDamageable
             hostMovementController = GetComponent<FirstPersonZoneController>();
 
         if (!weaponManager)
-            weaponManager = GetComponent<WeaponManager>();
+            weaponManager = FindFirstObjectByType<WeaponManager>();
 
-        if (!cameraPivot)
-            Debug.LogWarning($"[Host] CameraPivot not assigned on {gameObject.name}");
+        feedbackSystem = GetComponentInChildren<ShootingFeedbackSystem>();
 
-        // Get zone _controller for gravity settings
+        // Get zone controller reference
         zoneController = GetComponent<FirstPersonZoneController>();
-        if (zoneController != null)
-            gravity = zoneController.Gravity;
 
         // Get or add AudioSource component
         if (audioSource == null)
@@ -115,9 +116,7 @@ public class HostController : MonoBehaviour, IDamageable
 
         // Setup visual feedback renderer
         if (hostRenderer == null)
-        {
             hostRenderer = GetComponentInChildren<Renderer>();
-        }
 
         if (hostRenderer != null && hostRenderer.material != null)
         {
@@ -141,10 +140,6 @@ public class HostController : MonoBehaviour, IDamageable
         _inputManager = ServiceLocator.Instance.GetService<InputManager>();
         _gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
 
-        // Initially disable host movement - disable CharacterController first, then FirstPersonZoneController, then re-enable CharacterController after delay
-        if (hostMovementController)
-            StartCoroutine(InitializeHostMovementController());
-
         // Initialize weapon manager
         if (weaponManager && _inputManager)
         {
@@ -156,20 +151,6 @@ public class HostController : MonoBehaviour, IDamageable
         remainingLifetime = hostLifetime;
         if (decreaseLifetimeEachHost && hostCount > 0)
             remainingLifetime = Mathf.Max(minLifetime, hostLifetime - (hostCount * lifetimeDecreasePerHost));
-    }
-
-    private System.Collections.IEnumerator InitializeHostMovementController()
-    {
-        var characterController = GetComponent<CharacterController>();
-        if (characterController)
-            characterController.enabled = false;
-
-        hostMovementController.enabled = false;
-
-        yield return new WaitForSeconds(2f);
-
-        if (characterController)
-            characterController.enabled = true;
     }
 
     private void Update()
@@ -276,6 +257,23 @@ public class HostController : MonoBehaviour, IDamageable
             }
         }
 
+        // Enable weapon GameObject when possessing host
+        if (parasite != null)
+        {
+            parasite.EnableWeaponGameObject();
+        }
+
+        // This allows the room to update its enemy tracking and potentially open the exit door
+        if (isEnemyHost)
+        {
+            if (TryGetComponent<AI.Enemy.EnemyController>(out var enemyController))
+            {
+                // Find the room this enemy belongs to
+                if (enemyController.CurrentRoom.TryGetComponent<ProceduralGeneration.Room>(out var room))
+                    room.OnEnemyPossessed(enemyController);
+            }
+        }
+
         // Disable enemy AI components if this is an enemy host
         if (isEnemyHost)
         {
@@ -286,12 +284,28 @@ public class HostController : MonoBehaviour, IDamageable
         if (hostMovementController)
             hostMovementController.enabled = true;
 
-        // Enable weapon manager
+        // Enable weapon manager and apply weapon profiles
         if (weaponManager)
         {
             weaponManager.Enable();
             RangedWeapon weapon = weaponManager.GetPrimaryWeapon() as RangedWeapon;
-            weapon.SwitchWeaponProfile(weaponProfile);
+
+            if (weapon != null)
+            {
+                // Apply weapon profile
+                if (weaponProfile != null)
+                {
+                    weapon.SwitchWeaponProfile(weaponProfile);
+                    Debug.Log($"[Host] Applied weapon profile: {weaponProfile.weaponName}");
+                }
+
+                // Apply weapon feedback profile to shooting feedback system
+                if (weaponFeedbackProfile != null)
+                {
+                    if (feedbackSystem != null)
+                        feedbackSystem.SwitchProfile(weaponFeedbackProfile);
+                }
+            }
         }
 
         Camera transferredCamera = cameraPivot.GetComponentInChildren<Camera>();
@@ -314,6 +328,12 @@ public class HostController : MonoBehaviour, IDamageable
         // Hide trajectory
         if (trajectorySystem != null)
             trajectorySystem.HideTrajectory();
+
+        // Disable weapon GameObject when exiting host
+        if (attachedParasite != null)
+        {
+            attachedParasite.DisableWeaponGameObject();
+        }
 
         // Re-enable enemy AI components if this is an enemy host
         if (isEnemyHost)
@@ -440,22 +460,21 @@ public class HostController : MonoBehaviour, IDamageable
         if (!isEnemyHost) return;
 
         if (enemyController != null)
-        {
             enemyController.enabled = false;
-            Debug.Log($"[Host] Disabled EnemyController on {gameObject.name}");
-        }
 
         if (navMeshAgent != null)
-        {
             navMeshAgent.enabled = false;
-            Debug.Log($"[Host] Disabled NavMeshAgent on {gameObject.name}");
-        }
 
         // Disable Animator to stop root motion and animations
         if (animator != null)
-        {
             animator.enabled = false;
-            Debug.Log($"[Host] Disabled Animator on {gameObject.name}");
+
+        // Enable CharacterController when possessed (it's disabled during AI movement)
+        var characterController = GetComponent<CharacterController>();
+        if (characterController != null)
+        {
+            characterController.enabled = true;
+            Debug.Log("[Host] CharacterController enabled for player control");
         }
 
         // Disable SkinnedMeshRenderers to hide enemy mesh
@@ -464,11 +483,8 @@ public class HostController : MonoBehaviour, IDamageable
             foreach (var smr in skinnedMeshRenderers)
             {
                 if (smr != null)
-                {
                     smr.enabled = false;
-                }
             }
-            Debug.Log($"[Host] Disabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
         }
     }
 
@@ -480,22 +496,21 @@ public class HostController : MonoBehaviour, IDamageable
         if (!isEnemyHost) return;
 
         if (enemyController != null)
-        {
             enemyController.enabled = true;
-            Debug.Log($"[Host] Re-enabled EnemyController on {gameObject.name}");
-        }
 
         if (navMeshAgent != null)
-        {
             navMeshAgent.enabled = true;
-            Debug.Log($"[Host] Re-enabled NavMeshAgent on {gameObject.name}");
-        }
 
         // Re-enable Animator to resume root motion and animations
         if (animator != null)
-        {
             animator.enabled = true;
-            Debug.Log($"[Host] Re-enabled Animator on {gameObject.name}");
+
+        // Disable CharacterController when returning to AI control
+        var characterController = GetComponent<CharacterController>();
+        if (characterController != null)
+        {
+            characterController.enabled = false;
+            Debug.Log("[Host] CharacterController disabled for AI control");
         }
 
         // Re-enable SkinnedMeshRenderers to show enemy mesh
@@ -504,45 +519,12 @@ public class HostController : MonoBehaviour, IDamageable
             foreach (var smr in skinnedMeshRenderers)
             {
                 if (smr != null)
-                {
                     smr.enabled = true;
-                }
             }
-            Debug.Log($"[Host] Re-enabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
         }
     }
 
     #endregion Enemy Host Management
-
-    //private void OnGUI()
-    //{
-    //    if (!isControlled) return;
-
-    //    // Display lifetime warning
-    //    float screenWidth = Screen.width;
-
-    //    GUI.Label(new Rect(screenWidth - 220, 8, 200, 30), $"Host Time: {remainingLifetime:F1}s", new GUIStyle(GUI.skin.label) { fontSize = 18, normal = { textColor = remainingLifetime < 10f ? Color.red : Color.white } });
-
-    //    // Lifetime bar
-    //    float barWidth = 200f;
-    //    float barHeight = 20f;
-    //    float barX = screenWidth - barWidth - 10f;
-    //    float barY = 40f;
-
-    //    GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
-    //    GUI.Box(new Rect(barX, barY, barWidth * GetLifetimePercentage(), barHeight), "", new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
-
-    //    // Exit hint
-    //    if (allowVoluntaryExit)
-    //    {
-    //        string exitHint = isShowingExitTrajectory ?
-    //        "Release J to Exit" : "Hold J to Show Exit Trajectory";
-
-    //        Color hintColor = isShowingExitTrajectory ? Color.green : Color.yellow;
-
-    //        GUI.Label(new Rect(screenWidth - 220, 70, 200, 20), exitHint, new GUIStyle(GUI.skin.label) { fontSize = 12, normal = { textColor = hintColor } });
-    //    }
-    //}
 
     public static void ResetHostCount() => hostCount = 0;
 
@@ -554,24 +536,17 @@ public class HostController : MonoBehaviour, IDamageable
     public void TakeDamage(float damage)
     {
         if (!isControlled)
-        {
-            Debug.LogWarning("[Host] Cannot take damage - not currently controlled by parasite!");
             return;
-        }
 
         // Reduce lifetime by damage amount
         remainingLifetime -= damage;
-
-        Debug.Log($"[Host] Took {damage} damage! Remaining lifetime: {remainingLifetime:F1}s");
 
         // Visual feedback - damage flash
         StartDamageFlash();
 
         // Audio feedback - hit sound
         if (audioSource && hitSound)
-        {
             audioSource.PlayOneShot(hitSound);
-        }
 
         // Check if host should die
         if (remainingLifetime <= 0f)
@@ -590,9 +565,7 @@ public class HostController : MonoBehaviour, IDamageable
         flashTimer = damageFlashDuration;
 
         if (materialInstance != null)
-        {
             materialInstance.color = damageColor;
-        }
     }
 
     #endregion IDamageable Implementation

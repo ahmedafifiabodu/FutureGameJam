@@ -88,6 +88,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
     [SerializeField] private bool enableLifetimeDecay = true;
     [SerializeField] private bool showLifetimeWarning = true;
     [SerializeField] private float lifetimeWarningThreshold = 15f;
+    [SerializeField] private GameObject _weaponGameobject;
 
     private CharacterController _controller;
     private InputManager _inputManager;
@@ -178,6 +179,14 @@ public class ParasiteController : MonoBehaviour, IDamageable
                 Debug.Log("[Parasite] Disabled FirstPersonZoneController to avoid camera conflict");
         }
 
+        // Disable weapon GameObject when in parasite mode
+        if (_weaponGameobject != null)
+        {
+            _weaponGameobject.SetActive(false);
+            if (showDebug)
+                Debug.Log("[Parasite] Weapon GameObject disabled - parasite mode active");
+        }
+
         // Reset attachment flag when enabled
         isAttachingToHost = false;
     }
@@ -190,6 +199,14 @@ public class ParasiteController : MonoBehaviour, IDamageable
             zoneController.enabled = true;
             if (showDebug)
                 Debug.Log("[Parasite] Re-enabled FirstPersonZoneController");
+        }
+
+        // Show weapon GameObject when exiting parasite mode
+        if (_weaponGameobject != null)
+        {
+            _weaponGameobject.SetActive(true);
+            if (showDebug)
+                Debug.Log("[Parasite] Weapon GameObject enabled - exited parasite mode");
         }
 
         // Hide trajectory when disabled
@@ -979,5 +996,31 @@ public class ParasiteController : MonoBehaviour, IDamageable
 
         if (showDebug)
             Debug.Log($"[Parasite] Exit launched from host! Velocity: {velocity}");
+    }
+
+    /// <summary>
+    /// Enable weapon GameObject (called by HostController when parasite attaches to host)
+    /// </summary>
+    public void EnableWeaponGameObject()
+    {
+        if (_weaponGameobject != null)
+        {
+            _weaponGameobject.SetActive(true);
+            if (showDebug)
+                Debug.Log("[Parasite] Weapon GameObject enabled - host possessed");
+        }
+    }
+
+    /// <summary>
+    /// Disable weapon GameObject (called when returning to parasite mode)
+    /// </summary>
+    public void DisableWeaponGameObject()
+    {
+        if (_weaponGameobject != null)
+        {
+            _weaponGameobject.SetActive(false);
+            if (showDebug)
+                Debug.Log("[Parasite] Weapon GameObject disabled - returning to parasite mode");
+        }
     }
 }

@@ -26,7 +26,7 @@ MonoBehaviour:
   visionCheckInterval: 0.5
   visionObstacleMask:
     serializedVersion: 2
-    m_Bits: 2097216
+    m_Bits: 55
   attackRange: 8
   attackCooldown: 3
   chaseSpeed: 5

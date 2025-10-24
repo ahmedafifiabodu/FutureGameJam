@@ -7,11 +7,9 @@ public abstract class WeaponBase : MonoBehaviour
 {
     [Header("Weapon Info")]
     [SerializeField] protected string weaponName = "Weapon";
+
     [SerializeField] protected float damage = 10f;
-    
-    [Header("Animation")]
-    [SerializeField] protected Animator weaponAnimator;
-    
+
     protected bool isEquipped = false;
     protected InputManager inputManager;
 
@@ -33,8 +31,10 @@ public abstract class WeaponBase : MonoBehaviour
     }
 
     public abstract void Attack();
+
     public abstract void Update();
-    
+
     public string GetWeaponName() => weaponName;
+
     public float GetDamage() => damage;
 }

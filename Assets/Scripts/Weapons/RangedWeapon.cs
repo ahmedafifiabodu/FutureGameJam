@@ -36,9 +36,6 @@ public class RangedWeapon : WeaponBase
     // Runtime state only (not serialized)
     private float nextFireTime;
 
-    private bool isReloading;
-    private float reloadTimer;
-
     // Recoil tracking
     private Vector3 currentRecoilRotation;
 
@@ -129,8 +126,6 @@ public class RangedWeapon : WeaponBase
 
     private void HandleShooting()
     {
-        if (isReloading) return;
-
         // Check for fire input
         bool firePressed = inputManager.PlayerActions.Attack.IsPressed();
         bool aimPressed = inputManager.PlayerActions.Aim.IsPressed();
@@ -185,14 +180,15 @@ public class RangedWeapon : WeaponBase
                 foreach (RaycastHit hit in hits)
                 {
                     if (hit.collider.transform.root.gameObject == gameStateManager.CurrentHost)
-                    Debug.DrawLine(ray.origin, hit.point, Color.red, 10f);
+                        Debug.DrawLine(ray.origin, hit.point, Color.red, 10f);
                     if (i == 0)
                         targetPoint = hit.point;
 
                     // Apply damage if target has health
                     if (hit.collider.GetComponent<IDamageable>() != null)
                     {
-                        foreach (var damageable in hit.collider.GetComponents<IDamageable>()) {
+                        foreach (var damageable in hit.collider.GetComponents<IDamageable>())
+                        {
                             if (damageable is HostController) continue;
                             damageable.TakeDamage(weaponProfile.damage);
                         }
@@ -317,23 +313,6 @@ public class RangedWeapon : WeaponBase
         );
     }
 
-    /// <summary>
-    /// Handle only rotation recoil when WeaponRecoilController handles position (bob)
-    /// </summary>
-    private void HandleRecoilRotationOnly()
-    {
-        if (!weaponHolder) return;
-
-        // Interpolate to target recoil
-        currentRecoilRotation = Vector3.Slerp(currentRecoilRotation, targetRecoilRotation, weaponProfile.recoilSpeed * Time.deltaTime);
-
-        // Return to zero
-        targetRecoilRotation = Vector3.Lerp(targetRecoilRotation, Vector3.zero, weaponProfile.recoilReturnSpeed * Time.deltaTime);
-
-        // Apply only rotation, let WeaponRecoilController handle position
-        weaponHolder.localRotation = weaponHolderBaseRotation * Quaternion.Euler(currentRecoilRotation);
-    }
-
     private void PlaySound(AudioClip clip, float volume)
     {
         if (audioSource && clip)
@@ -341,15 +320,6 @@ public class RangedWeapon : WeaponBase
             audioSource.pitch = Random.Range(0.9f, 1.1f);
             audioSource.PlayOneShot(clip, volume);
         }
-    }
-
-    /// <summary>
-    /// Set aiming state (for animation)
-    /// </summary>
-    public void SetAiming(bool aiming)
-    {
-        if (weaponAnimator)
-            weaponAnimator.SetBool(aimingHash, aiming);
     }
 
     /// <summary>
@@ -361,11 +331,9 @@ public class RangedWeapon : WeaponBase
 
         // Switch feedback profile if specified (with null check)
         if (weaponProfile != null && weaponProfile.feedbackProfile != null && feedbackSystem != null)
-        {
-          feedbackSystem.SwitchProfile(weaponProfile.feedbackProfile);
-      }
+            feedbackSystem.SwitchProfile(weaponProfile.feedbackProfile);
 
-   Debug.Log($"[RangedWeapon] Switched to profile: {weaponProfile?.weaponName ?? "None"}");
+        Debug.Log($"[RangedWeapon] Switched to profile: {weaponProfile.weaponName ?? "None"}");
     }
 
     public override void Equip()
@@ -388,9 +356,7 @@ public class RangedWeapon : WeaponBase
 
         // Re-enable WeaponRecoilController if it was disabled
         if (weaponRecoilController)
-        {
             weaponRecoilController.enabled = true;
-        }
 
         isAiming = false;
 
@@ -400,54 +366,4 @@ public class RangedWeapon : WeaponBase
             gameplayHUD.SetCurrentWeapon(null);
         }
     }
-
-    public bool IsReloading() => isReloading;
-
-    public bool IsAiming() => isAiming;
-
-    public float GetAimingMoveSpeedMultiplier() => isAiming ? aimingMoveSpeedMultiplier : 1f;
-
-    public float GetReloadProgress() => isReloading && weaponProfile ? 1f - (reloadTimer / weaponProfile.reloadTime) : 1f;
-
-    public RangedWeaponProfile GetCurrentProfile() => weaponProfile;
-
-    //   private void OnGUI()
-    //   {
-    //       // Skip if using Canvas UI
-    //       if (useCanvasUI || !isEquipped || !weaponProfile) return;
-
-    //       // Legacy OnGUI display (for backward compatibility)
-    //       // Ammo display
-    //       GUI.Label(new Rect(Screen.width - 220, Screen.height - 80, 200, 30),
-    //     $"Ammo: {currentAmmo}/{weaponProfile.magazineSize}",
-    //new GUIStyle(GUI.skin.label) { fontSize = 20, normal = { textColor = Color.white } });
-
-    //       GUI.Label(new Rect(Screen.width - 220, Screen.height - 50, 200, 30),
-    //        $"Reserve: {reserveAmmo}",
-    //new GUIStyle(GUI.skin.label) { fontSize = 16, normal = { textColor = Color.gray } });
-
-    //       // Aiming indicator
-    //       if (isAiming)
-    //       {
-    //           GUI.Label(new Rect(Screen.width - 220, Screen.height - 110, 200, 20),
-    //          "AIMING",
-    //         new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
-    //       }
-
-    //       // Reload progress bar
-    //       if (isReloading)
-    //       {
-    //           float barWidth = 200f;
-    //           float barHeight = 20f;
-    //           float barX = Screen.width - barWidth - 10f;
-    //           float barY = Screen.height - 140f;
-
-    //           GUI.Box(new Rect(barX, barY, barWidth, barHeight), "");
-    //           GUI.Box(new Rect(barX, barY, barWidth * GetReloadProgress(), barHeight), "",
-    //          new GUIStyle(GUI.skin.box) { normal = { background = Texture2D.whiteTexture } });
-
-    //           GUI.Label(new Rect(barX, barY - 20, barWidth, 20), "RELOADING...",
-    //     new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.yellow } });
-    //       }
-    //   }
 }

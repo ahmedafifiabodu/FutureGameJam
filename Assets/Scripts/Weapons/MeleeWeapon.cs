@@ -8,6 +8,7 @@ public class MeleeWeapon : WeaponBase
 {
     [Header("Melee Settings")]
     [SerializeField] private float attackRange = 2f;
+
     [SerializeField] private float attackSpeed = 0.5f;
     [SerializeField] private LayerMask hitLayers = ~0;
 
@@ -42,29 +43,19 @@ public class MeleeWeapon : WeaponBase
     {
         Debug.Log("[MeleeWeapon] Melee attack - TO BE IMPLEMENTED");
 
-        // TODO: Implement swing animation
-        // TODO: Implement hitbox detection
-        // TODO: Implement damage application
-        // TODO: Add impact effects
-
         // Placeholder: Simple sphere cast for hit detection
         Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward * attackRange, 1f, hitLayers);
         foreach (var hit in hits)
         {
             if (hit.transform != transform.root) // Don't hit ourselves
             {
-                var damageable = hit.GetComponent<IDamageable>();
-                if (damageable != null)
+                if (hit.TryGetComponent<IDamageable>(out var damageable))
                 {
                     damageable.TakeDamage(damage);
                     Debug.Log($"[MeleeWeapon] Hit {hit.name} for {damage} damage");
                 }
             }
         }
-
-        // Trigger melee attack animation using cached hash
-        if (weaponAnimator)
-            weaponAnimator.SetTrigger(meleeAttackHash);
     }
 
     private void OnDrawGizmosSelected()

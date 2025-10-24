@@ -18,6 +18,10 @@ namespace AI.Enemy.States
 
         public void EnterState(EnemyController enemy)
         {
+            // Safety check: Ensure agent is valid and on NavMesh before proceeding
+            if (enemy.Agent == null || !enemy.Agent.isOnNavMesh || !enemy.Agent.enabled)
+                return;
+
             // Store original stopping distance and set patrol-specific stopping distance
             originalStoppingDistance = enemy.Agent.stoppingDistance;
             enemy.Agent.stoppingDistance = PATROL_STOPPING_DISTANCE;
@@ -41,6 +45,10 @@ namespace AI.Enemy.States
 
         public void UpdateState(EnemyController enemy)
         {
+            // Safety check: Ensure agent is still valid
+            if (enemy.Agent == null || !enemy.Agent.isOnNavMesh || !enemy.Agent.enabled)
+                return;
+
             // CRITICAL: Check if player has been spotted and transition to chase
             if (enemy.HasSeenPlayer && enemy.Player != null)
             {
@@ -102,7 +110,10 @@ namespace AI.Enemy.States
                         isWaiting = true;
                         hasStartedMoving = false;
                         waitTimer = enemy.Config.patrolWaitTime;
-                        enemy.Agent.isStopped = true;
+
+                        // Safety check before stopping
+                        if (enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+                            enemy.Agent.isStopped = true;
 
                         if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
                         {
@@ -116,8 +127,12 @@ namespace AI.Enemy.States
 
         public void ExitState(EnemyController enemy)
         {
-            // Restore original stopping distance when exiting patrol
-            enemy.Agent.stoppingDistance = originalStoppingDistance;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+            {
+                // Restore original stopping distance when exiting patrol
+                enemy.Agent.stoppingDistance = originalStoppingDistance;
+            }
 
             isWaiting = false;
             waitTimer = 0f;
@@ -127,6 +142,10 @@ namespace AI.Enemy.States
         private void MoveToNextPatrolPoint(EnemyController enemy)
         {
             if (enemy.PatrolPoints == null || enemy.PatrolPoints.Length == 0)
+                return;
+
+            // Safety check
+            if (enemy.Agent == null || !enemy.Agent.isOnNavMesh || !enemy.Agent.enabled)
                 return;
 
             currentPatrolIndex = (currentPatrolIndex + 1) % enemy.PatrolPoints.Length;
@@ -143,6 +162,10 @@ namespace AI.Enemy.States
 
         private void SetRandomWanderTarget(EnemyController enemy)
         {
+            // Safety check
+            if (enemy.Agent == null || !enemy.Agent.isOnNavMesh || !enemy.Agent.enabled)
+                return;
+
             int maxAttempts = 10;
             float minWanderDistance = 4f;
             float maxWanderDistance = 10f;

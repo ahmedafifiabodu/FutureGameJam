@@ -89,11 +89,13 @@ public class ServiceLocator
             {
                 var unregisteredService = services[service].service;
                 services.Remove(service);
-                string caller = GetCaller();
 #if UNITY_EDITOR
+                string caller = GetCaller();
                 unregisteredServices.Add((unregisteredService, "Unregistered by system", caller));
-#endif
                 ServiceUnregistered?.Invoke(unregisteredService, "Unregistered by system", caller);
+#else
+                ServiceUnregistered?.Invoke(unregisteredService, "Unregistered by system", "N/A");
+#endif
             }
         }
     }
@@ -107,11 +109,13 @@ public class ServiceLocator
         {
             var unregisteredService = services[serviceType].service;
             services.Remove(serviceType);
-            string caller = GetCaller();
 #if UNITY_EDITOR
+            string caller = GetCaller();
             unregisteredServices.Add((unregisteredService, "Unregistered by user", caller));
-#endif
             ServiceUnregistered?.Invoke(unregisteredService, "Unregistered by user", caller);
+#else
+            ServiceUnregistered?.Invoke(unregisteredService, "Unregistered by user", "N/A");
+#endif
         }
         else
         {

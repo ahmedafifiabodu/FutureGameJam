@@ -32,6 +32,11 @@ namespace ProceduralGeneration
         [Header("Next Area Generation")]
         [SerializeField] private bool disableProximityGeneration = true; // NEW: Disable proximity-based generation
 
+        [Header("Enemy Tracking")]
+        [SerializeField] private LayerMask enemyLayer = 1 << 7; // Default to layer 7 (Enemy)
+
+        [SerializeField] private bool trackEnemyMovement = true;
+
         private LevelPiece parentLevelPiece;
         private bool playerDetected = false;
         private bool playerInside = false;
@@ -78,10 +83,24 @@ namespace ProceduralGeneration
             // Check if the collider is on the player layer
             if (((1 << other.gameObject.layer) & playerLayer) != 0)
             {
-                if (debugMode)
+                // Check if this is a host and if it's controlled by the parasite
+                HostController hostController = other.GetComponentInParent<HostController>();
+                bool isControlledHost = hostController != null && hostController.IsControlled;
+
+                // Only process if this is the actual parasite or a parasite-controlled host
+                ParasiteController parasite = other.GetComponentInParent<ParasiteController>();
+                bool isParasite = parasite != null && parasite.enabled;
+
+                if (!isControlledHost && !isParasite)
                 {
-                    Debug.Log($"[ConnectionPoint] Player entered trigger at {gameObject.name}. Player: {other.gameObject.name} on layer {other.gameObject.layer}");
+                    if (debugMode)
+                        Debug.Log($"[ConnectionPoint] Ignoring trigger - not controlled host or active parasite: {other.gameObject.name}");
+
+                    return;
                 }
+
+                if (debugMode)
+                    Debug.Log($"[ConnectionPoint] Player entered trigger at {gameObject.name}. Player: {other.gameObject.name} on layer {other.gameObject.layer}");
 
                 playerInside = true;
 
@@ -98,6 +117,12 @@ namespace ProceduralGeneration
                     playerDetected = true;
                 }
             }
+
+            // NEW: Track enemy movement through connection points
+            if (trackEnemyMovement && ((1 << other.gameObject.layer) & enemyLayer) != 0)
+            {
+                HandleEnemyEntered(other);
+            }
         }
 
         private void OnTriggerExit(Collider other)
@@ -106,9 +131,7 @@ namespace ProceduralGeneration
             if (((1 << other.gameObject.layer) & playerLayer) != 0)
             {
                 if (debugMode)
-                {
                     Debug.Log($"[ConnectionPoint] Player exited trigger at {gameObject.name}. Player: {other.gameObject.name}");
-                }
 
                 playerInside = false;
 
@@ -118,6 +141,61 @@ namespace ProceduralGeneration
                     // Cancel any existing door close invoke
                     CancelInvoke(nameof(DelayedCloseDoor));
                     Invoke(nameof(DelayedCloseDoor), doorCloseDelay);
+                }
+            }
+
+            // NEW: Track enemy leaving through connection points
+            if (trackEnemyMovement && ((1 << other.gameObject.layer) & enemyLayer) != 0)
+            {
+                HandleEnemyExited(other);
+            }
+        }
+
+        /// <summary>
+        /// Handle enemy entering this connection point
+        /// </summary>
+        private void HandleEnemyEntered(Collider enemyCollider)
+        {
+            var enemyController = enemyCollider.GetComponentInParent<AI.Enemy.EnemyController>();
+            if (enemyController == null || enemyController.IsDead)
+                return;
+
+            if (debugMode)
+                Debug.Log($"[ConnectionPoint] Enemy {enemyController.name} entered {pointType} at {gameObject.name}");
+        }
+
+        /// <summary>
+        /// Handle enemy exiting this connection point (moving to next area)
+        /// </summary>
+        private void HandleEnemyExited(Collider enemyCollider)
+        {
+            var enemyController = enemyCollider.GetComponentInParent<AI.Enemy.EnemyController>();
+            if (enemyController == null || enemyController.IsDead)
+                return;
+
+            // If this is an entrance point (Point A), the enemy is leaving the CURRENT piece
+            // and entering the PREVIOUS piece (going backwards)
+            if (pointType == PointType.A)
+            {
+                if (debugMode)
+                    Debug.Log($"[ConnectionPoint] Enemy {enemyController.name} left through entrance (Point A) at {gameObject.name} - moving to previous area");
+
+                // Notify the current piece that this enemy left
+                if (parentLevelPiece != null)
+                {
+                    parentLevelPiece.OnEnemyLeftPiece(enemyController);
+                }
+            }
+            // If this is an exit point (Point B), the enemy is leaving to the NEXT piece
+            else if (pointType == PointType.B)
+            {
+                if (debugMode)
+                    Debug.Log($"[ConnectionPoint] Enemy {enemyController.name} left through exit (Point B) at {gameObject.name} - moving to next area");
+
+                // Notify the current piece that this enemy left
+                if (parentLevelPiece != null)
+                {
+                    parentLevelPiece.OnEnemyLeftPiece(enemyController);
                 }
             }
         }

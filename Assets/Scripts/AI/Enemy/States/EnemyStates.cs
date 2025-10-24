@@ -9,7 +9,9 @@ namespace AI.Enemy.States
     {
         public void EnterState(EnemyController enemy)
         {
-            enemy.Agent.isStopped = true;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+                enemy.Agent.isStopped = true;
 
             if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
@@ -36,24 +38,23 @@ namespace AI.Enemy.States
     public class EnemyChaseStateNew : IEnemyState
     {
         private Vector3 lastKnownPlayerPosition;
+
         private float memoryTimer = 0f;
         private float pathUpdateTimer = 0f;
-        private const float PATH_UPDATE_INTERVAL = 0.2f;
-        private float logTimer = 0f;
-        private const float LOG_INTERVAL = 1f;
         private float stateEntryTimer = 0f;
-        private const float ATTACK_CHECK_DELAY = 0.5f; // Wait 0.5s before checking attack range
-        private float parasiteModeTimer = 0f;
+
+        private const float PATH_UPDATE_INTERVAL = 0.2f;
+        private const float ATTACK_CHECK_DELAY = 0.5f;
 
         public void EnterState(EnemyController enemy)
         {
-            Debug.Log($"[CHASE] {enemy.Config.enemyName} ENTERED Chase State at {enemy.transform.position}");
+            // Safety check before modifying agent
+            if (enemy.Agent == null || !enemy.Agent.isOnNavMesh || !enemy.Agent.enabled)
+                return;
 
             enemy.Agent.isStopped = false;
             enemy.Agent.speed = enemy.Config.chaseSpeed;
             enemy.Agent.stoppingDistance = enemy.Config.attackRange * 0.7f;
-
-            Debug.Log($"[CHASE] Agent speed: {enemy.Agent.speed}, stopping distance: {enemy.Agent.stoppingDistance}, attack range: {enemy.Config.attackRange}");
 
             if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
@@ -65,11 +66,7 @@ namespace AI.Enemy.States
 
             lastKnownPlayerPosition = enemy.LastKnownPlayerPosition;
             pathUpdateTimer = 0f;
-            logTimer = 0f;
-            stateEntryTimer = 0f; // Reset entry timer
-            parasiteModeTimer = 0f; // Reset parasite mode timer
-
-            Debug.Log($"[CHASE] Initial target position: {lastKnownPlayerPosition}");
+            stateEntryTimer = 0f;
         }
 
         public void UpdateState(EnemyController enemy)
@@ -77,36 +74,22 @@ namespace AI.Enemy.States
             if (enemy.Player == null) return;
 
             pathUpdateTimer += Time.deltaTime;
-            logTimer += Time.deltaTime;
             stateEntryTimer += Time.deltaTime;
 
             // Update last known position from _controller
             enemy.UpdateLastKnownPosition();
             lastKnownPlayerPosition = enemy.LastKnownPlayerPosition;
 
-            float distanceToPlayer = Vector3.Distance(enemy.transform.position, enemy.Player.position);
-            float distanceToTarget = Vector3.Distance(enemy.transform.position, lastKnownPlayerPosition);
-
-            // Log every second
-            if (logTimer >= LOG_INTERVAL)
-            {
-                Debug.Log($"[CHASE] {enemy.Config.enemyName} - Type: {enemy.Config.enemyType}, Dist to Player: {distanceToPlayer:F2}, Dist to Target: {distanceToTarget:F2}, Remaining: {enemy.Agent.remainingDistance:F2}, Velocity: {enemy.Agent.velocity.magnitude:F2}");
-                Debug.Log($"[CHASE] Position: {enemy.transform.position}, Target: {lastKnownPlayerPosition}, Player: {enemy.Player.position}");
-                Debug.Log($"[CHASE] Agent - isOnNavMesh: {enemy.Agent.isOnNavMesh}, hasPath: {enemy.Agent.hasPath}, pathPending: {enemy.Agent.pathPending}, isStopped: {enemy.Agent.isStopped}");
-                logTimer = 0f;
-            }
-
             // CRITICAL: Check if game mode allows attack state transition
             // Wait before checking attack range to prevent instant loop
             if (stateEntryTimer >= ATTACK_CHECK_DELAY)
             {
-                // Check if can attack AND game mode allows attack state
+                // Check if can attack AND game mode allows attack
                 // Only transition to attack if BOTH conditions are met:
                 // 1. Player is in attack range and enemy can attack
                 // 2. Game mode allows attacking (not in Parasite mode with no host)
                 if (enemy.IsPlayerInAttackRange() && enemy.CanAttack() && enemy.CanTransitionToAttackState())
                 {
-                    Debug.Log($"[CHASE] Switching to ATTACK - Player in range ({distanceToPlayer:F2} <= {enemy.Config.attackRange})");
                     enemy.ChangeState(new EnemyAttackState());
                     return;
                 }
@@ -131,10 +114,8 @@ namespace AI.Enemy.States
 
         public void ExitState(EnemyController enemy)
         {
-            Debug.Log($"[CHASE] {enemy.Config.enemyName} EXITING Chase State");
             pathUpdateTimer = 0f;
             stateEntryTimer = 0f;
-            parasiteModeTimer = 0f;
         }
 
         private void UpdateBasicChase(EnemyController enemy)
@@ -145,20 +126,13 @@ namespace AI.Enemy.States
             {
                 lastKnownPlayerPosition = enemy.LastKnownPlayerPosition;
                 memoryTimer = 0f;
-                Debug.Log($"[CHASE-BASIC] Memory updated to: {lastKnownPlayerPosition}");
             }
 
             if (pathUpdateTimer >= PATH_UPDATE_INTERVAL)
             {
                 if (enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
-                {
                     enemy.Agent.SetDestination(lastKnownPlayerPosition);
-                    Debug.Log($"[CHASE-BASIC] Path updated to memory position: {lastKnownPlayerPosition}");
-                }
-                else
-                {
-                    Debug.LogWarning($"[CHASE-BASIC] Cannot set destination - isOnNavMesh: {enemy.Agent.isOnNavMesh}, enabled: {enemy.Agent.enabled}");
-                }
+
                 pathUpdateTimer = 0f;
             }
         }
@@ -168,14 +142,8 @@ namespace AI.Enemy.States
             if (pathUpdateTimer >= PATH_UPDATE_INTERVAL)
             {
                 if (enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
-                {
                     enemy.Agent.SetDestination(enemy.LastKnownPlayerPosition);
-                    Debug.Log($"[CHASE-TOUGH] Path updated to player position: {enemy.LastKnownPlayerPosition}");
-                }
-                else
-                {
-                    Debug.LogWarning($"[CHASE-TOUGH] Cannot set destination - isOnNavMesh: {enemy.Agent.isOnNavMesh}, enabled: {enemy.Agent.enabled}");
-                }
+
                 pathUpdateTimer = 0f;
             }
         }
@@ -189,7 +157,6 @@ namespace AI.Enemy.States
                 // Check if can attack AND game mode allows attack
                 if (enemy.CanAttack() && enemy.CanTransitionToAttackState())
                 {
-                    Debug.Log($"[CHASE-FAST] Initiating jump attack at distance {distance:F2}");
                     enemy.ChangeState(new EnemyFastJumpAttackState());
                     return;
                 }
@@ -198,14 +165,8 @@ namespace AI.Enemy.States
             if (pathUpdateTimer >= PATH_UPDATE_INTERVAL)
             {
                 if (enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
-                {
                     enemy.Agent.SetDestination(enemy.LastKnownPlayerPosition);
-                    Debug.Log($"[CHASE-FAST] Path updated to player position: {enemy.LastKnownPlayerPosition}");
-                }
-                else
-                {
-                    Debug.LogWarning($"[CHASE-FAST] Cannot set destination - isOnNavMesh: {enemy.Agent.isOnNavMesh}, enabled: {enemy.Agent.enabled}");
-                }
+
                 pathUpdateTimer = 0f;
             }
         }
@@ -220,9 +181,11 @@ namespace AI.Enemy.States
 
         public void EnterState(EnemyController enemy)
         {
-            Debug.Log($"[ATTACK] {enemy.Config.enemyName} ENTERED Attack State");
-
-            enemy.Agent.isStopped = true;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+            {
+                enemy.Agent.isStopped = true;
+            }
 
             if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
             {
@@ -244,7 +207,6 @@ namespace AI.Enemy.States
             // If player left attack range → go back to chase (not patrol!)
             if (distanceToPlayer > enemy.Config.attackRange)
             {
-                Debug.Log($"[ATTACK] Player out of range ({distanceToPlayer:F2}), returning to Chase");
                 enemy.ChangeState(new EnemyChaseStateNew());
                 return;
             }
@@ -261,7 +223,6 @@ namespace AI.Enemy.States
             // ⚔️ Attack repeatedly while in range
             if (Time.time >= nextAttackTime && enemy.CanAttack())
             {
-                Debug.Log($"[ATTACK] {enemy.Config.enemyName} is attacking player!");
                 enemy.PerformAttack();
 
                 // Trigger attack animation based on enemy type and whether ranged
@@ -279,8 +240,9 @@ namespace AI.Enemy.States
 
         public void ExitState(EnemyController enemy)
         {
-            Debug.Log($"[ATTACK] {enemy.Config.enemyName} EXITING Attack State");
-            enemy.Agent.isStopped = false;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+                enemy.Agent.isStopped = false;
         }
     }
 
@@ -294,14 +256,14 @@ namespace AI.Enemy.States
 
         public void EnterState(EnemyController enemy)
         {
-            enemy.Agent.isStopped = true;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+                enemy.Agent.isStopped = true;
 
             // Predict where player will be
             Vector3 playerVelocity = Vector3.zero;
             if (enemy.Player != null && enemy.Player.TryGetComponent<Rigidbody>(out var rb))
-            {
                 playerVelocity = rb.linearVelocity;
-            }
 
             // Calculate jump target
             float jumpTime = 0.5f; // Time to reach target
@@ -309,9 +271,7 @@ namespace AI.Enemy.States
 
             // Trigger jump animation (Jump is a trigger)
             if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
-            {
                 enemy.Animator.SetTrigger(enemy.Config.jumpAnimation);
-            }
 
             isJumping = true;
         }
@@ -321,11 +281,7 @@ namespace AI.Enemy.States
             if (!isJumping) return;
 
             // Move towards target (simplified - in production, use proper arc)
-            enemy.transform.position = Vector3.MoveTowards(
-         enemy.transform.position,
-            targetPosition,
-            enemy.Config.moveSpeed * 2f * Time.deltaTime
-                  );
+            enemy.transform.position = Vector3.MoveTowards(enemy.transform.position, targetPosition, enemy.Config.moveSpeed * 2f * Time.deltaTime);
 
             // Check if reached target
             float distance = Vector3.Distance(enemy.transform.position, targetPosition);
@@ -348,7 +304,9 @@ namespace AI.Enemy.States
 
         public void ExitState(EnemyController enemy)
         {
-            enemy.Agent.isStopped = false;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+                enemy.Agent.isStopped = false;
         }
     }
 
@@ -359,7 +317,11 @@ namespace AI.Enemy.States
     {
         public void EnterState(EnemyController enemy)
         {
-            enemy.Agent.isStopped = true;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+            {
+                enemy.Agent.isStopped = true;
+            }
 
             // Trigger stagger animation (Stagger is a trigger)
             if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
@@ -385,13 +347,13 @@ namespace AI.Enemy.States
     {
         public void EnterState(EnemyController enemy)
         {
-            enemy.Agent.isStopped = true;
+            // Safety check before modifying agent
+            if (enemy.Agent != null && enemy.Agent.isOnNavMesh && enemy.Agent.enabled)
+                enemy.Agent.isStopped = true;
 
             // Trigger death animation (Death is a trigger)
             if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
-            {
                 enemy.Animator.SetTrigger(enemy.Config.deathAnimation);
-            }
         }
 
         public void UpdateState(EnemyController enemy)

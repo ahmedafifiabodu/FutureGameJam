@@ -14,7 +14,6 @@ public class CanvasCrosshair : MonoBehaviour
     [SerializeField] private RectTransform bottomLine;
     [SerializeField] private RectTransform leftLine;
     [SerializeField] private RectTransform rightLine;
-    [SerializeField] private Image centerDot;
 
     [Header("Settings")]
     [SerializeField] private bool showCrosshair = true;
@@ -75,18 +74,8 @@ public class CanvasCrosshair : MonoBehaviour
         // Set colors for all elements
         SetColor(crosshairColor);
 
-        // Set dot color separately
-        if (centerDot)
-        {
-            centerDot.color = dotColor;
-            centerDot.rectTransform.sizeDelta = new Vector2(dotSize, dotSize);
-        }
-
         // Set base sizes
         UpdateCrosshairLayout(0f);
-
-        // Update dot visibility
-        UpdateCenterDot();
 
         if (showDebugLogs)
             Debug.Log($"[CanvasCrosshair] Initialized on {gameObject.name}");
@@ -101,9 +90,6 @@ public class CanvasCrosshair : MonoBehaviour
             UpdateDynamicSpread();
             UpdateCrosshairLayout(currentSpread);
         }
-
-        // Update center dot based on aiming state
-        UpdateCenterDot();
     }
 
     private void UpdateDynamicSpread()
@@ -134,39 +120,6 @@ public class CanvasCrosshair : MonoBehaviour
         float speed = targetSpread > currentSpread ? spreadSpeed : spreadRecoverySpeed;
         currentSpread = Mathf.Lerp(currentSpread, targetSpread, speed * Time.deltaTime);
         currentSpread = Mathf.Clamp(currentSpread, 0f, maxSpread);
-    }
-
-    private void UpdateCenterDot()
-    {
-        if (!centerDot || !showDotWhenAiming)
-        {
-            if (centerDot)
-                centerDot.gameObject.SetActive(false);
-            return;
-        }
-
-        bool shouldShowDot = false;
-
-        if (dotOnlyWhenAiming)
-        {
-            // Show dot only when aiming
-            if (currentWeapon != null && currentWeapon.IsAiming())
-            {
-                shouldShowDot = true;
-            }
-        }
-        else
-        {
-            // Always show dot when crosshair is visible
-            shouldShowDot = showCrosshair;
-        }
-
-        centerDot.gameObject.SetActive(shouldShowDot);
-
-        if (showDebugLogs && shouldShowDot != centerDot.gameObject.activeSelf)
-        {
-            Debug.Log($"[CanvasCrosshair] Center dot: {(shouldShowDot ? "SHOWN" : "HIDDEN")} (Aiming: {currentWeapon.IsAiming()})");
-        }
     }
 
     private void UpdateCrosshairLayout(float spread)
@@ -200,19 +153,12 @@ public class CanvasCrosshair : MonoBehaviour
             rightLine.anchoredPosition = new Vector2(gap + baseSize / 2f, 0);
             rightLine.sizeDelta = new Vector2(baseSize, thickness);
         }
-
-        // Update center dot size
-        if (centerDot)
-        {
-            centerDot.rectTransform.sizeDelta = new Vector2(dotSize, dotSize);
-        }
     }
 
     public void Show()
     {
         showCrosshair = true;
         UpdateVisibility();
-        UpdateCenterDot();
 
         if (showDebugLogs)
             Debug.Log($"[CanvasCrosshair] Showing crosshair - Alpha: {(canvasGroup ? canvasGroup.alpha : -1)}");
@@ -222,7 +168,6 @@ public class CanvasCrosshair : MonoBehaviour
     {
         showCrosshair = false;
         UpdateVisibility();
-        UpdateCenterDot();
 
         if (showDebugLogs)
             Debug.Log($"[CanvasCrosshair] Hiding crosshair - Alpha: {(canvasGroup ? canvasGroup.alpha : -1)}");
@@ -237,32 +182,6 @@ public class CanvasCrosshair : MonoBehaviour
         if (leftLine) leftLine.GetComponent<Image>().color = color;
         if (rightLine) rightLine.GetComponent<Image>().color = color;
         // Don't change dot color - it has its own color
-    }
-
-    public void SetDotColor(Color color)
-    {
-        dotColor = color;
-        if (centerDot)
-            centerDot.color = color;
-    }
-
-    public void SetSize(float size)
-    {
-        baseSize = size;
-        UpdateCrosshairLayout(currentSpread);
-    }
-
-    public void SetGap(float gap)
-    {
-        baseGap = gap;
-        UpdateCrosshairLayout(currentSpread);
-    }
-
-    public void SetDotSize(float size)
-    {
-        dotSize = size;
-        if (centerDot)
-            centerDot.rectTransform.sizeDelta = new Vector2(dotSize, dotSize);
     }
 
     /// <summary>
@@ -280,9 +199,6 @@ public class CanvasCrosshair : MonoBehaviour
             else
                 Debug.Log("[CanvasCrosshair] Weapon cleared (null)");
         }
-
-        // Update dot immediately
-        UpdateCenterDot();
     }
 
     private void UpdateVisibility()
@@ -313,7 +229,6 @@ public class CanvasCrosshair : MonoBehaviour
         bottomLine = bottom;
         leftLine = left;
         rightLine = right;
-        centerDot = dot;
 
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);
@@ -331,8 +246,6 @@ public class CanvasCrosshair : MonoBehaviour
         Debug.Log($"  Show Crosshair: {showCrosshair}");
         Debug.Log($"  Current Spread: {currentSpread:F2}");
         Debug.Log($"  Current Weapon: {(currentWeapon ? currentWeapon.gameObject.name : "NULL")}");
-        Debug.Log($"  Is Aiming: {(currentWeapon ? currentWeapon.IsAiming().ToString() : "N/A")}");
-        Debug.Log($"  Center Dot Active: {(centerDot ? centerDot.gameObject.activeSelf.ToString() : "NULL")}");
         Debug.Log($"  Canvas Alpha: {(canvasGroup ? canvasGroup.alpha.ToString("F2") : "NULL")}");
     }
 
@@ -341,16 +254,6 @@ public class CanvasCrosshair : MonoBehaviour
 
     [ContextMenu("Hide Crosshair")]
     private void HideCrosshairDebug() => Hide();
-
-    [ContextMenu("Toggle Dot")]
-    private void ToggleDotDebug()
-    {
-        if (centerDot)
-        {
-            centerDot.gameObject.SetActive(!centerDot.gameObject.activeSelf);
-            Debug.Log($"[CanvasCrosshair] Dot toggled to: {centerDot.gameObject.activeSelf}");
-        }
-    }
 
     #endregion Debug Helpers
 }

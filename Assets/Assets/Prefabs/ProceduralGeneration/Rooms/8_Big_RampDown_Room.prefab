@@ -7024,10 +7024,14 @@ MonoBehaviour:
   showGizmos: 1
   playerLayer:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 2097216
   debugMode: 1
   doorCloseDelay: 2
   disableProximityGeneration: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  trackEnemyMovement: 1
 --- !u!135 &1255087501950822135
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -9922,10 +9926,14 @@ MonoBehaviour:
   showGizmos: 1
   playerLayer:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 2097216
   debugMode: 1
   doorCloseDelay: 2
   disableProximityGeneration: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  trackEnemyMovement: 1
 --- !u!135 &4331141288290578979
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -21956,7 +21964,7 @@ MonoBehaviour:
   maxIteration: 50
   useCustomSpawnSettings: 1
   playerHasEntered: 0
-  showEnemyDebug: 0
+  showEnemyDebug: 1
   roomName: Room
   enemySpawnDelay: 0.5
   startingRoom: 0
@@ -24428,6 +24436,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (3)
@@ -26042,6 +26058,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.351
@@ -26426,6 +26450,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.2659838
@@ -26678,6 +26710,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.614
@@ -27960,6 +28000,10 @@ PrefabInstance:
       propertyPath: m_Color.g
       value: 0.28627455
       objectReference: {fileID: 0}
+    - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -29120,6 +29164,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.351
@@ -29493,6 +29545,10 @@ PrefabInstance:
     - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
       propertyPath: m_Color.g
       value: 0.28627455
+      objectReference: {fileID: 0}
+    - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -30321,8 +30377,16 @@ PrefabInstance:
       value: 164.48677
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_InnerSpotAngle
       value: 54.003136
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8096181586021228862, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_LocalPosition.x
@@ -30509,6 +30573,14 @@ PrefabInstance:
     - target: {fileID: 1975957974701693131, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_Name
       value: Pipes_Connected_02 (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -31610,6 +31682,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pipes_Connected_02 (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
       value: -7.1797404
@@ -32006,6 +32086,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.579
@@ -32518,6 +32606,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (1)
@@ -32858,8 +32954,16 @@ PrefabInstance:
       value: 164.48677
       objectReference: {fileID: 0}
     - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_InnerSpotAngle
       value: 54.003136
+      objectReference: {fileID: 0}
+    - target: {fileID: 6862116797710832721, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8096181586021228862, guid: 981b1f3de86d8ab488d5f9de31da237a, type: 3}
       propertyPath: m_LocalPosition.x
@@ -33499,6 +33603,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.8665485
@@ -34135,6 +34247,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (2)
@@ -34523,6 +34643,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.578984
@@ -34899,6 +35027,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pipes_Connected_02 (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.25
@@ -35144,6 +35280,10 @@ PrefabInstance:
     - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
       propertyPath: m_Color.g
       value: 0.28627455
+      objectReference: {fileID: 0}
+    - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -35485,6 +35625,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 7.249999
@@ -35547,6 +35695,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.614
@@ -35609,6 +35765,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.614
@@ -36232,6 +36396,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light
@@ -36546,6 +36718,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.499999
@@ -36818,6 +36998,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.598008
@@ -36954,6 +37142,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.614
@@ -37266,6 +37462,10 @@ PrefabInstance:
       propertyPath: m_Color.g
       value: 0.28627455
       objectReference: {fileID: 0}
+    - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -37482,6 +37682,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.613
@@ -37795,6 +38003,14 @@ PrefabInstance:
     - target: {fileID: 1975957974701693131, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_Name
       value: Pipes_Connected_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -38129,6 +38345,14 @@ PrefabInstance:
     - target: {fileID: 1975957974701693131, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_Name
       value: Pipes_Connected_02 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -38596,6 +38820,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.613
@@ -39744,6 +39976,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.614
@@ -40467,6 +40707,10 @@ PrefabInstance:
       propertyPath: m_Color.g
       value: 0.28627455
       objectReference: {fileID: 0}
+    - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -40621,6 +40865,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.614
@@ -40683,6 +40935,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.614
@@ -40748,6 +41008,14 @@ PrefabInstance:
     - target: {fileID: 1975957974701693131, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_Name
       value: Pipes_Connected_02 (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -40869,6 +41137,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646676971553826823}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.266
@@ -41385,6 +41661,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pipes_Connected_02 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8.5
@@ -41829,6 +42113,10 @@ PrefabInstance:
       propertyPath: m_Color.g
       value: 0.28627455
       objectReference: {fileID: 0}
+    - target: {fileID: 6396163299746802278, guid: 1173751ee1cb8f649aaf78992fd4bf4e, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -42258,6 +42546,14 @@ PrefabInstance:
     - target: {fileID: 1975957974701693131, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_Name
       value: Pipes_Connected_02 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018553896003548297, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8300858241204404022, guid: 9903b7570d1384a4cbe2a7afb5b120d0, type: 3}
       propertyPath: m_LocalPosition.x

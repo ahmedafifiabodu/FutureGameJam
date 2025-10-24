@@ -30,8 +30,6 @@ public class GameplayHUD : MonoBehaviour
     [Header("Weapon UI")]
     [SerializeField] private GameObject weaponPanel;
 
-    [SerializeField] private TextMeshProUGUI aimingText;
-
     [Header("Crosshair")]
     [SerializeField] private CanvasCrosshair crosshair;
 
@@ -62,37 +60,10 @@ public class GameplayHUD : MonoBehaviour
         parasiteController = ServiceLocator.Instance.GetService<ParasiteController>();
 
         if (!parasiteController)
-        {
-            Debug.LogWarning("[GameplayHUD] ParasiteController not found in ServiceLocator! Trying FindFirstObjectByType...");
             parasiteController = FindFirstObjectByType<ParasiteController>();
-
-            if (!parasiteController)
-            {
-                Debug.LogError("[GameplayHUD] ParasiteController not found! Lifetime slider will not update.");
-            }
-            else
-            {
-                Debug.Log("[GameplayHUD] ParasiteController found via FindFirstObjectByType");
-            }
-        }
-        else
-        {
-            Debug.Log("[GameplayHUD] ParasiteController found via ServiceLocator");
-        }
 
         // Start with parasite UI
         ShowParasiteUI();
-
-        // Log slider state
-        if (parasiteLifetimeSlider)
-        {
-            Debug.Log($"[GameplayHUD] Parasite lifetime slider assigned: {parasiteLifetimeSlider.gameObject.name}");
-            Debug.Log($"[GameplayHUD] Initial slider progress: {parasiteLifetimeSlider.GetProgress()}");
-        }
-        else
-        {
-            Debug.LogError("[GameplayHUD] Parasite lifetime slider not assigned!");
-        }
     }
 
     private void Update()
@@ -101,9 +72,6 @@ public class GameplayHUD : MonoBehaviour
             UpdateParasiteUI();
         else if (hostPanel.activeSelf)
             UpdateHostUI();
-
-        if (weaponPanel.activeSelf)
-            UpdateWeaponUI();
     }
 
     #region Panel Management
@@ -134,7 +102,6 @@ public class GameplayHUD : MonoBehaviour
             if (crosshair)
                 crosshair.Hide();
         }
-        // If weapon already equipped, keep panel and crosshair visible
     }
 
     public void HideAllPanels()
@@ -189,7 +156,7 @@ public class GameplayHUD : MonoBehaviour
             parasiteDebugText.text = $"Lifetime: {remainingLifetime:F1}s\n" +
                 $"Move: ({moveInput.x:F1}, {moveInput.y:F1})\n" +
                 $"Grounded: {isGrounded}\n" +
-                $"Slider Progress: {parasiteLifetimeSlider?.GetProgress():F2}";
+                $"Slider Progress: {parasiteLifetimeSlider.GetProgress():F2}";
             parasiteDebugText.color = lifetimeColor;
         }
     }
@@ -203,7 +170,6 @@ public class GameplayHUD : MonoBehaviour
         if (!currentHost) return;
 
         float remainingLifetime = currentHost.GetLifetimePercentage() * 100f; // Convert to percentage
-        float lifetimeSeconds = remainingLifetime; // Assuming GetLifetimePercentage returns actual seconds
 
         // Update lifetime slider
         if (hostLifetimeSlider)
@@ -262,39 +228,23 @@ public class GameplayHUD : MonoBehaviour
 
             if (crosshair)
             {
-                Debug.Log($"[GameplayHUD] SetCurrentWeapon - Showing crosshair for weapon: {weapon.gameObject.name}");
                 crosshair.SetWeapon(weapon);
                 crosshair.Show();
-            }
-            else
-            {
-                Debug.LogError("[GameplayHUD] SetCurrentWeapon - Crosshair is NULL!");
             }
         }
         else
         {
             // No weapon - hide UI
+            // Only hide weapon panel, but keep crosshair visible if in Host mode
+            // The crosshair will be hidden when switching back to Parasite mode
             weaponPanel.SetActive(false);
 
             if (crosshair)
             {
-                Debug.Log("[GameplayHUD] SetCurrentWeapon - Hiding crosshair (weapon cleared)");
                 crosshair.SetWeapon(null);
-                crosshair.Hide();
+                // Don't automatically hide crosshair - let ShowParasiteUI/ShowHostUI handle visibility
+                // crosshair.Hide(); // REMOVED - this was causing the issue
             }
-        }
-    }
-
-    private void UpdateWeaponUI()
-    {
-        if (!currentWeapon) return;
-
-        // Update aiming indicator
-        if (aimingText)
-        {
-            aimingText.gameObject.SetActive(currentWeapon.IsAiming());
-            aimingText.text = "AIMING";
-            aimingText.color = warningColor;
         }
     }
 

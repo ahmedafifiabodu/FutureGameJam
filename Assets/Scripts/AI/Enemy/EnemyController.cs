@@ -73,6 +73,9 @@ namespace AI.Enemy
         private ParasiteController parasiteController;
         private GameStateManager.GameMode lastKnownGameMode;
 
+        // CharacterController reference for possession management
+        private CharacterController characterController;
+
         public EnemyConfigSO Config => config;
         public NavMeshAgent Agent => agent;
         public Animator Animator => animator;
@@ -89,6 +92,7 @@ namespace AI.Enemy
         {
             if (agent == null) agent = GetComponent<NavMeshAgent>();
             if (animator == null) animator = GetComponent<Animator>();
+            characterController = GetComponent<CharacterController>();
 
             ValidateConfiguration();
         }
@@ -133,6 +137,17 @@ namespace AI.Enemy
             agent.angularSpeed = 200f;
             agent.autoBraking = true;
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+
+            // CRITICAL: Disable CharacterController during AI movement to prevent linear movement on stairs
+            // It will be enabled when the parasite possesses this enemy
+            if (characterController != null)
+            {
+                characterController.enabled = false;
+                if (showDebugTargeting)
+                {
+                    Debug.Log($"[EnemyController] {config.enemyName} CharacterController disabled for AI movement");
+                }
+            }
 
             // Get game state manager for player targeting
             gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
@@ -878,7 +893,7 @@ namespace AI.Enemy
 
         public void SetCurrentRoom(Transform room)
         {
-            currentRoom = room;
+          currentRoom = room;
         }
 
         #endregion Room Management

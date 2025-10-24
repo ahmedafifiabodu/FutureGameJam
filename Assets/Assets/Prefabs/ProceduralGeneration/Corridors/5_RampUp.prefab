@@ -114,7 +114,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 2.25, y: 1, z: 0.00000035762787}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.05, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9065347011631452553}
@@ -871,7 +871,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -2.25, y: 1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.05, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9065347011631452553}
@@ -1272,8 +1272,8 @@ Transform:
   m_GameObject: {fileID: 4082490932705338345}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: -8.500007}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -1, z: -8.646}
+  m_LocalScale: {x: 1, y: 1, z: 1.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9065347011631452553}
@@ -1694,10 +1694,14 @@ MonoBehaviour:
   showGizmos: 1
   playerLayer:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 2097216
   debugMode: 1
   doorCloseDelay: 2
   disableProximityGeneration: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  trackEnemyMovement: 1
 --- !u!135 &8758060694707220224
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -2124,10 +2128,14 @@ MonoBehaviour:
   showGizmos: 1
   playerLayer:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 2097216
   debugMode: 1
   doorCloseDelay: 2
   disableProximityGeneration: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  trackEnemyMovement: 1
 --- !u!135 &8957279808302646436
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -7321,8 +7329,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1730019398500347135, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
@@ -7643,6 +7663,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 1616415498625764665, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (17)
@@ -8411,6 +8443,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 1616415498625764665, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (21)
@@ -8539,6 +8583,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.9629983
@@ -8663,6 +8719,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 1616415498625764665, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (22)
@@ -8787,8 +8855,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1730019398500347135, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
@@ -8993,6 +9073,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.9569916
@@ -9245,6 +9337,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.9569916
@@ -9369,6 +9473,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.9629983
@@ -10169,6 +10285,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.9630336
@@ -10483,6 +10611,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 41529464927472786, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468339425690329274, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2707863600566480294, guid: a34f7fa336f95f64f83a40765a82ca73, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.956987
@@ -10999,6 +11139,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 1616415498625764665, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (18)
@@ -11503,6 +11655,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9065347011631452553}
     m_Modifications:
+    - target: {fileID: 1616415498625764665, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_AdditionalLightsShadowResolutionTier
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3800033276910739729, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
+      propertyPath: m_Shadows.m_Type
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8398616654792510454, guid: 0d4f7cfd38338904f8752e1ac50c3738, type: 3}
       propertyPath: m_Name
       value: Light (19)
