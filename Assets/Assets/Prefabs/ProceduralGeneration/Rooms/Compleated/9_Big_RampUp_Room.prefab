@@ -21251,6 +21251,10 @@ MonoBehaviour:
   isExitDoor: 0
   preGenerationDelay: 0.5
   doorOpenDelay: 1.5
+  audioSource: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  jammedSound: {fileID: 0}
 --- !u!4 &6843542671115008987 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -1431461942052358407, guid: 4f3928e71ae8046e29af2b503ce59a62, type: 3}
@@ -22993,6 +22997,10 @@ MonoBehaviour:
   isExitDoor: 0
   preGenerationDelay: 0.5
   doorOpenDelay: 1.5
+  audioSource: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  jammedSound: {fileID: 0}
 --- !u!4 &4071942599176431771 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4f3928e71ae8046e29af2b503ce59a62, type: 3}

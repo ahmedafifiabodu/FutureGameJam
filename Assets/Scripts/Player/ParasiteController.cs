@@ -71,6 +71,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
 
     [Header("Sound Effects")]
     [SerializeField] private AudioSource audioSource;
+
     [SerializeField] private float footstepCooldown = 0.2f;
     [SerializeField] private AudioClip[] footstepSounds;
     [SerializeField] private AudioClip jumpSound;
@@ -600,9 +601,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
         isAttachingToHost = false; // Reset attachment flag
         move += launchVelocity;
         move.y = 0;
-        audioSource.pitch = Random.Range(0.9f, 1.1f);
-        audioSource.PlayOneShot(landSound);
         launchVelocity = Vector3.zero;
+
         if (zoneController != null)
             gravity = zoneController.Gravity;
 

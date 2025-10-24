@@ -519,7 +519,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8943410146636557825}
-  - component: {fileID: 3591149819960227190}
   - component: {fileID: 2190060240022292612}
   - component: {fileID: 5833492942924718529}
   m_Layer: 21
@@ -537,35 +536,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1786211221398825297}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.956, z: 0.022}
+  m_LocalRotation: {x: 0.20039427, y: 0, z: 0, w: 0.97971535}
+  m_LocalPosition: {x: 0, y: 1.0629363, z: 0.022}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6469349419188536661}
   m_Father: {fileID: 4836115954098784898}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &3591149819960227190
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1786211221398825297}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2190060240022292612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2295,11 +2273,10 @@ GameObject:
   - component: {fileID: 4206389029848896758}
   - component: {fileID: 5028164661696232472}
   - component: {fileID: 3680472299826745225}
-  - component: {fileID: -6929809776696179469}
   - component: {fileID: 3916490835616004931}
   - component: {fileID: 8733364587675116616}
   - component: {fileID: 5888912064805358533}
-  m_Layer: 0
+  m_Layer: 21
   m_Name: Tough Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2386,33 +2363,12 @@ MonoBehaviour:
   animator: {fileID: 4206389029848896758}
   projectileSpawnPoint: {fileID: 5662431594015355263}
   deathEffect: {fileID: 0}
-  patrolPoints: []
-  debugRaycast: 0
-  raycastOriginHeight: 1.5
-  showDebugTargeting: 0
---- !u!114 &-6929809776696179469
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8679664440752320603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa2d76cd83399b849b3f290623896c59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TargetDummy
-  maxHealth: 100
-  respawnOnDeath: 0
-  respawnDelay: 3
-  targetRenderer: {fileID: 0}
-  damageColor: {r: 1, g: 0, b: 0, a: 1}
-  damageFlashDuration: 0.1
   audioSource: {fileID: 0}
-  hitSound: {fileID: 0}
-  destroySound: {fileID: 0}
-  hitEffectPrefab: {fileID: 0}
-  destroyEffectPrefab: {fileID: 0}
+  deathSound: {fileID: 0}
+  patrolPoints: []
+  debugRaycast: 1
+  raycastOriginHeight: 1.5
+  showDebugTargeting: 1
 --- !u!114 &3916490835616004931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2430,7 +2386,6 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 8943410146636557825}
-  hostHeadCollider: {fileID: 3591149819960227190}
   hostMovementController: {fileID: 5888912064805358533}
   weaponManager: {fileID: 5833492942924718529}
   weaponProfile: {fileID: 11400000, guid: 220f878e6fa31d047bd595122da20db5, type: 2}
@@ -2445,6 +2400,15 @@ MonoBehaviour:
   exitSimulationLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  audioSource: {fileID: 0}
+  exitSound: {fileID: 0}
+  hitSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  hostRenderer: {fileID: 0}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageFlashDuration: 0.1
+  skinnedMeshRenderers:
+  - {fileID: 7650437607477007794}
   isEnemyHost: 1
   destroyParentOnDeath: 0
 --- !u!143 &8733364587675116616
@@ -2471,7 +2435,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &5888912064805358533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2479,7 +2443,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8679664440752320603}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 547a1cc2b4096be409b08bc897eb171c, type: 3}
   m_Name: 
@@ -2506,6 +2470,10 @@ MonoBehaviour:
   bobSpeed: 4.8
   bobAmount: 0.05
   bobTimer: 1.5707964
+  audioSource: {fileID: 0}
+  footstepSounds: []
+  footstepCooldown: 0.2
+  jumpSound: {fileID: 0}
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -2651,6 +2619,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FPS_Character
       objectReference: {fileID: 0}
+    - target: {fileID: 100002, guid: 6cae2f82a0a62ff4ab9be3eeeda19688, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 100074, guid: 6cae2f82a0a62ff4ab9be3eeeda19688, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -2749,7 +2721,7 @@ MonoBehaviour:
   weaponName: bioweapon_low
   damage: 10
   weaponAnimator: {fileID: 6381764176164296699}
-  weaponProfile: {fileID: 11400000, guid: 220f878e6fa31d047bd595122da20db5, type: 2}
+  weaponProfile: {fileID: 11400000, guid: 495c8556979173145b1f68dccefdcd39, type: 2}
   muzzlePoint: {fileID: 0}
   feedbackSystem: {fileID: 6335746905279547896}
   shellEjector: {fileID: 686154034767415906}
@@ -2772,7 +2744,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6becadf9674dafc4f9fc5ce0e7db55de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShootingFeedbackSystem
-  feedbackProfile: {fileID: 11400000, guid: 9e1ae627d51eb6b46b1785d0f36ed310, type: 2}
+  feedbackProfile: {fileID: 11400000, guid: af6558444049c6d499b4e25e332ad729, type: 2}
   cameraShake: {fileID: 2190060240022292612}
   feedbackAudioSource: {fileID: 5901700653333515645}
   postProcessVolume: {fileID: 0}

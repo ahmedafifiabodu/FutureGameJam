@@ -926,7 +926,6 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 888035284}
-  hostHeadCollider: {fileID: 888035285}
   hostMovementController: {fileID: 274775743}
   weaponManager: {fileID: 1130484890}
   weaponProfile: {fileID: 11400000, guid: 220f878e6fa31d047bd595122da20db5, type: 2}
@@ -948,6 +947,7 @@ MonoBehaviour:
   hostRenderer: {fileID: 0}
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   damageFlashDuration: 0.1
+  skinnedMeshRenderers: []
   isEnemyHost: 0
   destroyParentOnDeath: 0
 --- !u!114 &274775743
@@ -1357,6 +1357,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.EnemySpawnManager
   enemyConfigs:
+  - {fileID: 11400000, guid: cf0e28ce7cf7ec3419628a0d22fd156d, type: 2}
+  - {fileID: 11400000, guid: 66f9731d13a1cd9488e809510eae313a, type: 2}
   - {fileID: 11400000, guid: f6dd0948c27ff2b41b86c9c0a1915249, type: 2}
   navMeshSearchRadius: 5
   maxSpawnAttempts: 5
@@ -2532,7 +2534,6 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 667089613}
-  hostHeadCollider: {fileID: 667089614}
   hostMovementController: {fileID: 669009866}
   weaponManager: {fileID: 1130484890}
   weaponProfile: {fileID: 11400000, guid: 2225c748f7e5c7742a810f76ee5aca06, type: 2}
@@ -2554,6 +2555,7 @@ MonoBehaviour:
   hostRenderer: {fileID: 0}
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   damageFlashDuration: 0.1
+  skinnedMeshRenderers: []
   isEnemyHost: 0
   destroyParentOnDeath: 0
 --- !u!114 &669009866
@@ -5386,7 +5388,6 @@ MonoBehaviour:
   lifetimeDecreasePerHost: 5
   minLifetime: 5
   cameraPivot: {fileID: 312920970}
-  hostHeadCollider: {fileID: 312920971}
   hostMovementController: {fileID: 1252195044}
   weaponManager: {fileID: 1130484890}
   weaponProfile: {fileID: 11400000, guid: 495c8556979173145b1f68dccefdcd39, type: 2}
@@ -5408,6 +5409,7 @@ MonoBehaviour:
   hostRenderer: {fileID: 0}
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   damageFlashDuration: 0.1
+  skinnedMeshRenderers: []
   isEnemyHost: 0
   destroyParentOnDeath: 0
 --- !u!114 &1252195044

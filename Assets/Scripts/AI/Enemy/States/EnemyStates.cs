@@ -96,22 +96,14 @@ namespace AI.Enemy.States
                 logTimer = 0f;
             }
 
-            // Check if we're in Parasite mode and should give up chasing
-            if (!enemy.CanTransitionToAttackState()) // In Parasite mode
-            {
-                Debug.Log($"[CHASE] {enemy.Config.enemyName} giving up chase - been in Parasite mode for {parasiteModeTimer:F1}s, returning to Patrol");
-
-                // Reset vision state
-                enemy.Agent.speed = enemy.Config.patrolSpeed;
-                enemy.ChangeState(new EnemyPatrolState());
-                return;
-            }
-
             // CRITICAL: Check if game mode allows attack state transition
             // Wait before checking attack range to prevent instant loop
             if (stateEntryTimer >= ATTACK_CHECK_DELAY)
             {
                 // Check if can attack AND game mode allows attack state
+                // Only transition to attack if BOTH conditions are met:
+                // 1. Player is in attack range and enemy can attack
+                // 2. Game mode allows attacking (not in Parasite mode with no host)
                 if (enemy.IsPlayerInAttackRange() && enemy.CanAttack() && enemy.CanTransitionToAttackState())
                 {
                     Debug.Log($"[CHASE] Switching to ATTACK - Player in range ({distanceToPlayer:F2} <= {enemy.Config.attackRange})");
@@ -276,15 +268,9 @@ namespace AI.Enemy.States
                 if (enemy.Animator != null && enemy.Config.hasCustomAnimations)
                 {
                     if (enemy.Config.isRanged)
-                    {
-                        // Use projectile attack trigger
                         enemy.Animator.SetTrigger(enemy.Config.projectileAttackAnimation);
-                    }
                     else
-                    {
-                        // Use melee attack trigger
                         enemy.Animator.SetTrigger(enemy.Config.meleeAttackAnimation);
-                    }
                 }
 
                 nextAttackTime = Time.time + enemy.Config.attackCooldown;

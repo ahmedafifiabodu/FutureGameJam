@@ -65,11 +65,12 @@ namespace AI.Enemy
         private Transform currentRoom;
 
         // Player targeting system
-        private GameStateManager gameStateManager;
-
-        private ParasiteController parasiteController;
         private Transform parasiteTransform;
+
         private Transform hostTransform;
+
+        private GameStateManager gameStateManager;
+        private ParasiteController parasiteController;
         private GameStateManager.GameMode lastKnownGameMode;
 
         public EnemyConfigSO Config => config;
@@ -543,18 +544,59 @@ namespace AI.Enemy
                 return;
             }
 
-            // Perform raycast attack (Host mode only from here)
+            // Check if this is a melee or ranged attack based on config
+            if (config.isRanged)
+            {
+                PerformRangedAttack();
+            }
+            else
+            {
+                PerformMeleeAttack();
+            }
+        }
+
+        /// <summary>
+        /// Perform ranged attack using raycast
+        /// </summary>
+        private void PerformRangedAttack()
+        {
+            // Perform raycast attack (Host mode only)
             Vector3 rayOrigin = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position + Vector3.up * raycastOriginHeight;
 
-            Vector3 directionToTarget = (player.position - rayOrigin).normalized;
-            float distanceToTarget = Vector3.Distance(rayOrigin, player.position);
+            // Calculate target position accounting for CharacterController height
+            Vector3 targetPosition;
+
+            // Try to get CharacterController to aim at center of capsule
+            CharacterController targetController = player.GetComponent<CharacterController>();
+            if (targetController != null)
+            {
+                // Aim at center of CharacterController capsule
+                targetPosition = player.position + targetController.center;
+            }
+            else
+            {
+                // Fallback: aim at chest height (1.5m up from feet)
+                targetPosition = player.position + Vector3.up * 1.5f;
+            }
+
+            Vector3 directionToTarget = (targetPosition - rayOrigin).normalized;
+            float distanceToTarget = Vector3.Distance(rayOrigin, targetPosition);
+
+            // Draw the attack ray for debugging (always draw when debugRaycast enabled)
+            if (debugRaycast)
+            {
+                // Draw actual aimed ray to the target position (center of body)
+                Debug.DrawRay(rayOrigin, directionToTarget * distanceToTarget, Color.cyan, 1f);
+                // Draw full potential attack range for context
+                Debug.DrawRay(rayOrigin, directionToTarget * config.attackRange, Color.yellow, 1f);
+            }
 
             // Perform the raycast using visionObstacleMask (same as vision detection)
             if (Physics.Raycast(rayOrigin, directionToTarget, out RaycastHit hit, config.attackRange, config.visionObstacleMask))
             {
                 if (debugRaycast)
                 {
-                    Debug.DrawRay(rayOrigin, directionToTarget * hit.distance, Color.red, 1f);
+                    Debug.DrawRay(rayOrigin, directionToTarget * hit.distance, Color.green, 1f);
                     Debug.Log($"[EnemyController] {config.enemyName} raycast hit: {hit.collider.name} at distance {hit.distance:F2}");
                 }
 
@@ -589,9 +631,52 @@ namespace AI.Enemy
                 // Raycast didn't hit anything
                 if (debugRaycast)
                 {
-                    Debug.DrawRay(rayOrigin, directionToTarget * config.attackRange, Color.yellow, 1f);
+                    Debug.DrawRay(rayOrigin, directionToTarget * config.attackRange, Color.red, 1f);
                     Debug.Log($"[EnemyController] {config.enemyName} raycast attack missed!");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Perform melee attack using sphere overlap (for knife/melee enemies)
+        /// </summary>
+        private void PerformMeleeAttack()
+        {
+            // Use a sphere overlap at the enemy's position to detect hits in melee range
+            Vector3 attackOrigin = transform.position + transform.forward * 0.5f + Vector3.up * 1f;
+            float meleeRadius = 1.5f; // Adjust based on weapon reach
+
+            Collider[] hitColliders = Physics.OverlapSphere(attackOrigin, meleeRadius);
+
+            if (debugRaycast)
+            {
+                Debug.DrawLine(transform.position, attackOrigin, Color.magenta, 1f);
+                Debug.Log($"[EnemyController] {config.enemyName} melee attack - checking {hitColliders.Length} colliders");
+            }
+
+            foreach (var hitCollider in hitColliders)
+            {
+                // Skip self
+                if (hitCollider.transform == transform || hitCollider.transform.IsChildOf(transform))
+                    continue;
+
+                // Check if this is the current host
+                HostController hitHost = hitCollider.GetComponentInParent<HostController>();
+                if (hitHost != null)
+                {
+                    HostController currentHost = gameStateManager.CurrentHostController;
+                    if (hitHost == currentHost)
+                    {
+                        hitHost.TakeDamage(config.attackDamage);
+                        Debug.Log($"[EnemyController] {config.enemyName} melee hit possessed host for {config.attackDamage} damage!");
+                        return; // Only damage once per attack
+                    }
+                }
+            }
+
+            if (debugRaycast)
+            {
+                Debug.Log($"[EnemyController] {config.enemyName} melee attack missed!");
             }
         }
 
@@ -819,6 +904,15 @@ namespace AI.Enemy
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
             Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
+
+            // Draw melee attack range for melee enemies
+            if (!config.isRanged)
+            {
+                Gizmos.color = Color.magenta;
+                Vector3 meleeAttackOrigin = transform.position + transform.forward * 0.5f + Vector3.up * 1f;
+                Gizmos.DrawWireSphere(meleeAttackOrigin, 1.5f);
+                Gizmos.DrawLine(transform.position, meleeAttackOrigin);
+            }
 
             // Draw patrol points connections
             if (patrolPoints != null && patrolPoints.Length > 0)

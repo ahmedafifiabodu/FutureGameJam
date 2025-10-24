@@ -11,6 +11,7 @@ public class FirstPersonZoneController : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+
     [SerializeField] private float airSpeedMultiplier = 1.15f;
 
     [SerializeField] private float jumpHeight = 1.2f;
@@ -37,13 +38,14 @@ public class FirstPersonZoneController : MonoBehaviour
     [SerializeField] private int overlapDebugFrames = 90;
 
     [Header("Bobbing")]
-
     [SerializeField] private float bobSpeed = 4.8f;
+
     [SerializeField] private float bobAmount = 0.05f;
     [SerializeField] private float bobTimer = Mathf.PI / 2;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
+
     [SerializeField] private AudioClip[] footstepSounds;
     [SerializeField] private float footstepCooldown = 0.2f;
     [SerializeField] private AudioClip jumpSound;
@@ -125,6 +127,9 @@ public class FirstPersonZoneController : MonoBehaviour
     {
         if (inputManager == null) return;
 
+        // Don't update if CharacterController is disabled
+        if (!controller.enabled) return;
+
         Look();
 
         // Compute desired deltas (we apply deltaTime after constraints)
@@ -201,8 +206,12 @@ public class FirstPersonZoneController : MonoBehaviour
         if (controller.isGrounded && inputManager.PlayerActions.Jump.triggered)
         {
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            audioSource.pitch = Random.Range(0.9f, 1.1f);
-            audioSource.PlayOneShot(jumpSound, 0.5f);
+
+            if (audioSource && jumpSound)
+            {
+                audioSource.pitch = Random.Range(0.9f, 1.1f);
+                audioSource.PlayOneShot(jumpSound, 0.5f);
+            }
         }
 
         if (!controller.isGrounded && yVel > 0.1f && inputManager.PlayerActions.Jump.WasReleasedThisFrame())

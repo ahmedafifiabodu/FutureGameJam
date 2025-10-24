@@ -17,7 +17,6 @@ public class HostController : MonoBehaviour, IDamageable
     [Header("References")]
     [SerializeField] private Transform cameraPivot;
 
-    [SerializeField] private Collider hostHeadCollider;
     [SerializeField] private FirstPersonZoneController hostMovementController;
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private RangedWeaponProfile weaponProfile;
@@ -39,17 +38,22 @@ public class HostController : MonoBehaviour, IDamageable
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
+
     [SerializeField] private AudioClip exitSound; // Sound when parasite exits the host
     [SerializeField] private AudioClip hitSound; // Sound when host takes damage
     [SerializeField] private AudioClip deathSound; // Sound when host dies
 
     [Header("Visual Feedback")]
     [SerializeField] private Renderer hostRenderer;
+
     [SerializeField] private Color damageColor = Color.red;
     [SerializeField] private float damageFlashDuration = 0.1f;
 
     [Header("Enemy Host Settings")]
+    [SerializeField] private SkinnedMeshRenderer[] skinnedMeshRenderers;
+
     [SerializeField] private bool isEnemyHost = false; // Set to true if this host is an enemy
+
     [SerializeField] private bool destroyParentOnDeath = false; // Destroy parent GameObject on death if true
 
     private bool isControlled = false;
@@ -68,13 +72,14 @@ public class HostController : MonoBehaviour, IDamageable
 
     // Enemy component references
     private EnemyController enemyController;
+
     private UnityEngine.AI.NavMeshAgent navMeshAgent;
     private Animator animator;
-    private SkinnedMeshRenderer[] skinnedMeshRenderers;
 
     // Visual feedback
     private Color originalColor;
- private Material materialInstance;
+
+    private Material materialInstance;
     private bool isFlashing;
     private float flashTimer;
 
@@ -99,51 +104,35 @@ public class HostController : MonoBehaviour, IDamageable
         // Get or add AudioSource component
         if (audioSource == null)
         {
-         audioSource = GetComponent<AudioSource>();
-       if (audioSource == null)
-    {
-    audioSource = gameObject.AddComponent<AudioSource>();
-           audioSource.playOnAwake = false;
-         audioSource.spatialBlend = 1f; // 3D sound
-    }
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 1f; // 3D sound
+            }
         }
 
-    // Setup visual feedback renderer
+        // Setup visual feedback renderer
         if (hostRenderer == null)
         {
- hostRenderer = GetComponentInChildren<Renderer>();
-}
+            hostRenderer = GetComponentInChildren<Renderer>();
+        }
 
         if (hostRenderer != null && hostRenderer.material != null)
         {
-       // Create material instance to avoid modifying shared material
-   materialInstance = new Material(hostRenderer.material);
-         hostRenderer.material = materialInstance;
+            // Create material instance to avoid modifying shared material
+            materialInstance = new Material(hostRenderer.material);
+            hostRenderer.material = materialInstance;
             originalColor = materialInstance.color;
         }
 
-    // Cache enemy components if this is an enemy host
-    if (isEnemyHost)
+        // Cache enemy components if this is an enemy host
+        if (isEnemyHost)
         {
             enemyController = GetComponent<EnemyController>();
             navMeshAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
             animator = GetComponent<Animator>();
-            skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-
-            if (enemyController == null)
-            {
-                Debug.LogWarning($"[Host] {gameObject.name} is marked as enemy host but no EnemyController found!");
-            }
-            
-            if (animator == null)
-            {
-                Debug.LogWarning($"[Host] {gameObject.name} is marked as enemy host but no Animator found!");
-            }
-
-            if (skinnedMeshRenderers == null || skinnedMeshRenderers.Length == 0)
-            {
-                Debug.LogWarning($"[Host] {gameObject.name} is marked as enemy host but no SkinnedMeshRenderer found!");
-            }
         }
     }
 
@@ -152,9 +141,9 @@ public class HostController : MonoBehaviour, IDamageable
         _inputManager = ServiceLocator.Instance.GetService<InputManager>();
         _gameStateManager = ServiceLocator.Instance.GetService<GameStateManager>();
 
-        // Initially disable host movement
+        // Initially disable host movement - disable CharacterController first, then FirstPersonZoneController, then re-enable CharacterController after delay
         if (hostMovementController)
-            hostMovementController.enabled = false;
+            StartCoroutine(InitializeHostMovementController());
 
         // Initialize weapon manager
         if (weaponManager && _inputManager)
@@ -169,20 +158,34 @@ public class HostController : MonoBehaviour, IDamageable
             remainingLifetime = Mathf.Max(minLifetime, hostLifetime - (hostCount * lifetimeDecreasePerHost));
     }
 
+    private System.Collections.IEnumerator InitializeHostMovementController()
+    {
+        var characterController = GetComponent<CharacterController>();
+        if (characterController)
+            characterController.enabled = false;
+
+        hostMovementController.enabled = false;
+
+        yield return new WaitForSeconds(2f);
+
+        if (characterController)
+            characterController.enabled = true;
+    }
+
     private void Update()
     {
         if (!isControlled || exitingHost || dead) return;
 
         // Update visual feedback flash
         if (isFlashing)
- {
-  flashTimer -= Time.deltaTime;
-       if (flashTimer <= 0)
-     {
-     isFlashing = false;
-  if (materialInstance != null)
-           materialInstance.color = originalColor;
-    }
+        {
+            flashTimer -= Time.deltaTime;
+            if (flashTimer <= 0)
+            {
+                isFlashing = false;
+                if (materialInstance != null)
+                    materialInstance.color = originalColor;
+            }
         }
 
         // Count down lifetime
@@ -194,6 +197,7 @@ public class HostController : MonoBehaviour, IDamageable
             remainingLifetime = 0f;
             Die();
         }
+
         // Check for voluntary exit input
         if (allowVoluntaryExit && _inputManager != null && Time.time - lastExitAttemptTime >= exitCooldown)
         {
@@ -257,8 +261,6 @@ public class HostController : MonoBehaviour, IDamageable
         attachedParasite = parasite;
         isControlled = true;
         hostCount++;
-        if (hostHeadCollider != null)
-            hostHeadCollider.enabled = false;
 
         // Get trajectory system from the parasite
         if (trajectorySystem == null && parasite != null)
@@ -327,12 +329,6 @@ public class HostController : MonoBehaviour, IDamageable
         if (weaponManager)
             weaponManager.Disable();
 
-        // Disable specific host head collider if assigned
-        if (hostHeadCollider != null)
-        {
-            Invoke(nameof(EnableCollider), 1.5f);
-        }
-
         // Reset parasite lifetime when exiting host
         if (attachedParasite != null)
             attachedParasite.ResetLifetime();
@@ -367,17 +363,17 @@ public class HostController : MonoBehaviour, IDamageable
         dead = true;
         Debug.Log($"[Host] Host died! Survived: {timeSinceAttached:F1}s");
 
-   // Hide trajectory if showing
-      if (trajectorySystem != null)
- {
-      trajectorySystem.HideTrajectory();
+        // Hide trajectory if showing
+        if (trajectorySystem != null)
+        {
+            trajectorySystem.HideTrajectory();
         }
 
         // Play death sound
         if (audioSource && deathSound)
- {
-       audioSource.PlayOneShot(deathSound);
- }
+        {
+            audioSource.PlayOneShot(deathSound);
+        }
 
         // Disable movement
 
@@ -400,22 +396,18 @@ public class HostController : MonoBehaviour, IDamageable
 
         if (attachedParasite != null)
             _gameStateManager.OnHostDied(attachedParasite);
-        
+
         EnableRagdoll();
 
-     // Determine what to destroy
-  GameObject objectToDestroy = gameObject;
- 
+        // Determine what to destroy
+        GameObject objectToDestroy = gameObject;
+
         // If destroyParentOnDeath is true and we have a parent, destroy the parent instead
         if (destroyParentOnDeath && transform.parent != null)
- {
+        {
             objectToDestroy = transform.parent.gameObject;
-    Debug.Log($"[Host] Destroying parent GameObject: {objectToDestroy.name}");
-     }
-        else
-  {
-  Debug.Log($"[Host] Destroying host GameObject: {objectToDestroy.name}");
-  }
+            Debug.Log($"[Host] Destroying parent GameObject: {objectToDestroy.name}");
+        }
 
         Destroy(objectToDestroy, ragdollDuration);
     }
@@ -438,12 +430,6 @@ public class HostController : MonoBehaviour, IDamageable
 
     public float GetLifetimePercentage() => remainingLifetime / hostLifetime;
 
-    public void EnableCollider()
-    {
-        if (hostHeadCollider != null)
-            hostHeadCollider.enabled = true;
-    }
-
     #region Enemy Host Management
 
     /// <summary>
@@ -451,38 +437,38 @@ public class HostController : MonoBehaviour, IDamageable
     /// </summary>
     private void DisableEnemyComponents()
     {
- if (!isEnemyHost) return;
+        if (!isEnemyHost) return;
 
         if (enemyController != null)
         {
-      enemyController.enabled = false;
-        Debug.Log($"[Host] Disabled EnemyController on {gameObject.name}");
-   }
-
-     if (navMeshAgent != null)
-        {
-       navMeshAgent.enabled = false;
-   Debug.Log($"[Host] Disabled NavMeshAgent on {gameObject.name}");
+            enemyController.enabled = false;
+            Debug.Log($"[Host] Disabled EnemyController on {gameObject.name}");
         }
 
-      // Disable Animator to stop root motion and animations
-     if (animator != null)
-      {
-            animator.enabled = false;
-   Debug.Log($"[Host] Disabled Animator on {gameObject.name}");
-  }
+        if (navMeshAgent != null)
+        {
+            navMeshAgent.enabled = false;
+            Debug.Log($"[Host] Disabled NavMeshAgent on {gameObject.name}");
+        }
 
-  // Disable SkinnedMeshRenderers to hide enemy mesh
-     if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
-    {
-    foreach (var smr in skinnedMeshRenderers)
-      {
-   if (smr != null)
-     {
-  smr.enabled = false;
-   }
-    }
-   Debug.Log($"[Host] Disabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
+        // Disable Animator to stop root motion and animations
+        if (animator != null)
+        {
+            animator.enabled = false;
+            Debug.Log($"[Host] Disabled Animator on {gameObject.name}");
+        }
+
+        // Disable SkinnedMeshRenderers to hide enemy mesh
+        if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+        {
+            foreach (var smr in skinnedMeshRenderers)
+            {
+                if (smr != null)
+                {
+                    smr.enabled = false;
+                }
+            }
+            Debug.Log($"[Host] Disabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
         }
     }
 
@@ -491,39 +477,39 @@ public class HostController : MonoBehaviour, IDamageable
     /// </summary>
     private void EnableEnemyComponents()
     {
-   if (!isEnemyHost) return;
+        if (!isEnemyHost) return;
 
-     if (enemyController != null)
-    {
-   enemyController.enabled = true;
+        if (enemyController != null)
+        {
+            enemyController.enabled = true;
             Debug.Log($"[Host] Re-enabled EnemyController on {gameObject.name}");
- }
+        }
 
-      if (navMeshAgent != null)
-  {
-  navMeshAgent.enabled = true;
-    Debug.Log($"[Host] Re-enabled NavMeshAgent on {gameObject.name}");
-}
+        if (navMeshAgent != null)
+        {
+            navMeshAgent.enabled = true;
+            Debug.Log($"[Host] Re-enabled NavMeshAgent on {gameObject.name}");
+        }
 
         // Re-enable Animator to resume root motion and animations
-     if (animator != null)
+        if (animator != null)
         {
-     animator.enabled = true;
+            animator.enabled = true;
             Debug.Log($"[Host] Re-enabled Animator on {gameObject.name}");
-      }
+        }
 
-     // Re-enable SkinnedMeshRenderers to show enemy mesh
-      if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+        // Re-enable SkinnedMeshRenderers to show enemy mesh
+        if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
         {
-   foreach (var smr in skinnedMeshRenderers)
-       {
-     if (smr != null)
-         {
-        smr.enabled = true;
-      }
-    }
-      Debug.Log($"[Host] Re-enabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
-  }
+            foreach (var smr in skinnedMeshRenderers)
+            {
+                if (smr != null)
+                {
+                    smr.enabled = true;
+                }
+            }
+            Debug.Log($"[Host] Re-enabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
+        }
     }
 
     #endregion Enemy Host Management
@@ -573,23 +559,25 @@ public class HostController : MonoBehaviour, IDamageable
             return;
         }
 
-        //remainingLifetime -= damage;
+        // Reduce lifetime by damage amount
+        remainingLifetime -= damage;
 
         Debug.Log($"[Host] Took {damage} damage! Remaining lifetime: {remainingLifetime:F1}s");
 
-      // Visual feedback - damage flash
+        // Visual feedback - damage flash
         StartDamageFlash();
 
         // Audio feedback - hit sound
-      if (audioSource && hitSound)
+        if (audioSource && hitSound)
         {
-   audioSource.PlayOneShot(hitSound);
-     }
+            audioSource.PlayOneShot(hitSound);
+        }
 
+        // Check if host should die
         if (remainingLifetime <= 0f)
-     {
+        {
             remainingLifetime = 0f;
- Die();
+            Die();
         }
     }
 
@@ -598,13 +586,13 @@ public class HostController : MonoBehaviour, IDamageable
     /// </summary>
     private void StartDamageFlash()
     {
-    isFlashing = true;
- flashTimer = damageFlashDuration;
+        isFlashing = true;
+        flashTimer = damageFlashDuration;
 
-   if (materialInstance != null)
-   {
-         materialInstance.color = damageColor;
- }
+        if (materialInstance != null)
+        {
+            materialInstance.color = damageColor;
+        }
     }
 
     #endregion IDamageable Implementation
