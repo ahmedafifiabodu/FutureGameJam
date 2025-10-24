@@ -6819,6 +6819,10 @@ MonoBehaviour:
   isExitDoor: 1
   preGenerationDelay: 0.5
   doorOpenDelay: 1.5
+  audioSource: {fileID: 0}
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+  jammedSound: {fileID: 0}
 --- !u!23 &7502554095424551289 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -4679458680561774453, guid: 4f3928e71ae8046e29af2b503ce59a62, type: 3}

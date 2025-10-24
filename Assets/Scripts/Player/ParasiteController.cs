@@ -297,7 +297,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
             // Play jump sound
             if (audioSource && jumpSound)
             {
-                audioSource.PlayOneShot(jumpSound);
+                audioSource.pitch = Random.Range(1.1f, 1.3f);
+                audioSource.PlayOneShot(jumpSound, 0.5f);
             }
         }
 
@@ -308,6 +309,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
         if (moveDir != Vector3.zero && _controller.isGrounded && footstepSounds.Length > 0 && Time.time > lastFootstep + footstepCooldown)
         {
             lastFootstep = Time.time;
+            audioSource.pitch = Random.Range(0.75f, 1.25f);
             audioSource.PlayOneShot(footstepSounds[Random.Range(0, footstepSounds.Length)]);
         }
         if (!cameraPivot) return;
@@ -399,6 +401,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
         // Play launch sound
         if (audioSource && launchSound)
         {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
             audioSource.PlayOneShot(launchSound);
         }
 
@@ -545,9 +548,9 @@ public class ParasiteController : MonoBehaviour, IDamageable
             Debug.Log($"[Parasite] Successfully attaching to host: {hostGameObject.name}");
 
         // Play possession sound
-        if (audioSource && possessionSound)
+        if (possessionSound)
         {
-            audioSource.PlayOneShot(possessionSound);
+            AudioSource.PlayClipAtPoint(possessionSound, transform.position);
         }
 
         // Use cached camera reference
@@ -604,6 +607,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
         // Play land sound when returning to ground after launch
         if (audioSource && landSound)
         {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
             audioSource.PlayOneShot(landSound);
         }
 

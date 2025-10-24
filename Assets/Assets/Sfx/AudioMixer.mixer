@@ -14,7 +14,63 @@ AudioMixerGroupController:
   m_Pitch: dcb78a412eb0b034f90386ce9037c8c3
   m_Send: 00000000000000000000000000000000
   m_Effects:
+  - {fileID: -6837905018517012272}
   - {fileID: 4805894197787760803}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!244 &-6837905018517012272
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 515cd3027e59bb845a954d79c6167aa4
+  m_EffectName: Pitch Shifter
+  m_MixLevel: 7895f9233d0793545983291823cdeb68
+  m_Parameters:
+  - m_ParameterName: Pitch
+    m_GUID: b6e6aa277d47b6c4a86fd069f16e0fc0
+  - m_ParameterName: FFT size
+    m_GUID: 385fa8d77e140e74c84e2e6fe82a4daf
+  - m_ParameterName: Overlap
+    m_GUID: 687cf1bdaf0b10b43921668a99982c10
+  - m_ParameterName: Max channels
+    m_GUID: c720a014dc5a42a4ca94a65777bf5638
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
+--- !u!244 &-4934192151473240119
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: b68132f2724df284aa842ee7dfc77983
+  m_EffectName: Attenuation
+  m_MixLevel: e9ecae3c0ea94304eb3864dafa3b05b4
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
+--- !u!243 &-1812603246779870157
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Music
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: ba1708df90aa8284cb6a320c8f042a06
+  m_Children: []
+  m_Volume: 7c2361b2338721a40a12a3d680a120f6
+  m_Pitch: 3c8c7c9fe567ce34d9a7048eb0874416
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: -4934192151473240119}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0
@@ -39,6 +95,7 @@ AudioMixerController:
   - guids:
     - aa12c96cccae9884fa9eea00c8bdc913
     - 89847b0a5855ad44eb7d7371c58bbaf1
+    - ba1708df90aa8284cb6a320c8f042a06
     name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500006}
@@ -53,6 +110,7 @@ AudioMixerGroupController:
   m_GroupID: aa12c96cccae9884fa9eea00c8bdc913
   m_Children:
   - {fileID: -7861501171091893654}
+  - {fileID: -1812603246779870157}
   m_Volume: 36afd79c27a40a743841df4b141f1aec
   m_Pitch: 2e015629ede0d5049bb65495fad2759e
   m_Send: 00000000000000000000000000000000

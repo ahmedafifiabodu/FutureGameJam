@@ -89,6 +89,7 @@ public class RangedWeaponProfile : ScriptableObject
 
     [Header("Audio")]
     public AudioClip[] shootSounds;
+    public float soundVolume = 1f;
 
     public AudioClip reloadSound;
     public AudioClip emptySound;

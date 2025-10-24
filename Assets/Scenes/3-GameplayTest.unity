@@ -941,6 +941,15 @@ MonoBehaviour:
   exitSimulationLayers:
     serializedVersion: 2
     m_Bits: 2097152
+  audioSource: {fileID: 274775753}
+  exitSound: {fileID: 8300000, guid: 370fdba4486f53e47abd13c0b5ae4870, type: 3}
+  hitSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  hostRenderer: {fileID: 0}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageFlashDuration: 0.1
+  isEnemyHost: 0
+  destroyParentOnDeath: 0
 --- !u!114 &274775743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -975,6 +984,15 @@ MonoBehaviour:
   bobSpeed: 5
   bobAmount: 0.1
   bobTimer: 1.5707964
+  audioSource: {fileID: 274775753}
+  footstepSounds:
+  - {fileID: 8300000, guid: 73fd6e7ee26742d42a780f811af3d6ef, type: 3}
+  - {fileID: 8300000, guid: fb7812bdb59e796438eb6e522abb684e, type: 3}
+  - {fileID: 8300000, guid: 67f4220f28a39784a870a359420fb16e, type: 3}
+  - {fileID: 8300000, guid: 30fb547730a5fad41b4750eb1778087f, type: 3}
+  - {fileID: 8300000, guid: 18a72fcc8a0413242bbb52c3ab2fbc71, type: 3}
+  footstepCooldown: 0.3
+  jumpSound: {fileID: 8300000, guid: 936e450f1b1091f42bcabf207c7225eb, type: 3}
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -2529,6 +2547,15 @@ MonoBehaviour:
   exitSimulationLayers:
     serializedVersion: 2
     m_Bits: 2097152
+  audioSource: {fileID: 669009873}
+  exitSound: {fileID: 8300000, guid: 370fdba4486f53e47abd13c0b5ae4870, type: 3}
+  hitSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  hostRenderer: {fileID: 0}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageFlashDuration: 0.1
+  isEnemyHost: 0
+  destroyParentOnDeath: 0
 --- !u!114 &669009866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2563,6 +2590,15 @@ MonoBehaviour:
   bobSpeed: 5
   bobAmount: 0.1
   bobTimer: 1.5707964
+  audioSource: {fileID: 669009873}
+  footstepSounds:
+  - {fileID: 8300000, guid: 73fd6e7ee26742d42a780f811af3d6ef, type: 3}
+  - {fileID: 8300000, guid: fb7812bdb59e796438eb6e522abb684e, type: 3}
+  - {fileID: 8300000, guid: 67f4220f28a39784a870a359420fb16e, type: 3}
+  - {fileID: 8300000, guid: 30fb547730a5fad41b4750eb1778087f, type: 3}
+  - {fileID: 8300000, guid: 18a72fcc8a0413242bbb52c3ab2fbc71, type: 3}
+  footstepCooldown: 0.3
+  jumpSound: {fileID: 8300000, guid: 936e450f1b1091f42bcabf207c7225eb, type: 3}
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -3024,6 +3060,10 @@ PrefabInstance:
       propertyPath: disableSprintWhileAiming
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9176812407783591817, guid: 13c46916fa552fb4e846d566e8b3a073, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -7861501171091893654, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 1000010210776282, guid: 13c46916fa552fb4e846d566e8b3a073, type: 3}
@@ -3847,13 +3887,13 @@ MonoBehaviour:
   bobAmount: 1.5
   bobTimer: 1.5707964
   audioSource: {fileID: 926719484}
-  footstepCooldown: 0.25
+  footstepCooldown: 0.35
   footstepSounds:
-  - {fileID: 8300000, guid: e541a54addb4aba40bebbdceb08c2dc3, type: 3}
-  - {fileID: 8300000, guid: ef7b4a88e7704f341baa338ab76eda60, type: 3}
-  - {fileID: 8300000, guid: 0dc94dba3f4102f4ba74d91ddca579fd, type: 3}
-  - {fileID: 8300000, guid: c6febd4f4af17f44da1801e9478f9e5c, type: 3}
-  - {fileID: 8300000, guid: 70326d900c8f0bc469b63202cb1a6d7d, type: 3}
+  - {fileID: 8300000, guid: 33418943b83f81642ac83a562972f27a, type: 3}
+  jumpSound: {fileID: 8300000, guid: 936e450f1b1091f42bcabf207c7225eb, type: 3}
+  launchSound: {fileID: 8300000, guid: b951fe91f84ff204792125f373ff82ac, type: 3}
+  possessionSound: {fileID: 8300000, guid: 370fdba4486f53e47abd13c0b5ae4870, type: 3}
+  landSound: {fileID: 8300000, guid: 8dbaf8ce152e0074cb93a26a58175eea, type: 3}
   usePossessionTransition: 1
   maxParasiteLifetime: 60
   enableLifetimeDecay: 1
@@ -3931,6 +3971,10 @@ MonoBehaviour:
   bobSpeed: 5
   bobAmount: 0.1
   bobTimer: 1.5707964
+  audioSource: {fileID: 0}
+  footstepSounds: []
+  footstepCooldown: 0.2
+  jumpSound: {fileID: 0}
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3
@@ -4836,7 +4880,7 @@ MonoBehaviour:
   primaryWeapon: {fileID: 689216630}
   secondaryWeapon: {fileID: 0}
   weaponHolder: {fileID: 0}
-  characterAnimator: {fileID: 0}
+  weaponAnimator: {fileID: 0}
 --- !u!4 &1130484891
 Transform:
   m_ObjectHideFlags: 0
@@ -5224,6 +5268,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 574150693572542344, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -1812603246779870157, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
+    - target: {fileID: 1740374576045549919, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -1812603246779870157, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
+    - target: {fileID: 2515489934909173242, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -1812603246779870157, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
+    - target: {fileID: 2700009023997736389, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -1812603246779870157, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
     - target: {fileID: 4484510572557723543, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
       propertyPath: showHUD
       value: 0
@@ -5272,6 +5332,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6631023778527148918, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -1812603246779870157, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
+    - target: {fileID: 7231110847452054472, guid: ec9f49b46c86741ee836b327be6dfa98, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -1812603246779870157, guid: bb1cf49b1c0c3c34dbfbac88f12a3e83, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5333,6 +5401,15 @@ MonoBehaviour:
   exitSimulationLayers:
     serializedVersion: 2
     m_Bits: 2097152
+  audioSource: {fileID: 1252195051}
+  exitSound: {fileID: 8300000, guid: 370fdba4486f53e47abd13c0b5ae4870, type: 3}
+  hitSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  hostRenderer: {fileID: 0}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageFlashDuration: 0.1
+  isEnemyHost: 0
+  destroyParentOnDeath: 0
 --- !u!114 &1252195044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5367,6 +5444,15 @@ MonoBehaviour:
   bobSpeed: 5
   bobAmount: 0.1
   bobTimer: 1.5707964
+  audioSource: {fileID: 1252195051}
+  footstepSounds:
+  - {fileID: 8300000, guid: 73fd6e7ee26742d42a780f811af3d6ef, type: 3}
+  - {fileID: 8300000, guid: fb7812bdb59e796438eb6e522abb684e, type: 3}
+  - {fileID: 8300000, guid: 67f4220f28a39784a870a359420fb16e, type: 3}
+  - {fileID: 8300000, guid: 30fb547730a5fad41b4750eb1778087f, type: 3}
+  - {fileID: 8300000, guid: 18a72fcc8a0413242bbb52c3ab2fbc71, type: 3}
+  footstepCooldown: 0.3
+  jumpSound: {fileID: 8300000, guid: 936e450f1b1091f42bcabf207c7225eb, type: 3}
   overrideControllerTuning: 0
   tunedSlopeLimit: 45
   tunedStepOffset: 0.3

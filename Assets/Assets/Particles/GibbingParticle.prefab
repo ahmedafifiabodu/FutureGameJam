@@ -5008,4 +5008,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   audioSource: {fileID: 1002168492999770456}
   explosionSounds:
-  - {fileID: 8300000, guid: 167ddd1d9e95ade45aadee7dcd624108, type: 3}
+  - {fileID: 8300000, guid: 75aa97f68fe314addbfbb35078dd0aff, type: 3}
+  - {fileID: 8300000, guid: ac35998c9efa24954b92edbd4dbcf153, type: 3}
+  - {fileID: 8300000, guid: a9debb3f39d0c4b0ebdd68f31e169e4a, type: 3}
