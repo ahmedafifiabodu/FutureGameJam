@@ -31,6 +31,12 @@ namespace ProceduralGeneration
         [SerializeField] private float preGenerationDelay = 0.5f; // Time before door opens to generate next area
         [SerializeField] private float doorOpenDelay = 1.5f; // Additional delay after generation starts
 
+        [Header("Audio")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip openSound;
+        [SerializeField] private AudioClip closeSound;
+        [SerializeField] private AudioClip jammedSound; // For jammed open animation
+
         private bool isOpen = false;
         private Material[] lightMaterials;
         private ProceduralLevelGenerator levelGenerator;
@@ -50,6 +56,18 @@ namespace ProceduralGeneration
 
             // Find the level generator
             levelGenerator = FindFirstObjectByType<ProceduralLevelGenerator>();
+
+            // Get or add AudioSource component
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    audioSource.playOnAwake = false;
+                    audioSource.spatialBlend = 1f; // 3D sound
+                }
+            }
 
             // Find associated connection point (usually in parent or siblings)
             associatedConnectionPoint = GetComponentInParent<ConnectionPoint>();
@@ -156,13 +174,27 @@ namespace ProceduralGeneration
             if (doorAnimator != null)
             {
                 // Randomly choose between normal open and jammed open animations
-                string animationTrigger = Random.Range(0, 2) == 0
-                    ? GameConstant.AnimationParameters.Door.Open
-                    : GameConstant.AnimationParameters.Door.OpenJammed;
+                bool isJammed = Random.Range(0, 2) == 0;
+                string animationTrigger = isJammed
+                    ? GameConstant.AnimationParameters.Door.OpenJammed
+                    : GameConstant.AnimationParameters.Door.Open;
 
                 doorAnimator.SetTrigger(animationTrigger);
 
                 Debug.Log($"[Door] {gameObject.name} playing animation: {animationTrigger}");
+
+                // Play appropriate sound based on animation type
+                if (audioSource != null)
+                {
+                    if (isJammed && jammedSound != null)
+                    {
+                        audioSource.PlayOneShot(jammedSound);
+                    }
+                    else if (openSound != null)
+                    {
+                        audioSource.PlayOneShot(openSound);
+                    }
+                }
             }
 
             if (doorCollider != null)
@@ -186,6 +218,12 @@ namespace ProceduralGeneration
             if (doorAnimator != null)
             {
                 doorAnimator.SetTrigger(GameConstant.AnimationParameters.Door.Close);
+            }
+
+            // Play close sound
+            if (audioSource != null && closeSound != null)
+            {
+                audioSource.PlayOneShot(closeSound);
             }
 
             if (doorCollider != null)
