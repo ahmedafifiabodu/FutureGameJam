@@ -296,67 +296,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &112054001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 112054003}
-  - component: {fileID: 112054002}
-  m_Layer: 0
-  m_Name: ProceduralLevelGenerator (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &112054002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112054001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d451b284977f31641828de358d880061, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ProceduralLevelGenerator
-  roomPrefabs:
-  - roomPrefab: {fileID: 7604991661879118048, guid: 323586b191138b0408447fc144fb0bab, type: 3}
-    weight: 60
-    description: 
-  corridorPrefabs:
-  - corridorPrefab: {fileID: 7647134066835127503, guid: 9e0c9eef0c43f3a4a94d2feeda663403, type: 3}
-    weight: 0
-    description: 
-  - corridorPrefab: {fileID: 7647134066835127503, guid: da06504dfa43a55478e32e03ccdf9361, type: 3}
-    weight: 0
-    description: 
-  - corridorPrefab: {fileID: 7647134066835127503, guid: 6eb931d2753ffe34cb1fd0502b93f414, type: 3}
-    weight: 0
-    description: 
-  startingRoomPrefab: {fileID: 6181002203944844611, guid: d43cd428a75bb52409652b04650abad5, type: 3}
-  currentRoomIteration: 3
-  enableDebugLogs: 1
---- !u!4 &112054003
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112054001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &135948389
 GameObject:
   m_ObjectHideFlags: 0
@@ -2320,6 +2259,100 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1035075947}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &594990224
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 594990226}
+  - component: {fileID: 594990225}
+  m_Layer: 0
+  m_Name: ProceduralLevelGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &594990225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594990224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d451b284977f31641828de358d880061, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.ProceduralLevelGenerator
+  roomPrefabs:
+  - roomPrefab: {fileID: 7604991661879118048, guid: 323586b191138b0408447fc144fb0bab, type: 3}
+    weight: 15
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: 3f56394dd54458d4d902ac877cd0b70c, type: 3}
+    weight: 15
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: e84ed08b4e61df34a940441a4fd934f4, type: 3}
+    weight: 15
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: ca6e381f6ef9a9541837b87030fea73e, type: 3}
+    weight: 15
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: bbdaa7e5720fec64dacb44ac6f146aa3, type: 3}
+    weight: 10
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: d73e13a5f70ba30479151bf66bcddd1f, type: 3}
+    weight: 10
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: d281201311b5d624492d6dbf10961dbe, type: 3}
+    weight: 5
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: c928e9baa66391446be724fa3a34e5c9, type: 3}
+    weight: 5
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: eac10a1497c8da94d83cf6119ccdab9f, type: 3}
+    weight: 5
+    description: 
+  - roomPrefab: {fileID: 7604991661879118048, guid: 2037e11b095191a46abf7cfcb30b434e, type: 3}
+    weight: 5
+    description: 
+  corridorPrefabs:
+  - corridorPrefab: {fileID: 7647134066835127503, guid: 9e0c9eef0c43f3a4a94d2feeda663403, type: 3}
+    weight: 30
+    description: 
+  - corridorPrefab: {fileID: 7647134066835127503, guid: da06504dfa43a55478e32e03ccdf9361, type: 3}
+    weight: 20
+    description: 
+  - corridorPrefab: {fileID: 7647134066835127503, guid: 6eb931d2753ffe34cb1fd0502b93f414, type: 3}
+    weight: 20
+    description: 
+  - corridorPrefab: {fileID: 7647134066835127503, guid: 9aa3005a733ad484c8f13579c4f163ad, type: 3}
+    weight: 15
+    description: 
+  - corridorPrefab: {fileID: 7647134066835127503, guid: f7650a67aaf4b4549b57eed90f52a852, type: 3}
+    weight: 15
+    description: 1
+  startingRoomPrefab: {fileID: 6181002203944844611, guid: d43cd428a75bb52409652b04650abad5, type: 3}
+  currentRoomIteration: 3
+  enableDebugLogs: 1
+--- !u!4 &594990226
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594990224}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &598721343
 GameObject:
@@ -8818,6 +8851,6 @@ SceneRoots:
   - {fileID: 135948390}
   - {fileID: 744069643}
   - {fileID: 1568901438}
-  - {fileID: 112054003}
+  - {fileID: 594990226}
   - {fileID: 526552920}
   - {fileID: 1113173111}

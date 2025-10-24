@@ -15547,7 +15547,7 @@ MonoBehaviour:
   targetIsSelf: 1
   targetGO: {fileID: 0}
   tweenTargetIsTargetGO: 1
-  delay: 0
+  delay: 1
   duration: 2.5
   easeType: 7
   easeCurve:
@@ -17071,6 +17071,10 @@ PrefabInstance:
     - target: {fileID: 5257289937928075504, guid: f53605113ed56544b82845e693ef7db8, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560474643851080582, guid: f53605113ed56544b82845e693ef7db8, type: 3}
+      propertyPath: delay
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -19339,7 +19343,7 @@ MonoBehaviour:
   targetIsSelf: 1
   targetGO: {fileID: 0}
   tweenTargetIsTargetGO: 1
-  delay: 0
+  delay: 0.8
   duration: 2.5
   easeType: 7
   easeCurve:
@@ -20954,7 +20958,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2806799216870966543, guid: d87c9dec5d21e7b4394e3ef56f3b3373, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2806799216870966543, guid: d87c9dec5d21e7b4394e3ef56f3b3373, type: 3}
       propertyPath: m_LocalPosition.z
@@ -22116,7 +22120,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2806799216870966543, guid: d87c9dec5d21e7b4394e3ef56f3b3373, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2806799216870966543, guid: d87c9dec5d21e7b4394e3ef56f3b3373, type: 3}
       propertyPath: m_LocalPosition.z
@@ -24922,7 +24926,7 @@ MonoBehaviour:
   targetIsSelf: 1
   targetGO: {fileID: 0}
   tweenTargetIsTargetGO: 1
-  delay: 0
+  delay: 0.5
   duration: 2.5
   easeType: 7
   easeCurve:
