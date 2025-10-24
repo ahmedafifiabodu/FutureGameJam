@@ -2913,6 +2913,53 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1 &1217126082017326576
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 194361260561063928}
+  - component: {fileID: 6147179479186795142}
+  m_Layer: 0
+  m_Name: 9
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &194361260561063928
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217126082017326576}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.4999992, z: -0, w: 0.8660259}
+  m_LocalPosition: {x: -2.0794, y: -1, z: 7.79126}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9067371712702296430}
+  m_LocalEulerAnglesHint: {x: 0, y: -60, z: 0}
+--- !u!114 &6147179479186795142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217126082017326576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4aa40827214fb4e4d9acd109709cf1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
+  spawnType: 0
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &1308795789520091719
 GameObject:
   m_ObjectHideFlags: 0
@@ -2950,6 +2997,8 @@ Transform:
   - {fileID: 7250418363708827674}
   - {fileID: 5677170661228226089}
   - {fileID: 8863562081560307084}
+  - {fileID: 194361260561063928}
+  - {fileID: 7444655159284368451}
   m_Father: {fileID: 646676971553826823}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1413831039975193759
@@ -12560,6 +12609,53 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1 &6254431338431605616
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7444655159284368451}
+  - component: {fileID: 3726338916116619885}
+  m_Layer: 0
+  m_Name: 10
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7444655159284368451
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6254431338431605616}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.4999992, z: -0, w: 0.8660259}
+  m_LocalPosition: {x: 5.4206, y: -1, z: -5.95874}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9067371712702296430}
+  m_LocalEulerAnglesHint: {x: 0, y: -60, z: 0}
+--- !u!114 &3726338916116619885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6254431338431605616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4aa40827214fb4e4d9acd109709cf1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
+  spawnType: 0
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &6416556791566540989
 GameObject:
   m_ObjectHideFlags: 0
@@ -14728,13 +14824,15 @@ MonoBehaviour:
   - {fileID: 6440960345640653974}
   - {fileID: 9128595837259114515}
   - {fileID: 9005475806878085973}
-  baseEnemiesPerPiece: 3
-  enemiesPerIteration: 0.5
+  - {fileID: 6147179479186795142}
+  - {fileID: 3726338916116619885}
+  baseEnemiesPerPiece: 4
+  enemiesPerIteration: 0.12
   maxEnemiesPerPiece: 10
   spawnChance: 0.8
   minIteration: 0
-  maxIteration: 0
-  useCustomSpawnSettings: 0
+  maxIteration: 50
+  useCustomSpawnSettings: 1
   playerHasEntered: 0
   showEnemyDebug: 0
   roomName: Room

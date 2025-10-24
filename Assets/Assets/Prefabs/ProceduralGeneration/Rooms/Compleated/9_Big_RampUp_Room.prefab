@@ -14385,13 +14385,13 @@ MonoBehaviour:
   - {fileID: 5351169592273511291}
   - {fileID: 8450862404856330215}
   - {fileID: 744693636500610639}
-  baseEnemiesPerPiece: 3
-  enemiesPerIteration: 0.5
-  maxEnemiesPerPiece: 10
+  baseEnemiesPerPiece: 5
+  enemiesPerIteration: 0.18
+  maxEnemiesPerPiece: 14
   spawnChance: 0.8
   minIteration: 0
-  maxIteration: 0
-  useCustomSpawnSettings: 0
+  maxIteration: 50
+  useCustomSpawnSettings: 1
   playerHasEntered: 0
   showEnemyDebug: 0
   roomName: Room

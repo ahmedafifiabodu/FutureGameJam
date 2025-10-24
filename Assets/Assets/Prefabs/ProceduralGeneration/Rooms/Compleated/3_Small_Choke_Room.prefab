@@ -1291,6 +1291,53 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &981390249201932009
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8711425354167422619}
+  - component: {fileID: 2581991601325070563}
+  m_Layer: 0
+  m_Name: 10
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8711425354167422619
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981390249201932009}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.1773962, y: -0.7052341, z: -0.68496966, w: 0.044632662}
+  m_LocalPosition: {x: -5.3294, y: -1, z: -1.9587402}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8956353404152450906}
+  m_LocalEulerAnglesHint: {x: -71.859, y: -100.67, z: -90.24}
+--- !u!114 &2581991601325070563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981390249201932009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4aa40827214fb4e4d9acd109709cf1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
+  spawnType: 0
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &1026576658893464682
 GameObject:
   m_ObjectHideFlags: 0
@@ -2702,6 +2749,8 @@ Transform:
   - {fileID: 6944027230194168843}
   - {fileID: 1187297542427420717}
   - {fileID: 8851569813789224862}
+  - {fileID: 7814556824526291839}
+  - {fileID: 8711425354167422619}
   m_Father: {fileID: 646676971553826823}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5276848774909001575
@@ -6382,13 +6431,13 @@ MonoBehaviour:
   - {fileID: 8490848948290863288}
   - {fileID: 6152204901956165415}
   - {fileID: 8879186924828991646}
-  baseEnemiesPerPiece: 3
-  enemiesPerIteration: 0.5
+  baseEnemiesPerPiece: 4
+  enemiesPerIteration: 0.12
   maxEnemiesPerPiece: 10
   spawnChance: 0.8
   minIteration: 0
-  maxIteration: 0
-  useCustomSpawnSettings: 0
+  maxIteration: 50
+  useCustomSpawnSettings: 1
   playerHasEntered: 0
   showEnemyDebug: 0
   roomName: Room
@@ -6396,6 +6445,53 @@ MonoBehaviour:
   startingRoom: 0
   startingRoomDoorDelay: 1.5
   showDebugLogs: 1
+--- !u!1 &7783989294369418968
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7814556824526291839}
+  - component: {fileID: 931864984973896431}
+  m_Layer: 0
+  m_Name: 9
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7814556824526291839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7783989294369418968}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.1773962, y: -0.7052341, z: -0.68496966, w: 0.044632662}
+  m_LocalPosition: {x: 5.6706, y: -1, z: -6.95874}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8956353404152450906}
+  m_LocalEulerAnglesHint: {x: -71.859, y: -100.67, z: -90.24}
+--- !u!114 &931864984973896431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7783989294369418968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4aa40827214fb4e4d9acd109709cf1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.Spawning.SpawnPoint
+  spawnType: 0
+  isActive: 1
+  hasSpawned: 0
 --- !u!1 &7950857213479733705
 GameObject:
   m_ObjectHideFlags: 0
@@ -23026,7 +23122,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8707338079883220553, guid: a3f0202717669454a8ba2195656a1e90, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.5
+      value: 9.462
       objectReference: {fileID: 0}
     - target: {fileID: 8707338079883220553, guid: a3f0202717669454a8ba2195656a1e90, type: 3}
       propertyPath: m_LocalPosition.y
