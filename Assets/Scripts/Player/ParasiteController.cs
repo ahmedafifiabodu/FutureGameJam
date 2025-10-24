@@ -73,6 +73,10 @@ public class ParasiteController : MonoBehaviour, IDamageable
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private float footstepCooldown = 0.2f;
     [SerializeField] private AudioClip[] footstepSounds;
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip launchSound;
+    [SerializeField] private AudioClip possessionSound; // Sound when entering a host
+    [SerializeField] private AudioClip landSound; // Sound when landing from launch
 
     [Header("Visual Effects")]
     [SerializeField] private bool usePossessionTransition = true;
@@ -287,7 +291,15 @@ public class ParasiteController : MonoBehaviour, IDamageable
             yVel = -2f;
 
         if (_controller.isGrounded && _inputManager.ParasiteActions.Jump.triggered)
+        {
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+            // Play jump sound
+            if (audioSource && jumpSound)
+            {
+                audioSource.PlayOneShot(jumpSound);
+            }
+        }
 
         yVel += gravity * Time.deltaTime;
         move.y = yVel;
@@ -383,6 +395,12 @@ public class ParasiteController : MonoBehaviour, IDamageable
         lastLaunchTime = Time.time;
         launchStartTime = Time.time;
         gravity *= startGravityMultiplier;
+
+        // Play launch sound
+        if (audioSource && launchSound)
+        {
+            audioSource.PlayOneShot(launchSound);
+        }
 
         if (showDebug)
             Debug.Log($"[Parasite] Launched! Direction: {launchDir}");
@@ -526,6 +544,12 @@ public class ParasiteController : MonoBehaviour, IDamageable
         if (showDebug)
             Debug.Log($"[Parasite] Successfully attaching to host: {hostGameObject.name}");
 
+        // Play possession sound
+        if (audioSource && possessionSound)
+        {
+            audioSource.PlayOneShot(possessionSound);
+        }
+
         // Use cached camera reference
         Camera parasiteCamera = _parasiteCamera;
         Transform hostCameraPivot = hostController.GetCameraPivot();
@@ -576,6 +600,12 @@ public class ParasiteController : MonoBehaviour, IDamageable
         launchVelocity = Vector3.zero;
         if (zoneController != null)
             gravity = zoneController.Gravity;
+
+        // Play land sound when returning to ground after launch
+        if (audioSource && landSound)
+        {
+            audioSource.PlayOneShot(landSound);
+        }
 
         if (showDebug)
             Debug.Log("[Parasite] Returned to crawling state");
@@ -938,6 +968,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
         lastLaunchTime = Time.time;
         launchStartTime = Time.time;
         gravity *= startGravityMultiplier;
+
+        audioSource.PlayOneShot(launchSound); // Play launch sound
 
         if (showDebug)
             Debug.Log($"[Parasite] Exit launched from host! Velocity: {velocity}");

@@ -37,6 +37,17 @@ public class HostController : MonoBehaviour, IDamageable
     [SerializeField] private float maxExitDistance = 10f;
     [SerializeField] private LayerMask exitSimulationLayers = -1;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip exitSound; // Sound when parasite exits the host
+    [SerializeField] private AudioClip hitSound; // Sound when host takes damage
+    [SerializeField] private AudioClip deathSound; // Sound when host dies
+
+    [Header("Visual Feedback")]
+    [SerializeField] private Renderer hostRenderer;
+    [SerializeField] private Color damageColor = Color.red;
+    [SerializeField] private float damageFlashDuration = 0.1f;
+
     [Header("Enemy Host Settings")]
     [SerializeField] private bool isEnemyHost = false; // Set to true if this host is an enemy
     [SerializeField] private bool destroyParentOnDeath = false; // Destroy parent GameObject on death if true
@@ -61,6 +72,12 @@ public class HostController : MonoBehaviour, IDamageable
     private Animator animator;
     private SkinnedMeshRenderer[] skinnedMeshRenderers;
 
+    // Visual feedback
+    private Color originalColor;
+ private Material materialInstance;
+    private bool isFlashing;
+    private float flashTimer;
+
     private static int hostCount = 0;
 
     private void Awake()
@@ -79,8 +96,34 @@ public class HostController : MonoBehaviour, IDamageable
         if (zoneController != null)
             gravity = zoneController.Gravity;
 
-        // Cache enemy components if this is an enemy host
-        if (isEnemyHost)
+        // Get or add AudioSource component
+        if (audioSource == null)
+        {
+         audioSource = GetComponent<AudioSource>();
+       if (audioSource == null)
+    {
+    audioSource = gameObject.AddComponent<AudioSource>();
+           audioSource.playOnAwake = false;
+         audioSource.spatialBlend = 1f; // 3D sound
+    }
+        }
+
+    // Setup visual feedback renderer
+        if (hostRenderer == null)
+        {
+ hostRenderer = GetComponentInChildren<Renderer>();
+}
+
+        if (hostRenderer != null && hostRenderer.material != null)
+        {
+       // Create material instance to avoid modifying shared material
+   materialInstance = new Material(hostRenderer.material);
+         hostRenderer.material = materialInstance;
+            originalColor = materialInstance.color;
+        }
+
+    // Cache enemy components if this is an enemy host
+    if (isEnemyHost)
         {
             enemyController = GetComponent<EnemyController>();
             navMeshAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
@@ -129,6 +172,18 @@ public class HostController : MonoBehaviour, IDamageable
     private void Update()
     {
         if (!isControlled || exitingHost || dead) return;
+
+        // Update visual feedback flash
+        if (isFlashing)
+ {
+  flashTimer -= Time.deltaTime;
+       if (flashTimer <= 0)
+     {
+     isFlashing = false;
+  if (materialInstance != null)
+           materialInstance.color = originalColor;
+    }
+        }
 
         // Count down lifetime
         timeSinceAttached += Time.deltaTime;
@@ -295,6 +350,12 @@ public class HostController : MonoBehaviour, IDamageable
         exitingHost = true;
         Debug.Log($"[Host] Player initiated voluntary exit from host");
 
+        // Play exit sound
+        if (audioSource && exitSound)
+        {
+            audioSource.PlayOneShot(exitSound);
+        }
+
         // Notify game manager to handle the voluntary exit
         _gameStateManager.OnVoluntaryHostExit(attachedParasite, cameraPivot.forward, exitLaunchForce);
     }
@@ -306,13 +367,20 @@ public class HostController : MonoBehaviour, IDamageable
         dead = true;
         Debug.Log($"[Host] Host died! Survived: {timeSinceAttached:F1}s");
 
-        // Hide trajectory if showing
-        if (trajectorySystem != null)
-        {
-            trajectorySystem.HideTrajectory();
+   // Hide trajectory if showing
+      if (trajectorySystem != null)
+ {
+      trajectorySystem.HideTrajectory();
         }
 
+        // Play death sound
+        if (audioSource && deathSound)
+ {
+       audioSource.PlayOneShot(deathSound);
+ }
+
         // Disable movement
+
         if (hostMovementController)
             hostMovementController.enabled = false;
 
@@ -323,6 +391,12 @@ public class HostController : MonoBehaviour, IDamageable
         // Spawn death effect
         if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
+
+        // Play death sound
+        if (audioSource && deathSound)
+        {
+            audioSource.PlayOneShot(deathSound);
+        }
 
         if (attachedParasite != null)
             _gameStateManager.OnHostDied(attachedParasite);
@@ -503,11 +577,34 @@ public class HostController : MonoBehaviour, IDamageable
 
         Debug.Log($"[Host] Took {damage} damage! Remaining lifetime: {remainingLifetime:F1}s");
 
-        if (remainingLifetime <= 0f)
+      // Visual feedback - damage flash
+        StartDamageFlash();
+
+        // Audio feedback - hit sound
+      if (audioSource && hitSound)
         {
+   audioSource.PlayOneShot(hitSound);
+     }
+
+        if (remainingLifetime <= 0f)
+     {
             remainingLifetime = 0f;
-            Die();
+ Die();
         }
+    }
+
+    /// <summary>
+    /// Start the damage flash visual feedback
+    /// </summary>
+    private void StartDamageFlash()
+    {
+    isFlashing = true;
+ flashTimer = damageFlashDuration;
+
+   if (materialInstance != null)
+   {
+         materialInstance.color = damageColor;
+ }
     }
 
     #endregion IDamageable Implementation
