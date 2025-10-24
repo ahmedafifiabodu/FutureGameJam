@@ -26,7 +26,7 @@ MonoBehaviour:
   visionCheckInterval: 0.5
   visionObstacleMask:
     serializedVersion: 2
-    m_Bits: 2097153
+    m_Bits: 2097216
   attackRange: 8
   attackCooldown: 3
   chaseSpeed: 5
@@ -34,7 +34,7 @@ MonoBehaviour:
   staggerChance: 0.2
   staggerDuration: 0.3
   spawnWeight: 30
-  minRoomIteration: 2
+  minRoomIteration: 5
   memoryDelay: 1
   shotgunConeAngle: 30
   shotgunRange: 8
@@ -44,8 +44,6 @@ MonoBehaviour:
   mediumRangeMin: 5
   mediumRangeMax: 12
   isRanged: 1
-  projectilePrefab: {fileID: 3627899498136515975, guid: e25d2ed9f08a26644a9f789ea99f2b2b, type: 3}
-  projectileSpeed: 20
   hasCustomAnimations: 1
   idleAnimation: Idle
   patrolAnimation: Patrol

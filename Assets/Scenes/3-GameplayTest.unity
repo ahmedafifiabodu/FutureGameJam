@@ -901,7 +901,7 @@ GameObject:
   - component: {fileID: 274775750}
   - component: {fileID: 274775749}
   - component: {fileID: 274775752}
-  m_Layer: 0
+  m_Layer: 21
   m_Name: Player (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3587,7 +3587,7 @@ GameObject:
   - component: {fileID: 926719478}
   - component: {fileID: 926719475}
   - component: {fileID: 926719476}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Parasite (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -15,7 +15,7 @@ public class WeaponManager : MonoBehaviour
     [SerializeField] private Transform weaponHolder; // Where weapons are parented
 
     [Header("Animation")]
-    [SerializeField] private Animator characterAnimator; // Character animator for weapon switching
+    [SerializeField] private Animator weaponAnimator; // Character animator for weapon switching
 
     private WeaponBase currentWeapon;
     private InputManager inputManager;
@@ -114,9 +114,9 @@ public class WeaponManager : MonoBehaviour
         if (weapon == null || weapon == currentWeapon) return;
 
         // Trigger weapon change animation if character animator exists
-        if (characterAnimator)
+        if (weaponAnimator)
         {
-            characterAnimator.SetTrigger(changingWeaponHash);
+            weaponAnimator.SetTrigger(changingWeaponHash);
         }
 
         EquipWeapon(weapon);

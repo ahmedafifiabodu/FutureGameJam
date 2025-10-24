@@ -26,7 +26,7 @@ MonoBehaviour:
   visionCheckInterval: 0.5
   visionObstacleMask:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 2097216
   attackRange: 1.5
   attackCooldown: 1
   chaseSpeed: 5
@@ -44,11 +44,9 @@ MonoBehaviour:
   mediumRangeMin: 5
   mediumRangeMax: 12
   isRanged: 0
-  projectilePrefab: {fileID: 0}
-  projectileSpeed: 20
   hasCustomAnimations: 0
   idleAnimation: Idle
-  patrolAnimation: IsMoving
+  patrolAnimation: Patrol
   chaseAnimation: Chase
   meleeAttackAnimation: meeleAttack
   projectileAttackAnimation: ProjectileAttack

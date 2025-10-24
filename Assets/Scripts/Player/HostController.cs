@@ -1,4 +1,5 @@
 using UnityEngine;
+using AI.Enemy;
 
 /// <summary>
 /// Controls a host body that the parasite can attach to.
@@ -36,6 +37,10 @@ public class HostController : MonoBehaviour, IDamageable
     [SerializeField] private float maxExitDistance = 10f;
     [SerializeField] private LayerMask exitSimulationLayers = -1;
 
+    [Header("Enemy Host Settings")]
+    [SerializeField] private bool isEnemyHost = false; // Set to true if this host is an enemy
+    [SerializeField] private bool destroyParentOnDeath = false; // Destroy parent GameObject on death if true
+
     private bool isControlled = false;
     private float remainingLifetime;
     private float lastExitAttemptTime = -10f;
@@ -49,6 +54,12 @@ public class HostController : MonoBehaviour, IDamageable
     private InputManager _inputManager;
     private FirstPersonZoneController zoneController;
     private GameStateManager _gameStateManager;
+
+    // Enemy component references
+    private EnemyController enemyController;
+    private UnityEngine.AI.NavMeshAgent navMeshAgent;
+    private Animator animator;
+    private SkinnedMeshRenderer[] skinnedMeshRenderers;
 
     private static int hostCount = 0;
 
@@ -68,19 +79,27 @@ public class HostController : MonoBehaviour, IDamageable
         if (zoneController != null)
             gravity = zoneController.Gravity;
 
-        // Setup trajectory system if not assigned
-        if (trajectorySystem == null && showExitTrajectory)
+        // Cache enemy components if this is an enemy host
+        if (isEnemyHost)
         {
-            trajectorySystem = GetComponent<ParasiteLaunchTrajectory>();
-            if (trajectorySystem == null)
+            enemyController = GetComponent<EnemyController>();
+            navMeshAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+            animator = GetComponent<Animator>();
+            skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+
+            if (enemyController == null)
             {
-                trajectorySystem = GetComponentInChildren<ParasiteLaunchTrajectory>();
+                Debug.LogWarning($"[Host] {gameObject.name} is marked as enemy host but no EnemyController found!");
+            }
+            
+            if (animator == null)
+            {
+                Debug.LogWarning($"[Host] {gameObject.name} is marked as enemy host but no Animator found!");
             }
 
-            if (trajectorySystem == null)
+            if (skinnedMeshRenderers == null || skinnedMeshRenderers.Length == 0)
             {
-                Debug.LogWarning("[Host] ParasiteLaunchTrajectory component not found. Exit trajectory visualization will be disabled.");
-                showExitTrajectory = false;
+                Debug.LogWarning($"[Host] {gameObject.name} is marked as enemy host but no SkinnedMeshRenderer found!");
             }
         }
     }
@@ -186,6 +205,26 @@ public class HostController : MonoBehaviour, IDamageable
         if (hostHeadCollider != null)
             hostHeadCollider.enabled = false;
 
+        // Get trajectory system from the parasite
+        if (trajectorySystem == null && parasite != null)
+        {
+            trajectorySystem = parasite.GetComponent<ParasiteLaunchTrajectory>();
+            if (trajectorySystem != null)
+            {
+                Debug.Log("[Host] Acquired trajectory system from parasite");
+            }
+            else
+            {
+                Debug.LogWarning("[Host] No trajectory system found on parasite!");
+            }
+        }
+
+        // Disable enemy AI components if this is an enemy host
+        if (isEnemyHost)
+        {
+            DisableEnemyComponents();
+        }
+
         // Enable host movement _controller
         if (hostMovementController)
             hostMovementController.enabled = true;
@@ -218,6 +257,12 @@ public class HostController : MonoBehaviour, IDamageable
         // Hide trajectory
         if (trajectorySystem != null)
             trajectorySystem.HideTrajectory();
+
+        // Re-enable enemy AI components if this is an enemy host
+        if (isEnemyHost)
+        {
+            EnableEnemyComponents();
+        }
 
         // Disable host movement _controller
         if (hostMovementController)
@@ -279,10 +324,26 @@ public class HostController : MonoBehaviour, IDamageable
         if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        if  (attachedParasite != null)
+        if (attachedParasite != null)
             _gameStateManager.OnHostDied(attachedParasite);
+        
         EnableRagdoll();
-        Destroy(gameObject, ragdollDuration);
+
+     // Determine what to destroy
+  GameObject objectToDestroy = gameObject;
+ 
+        // If destroyParentOnDeath is true and we have a parent, destroy the parent instead
+        if (destroyParentOnDeath && transform.parent != null)
+ {
+            objectToDestroy = transform.parent.gameObject;
+    Debug.Log($"[Host] Destroying parent GameObject: {objectToDestroy.name}");
+     }
+        else
+  {
+  Debug.Log($"[Host] Destroying host GameObject: {objectToDestroy.name}");
+  }
+
+        Destroy(objectToDestroy, ragdollDuration);
     }
 
     private void EnableRagdoll()
@@ -308,6 +369,90 @@ public class HostController : MonoBehaviour, IDamageable
         if (hostHeadCollider != null)
             hostHeadCollider.enabled = true;
     }
+
+    #region Enemy Host Management
+
+    /// <summary>
+    /// Disable enemy AI components when possessed by parasite
+    /// </summary>
+    private void DisableEnemyComponents()
+    {
+ if (!isEnemyHost) return;
+
+        if (enemyController != null)
+        {
+      enemyController.enabled = false;
+        Debug.Log($"[Host] Disabled EnemyController on {gameObject.name}");
+   }
+
+     if (navMeshAgent != null)
+        {
+       navMeshAgent.enabled = false;
+   Debug.Log($"[Host] Disabled NavMeshAgent on {gameObject.name}");
+        }
+
+      // Disable Animator to stop root motion and animations
+     if (animator != null)
+      {
+            animator.enabled = false;
+   Debug.Log($"[Host] Disabled Animator on {gameObject.name}");
+  }
+
+  // Disable SkinnedMeshRenderers to hide enemy mesh
+     if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+    {
+    foreach (var smr in skinnedMeshRenderers)
+      {
+   if (smr != null)
+     {
+  smr.enabled = false;
+   }
+    }
+   Debug.Log($"[Host] Disabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
+        }
+    }
+
+    /// <summary>
+    /// Re-enable enemy AI components when parasite exits (before lifetime expires)
+    /// </summary>
+    private void EnableEnemyComponents()
+    {
+   if (!isEnemyHost) return;
+
+     if (enemyController != null)
+    {
+   enemyController.enabled = true;
+            Debug.Log($"[Host] Re-enabled EnemyController on {gameObject.name}");
+ }
+
+      if (navMeshAgent != null)
+  {
+  navMeshAgent.enabled = true;
+    Debug.Log($"[Host] Re-enabled NavMeshAgent on {gameObject.name}");
+}
+
+        // Re-enable Animator to resume root motion and animations
+     if (animator != null)
+        {
+     animator.enabled = true;
+            Debug.Log($"[Host] Re-enabled Animator on {gameObject.name}");
+      }
+
+     // Re-enable SkinnedMeshRenderers to show enemy mesh
+      if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+        {
+   foreach (var smr in skinnedMeshRenderers)
+       {
+     if (smr != null)
+         {
+        smr.enabled = true;
+      }
+    }
+      Debug.Log($"[Host] Re-enabled {skinnedMeshRenderers.Length} SkinnedMeshRenderer(s) on {gameObject.name}");
+  }
+    }
+
+    #endregion Enemy Host Management
 
     //private void OnGUI()
     //{
