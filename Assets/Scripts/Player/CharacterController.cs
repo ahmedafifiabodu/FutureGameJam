@@ -11,6 +11,7 @@ public class FirstPersonZoneController : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+
     [SerializeField] private float airSpeedMultiplier = 1.15f;
 
     [SerializeField] private float jumpHeight = 1.2f;
@@ -37,10 +38,17 @@ public class FirstPersonZoneController : MonoBehaviour
     [SerializeField] private int overlapDebugFrames = 90;
 
     [Header("Bobbing")]
-
     [SerializeField] private float bobSpeed = 4.8f;
+
     [SerializeField] private float bobAmount = 0.05f;
     [SerializeField] private float bobTimer = Mathf.PI / 2;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private AudioClip[] footstepSounds;
+    [SerializeField] private float footstepCooldown = 0.2f;
+    [SerializeField] private AudioClip jumpSound;
 
     [Header("Controller Tuning (optional)")]
     [SerializeField] private bool overrideControllerTuning = false;
@@ -57,6 +65,7 @@ public class FirstPersonZoneController : MonoBehaviour
     private InputManager inputManager;
     private float yaw, pitch, roll, yVel;
     private int overlapFramesLeft;
+    private float lastFootstep;
     private Vector3 hDelta;
     private Vector3 restPosition;
 
@@ -118,6 +127,9 @@ public class FirstPersonZoneController : MonoBehaviour
     {
         if (inputManager == null) return;
 
+        // Don't update if CharacterController is disabled
+        if (!controller.enabled) return;
+
         Look();
 
         // Compute desired deltas (we apply deltaTime after constraints)
@@ -141,6 +153,12 @@ public class FirstPersonZoneController : MonoBehaviour
 
         if (debugOverlaps && overlapFramesLeft-- > 0) DebugOverlaps();
 
+        if (desiredH != Vector3.zero && controller.isGrounded && footstepSounds.Length > 0 && Time.time > lastFootstep + footstepCooldown)
+        {
+            lastFootstep = Time.time;
+            audioSource.pitch = Random.Range(0.75f, 1.25f);
+            audioSource.PlayOneShot(footstepSounds[Random.Range(0, footstepSounds.Length)]);
+        }
         if (!cameraPivot) return;
         if (desiredH != Vector3.zero && controller.isGrounded)
         {
@@ -186,7 +204,15 @@ public class FirstPersonZoneController : MonoBehaviour
             yVel = -2f;
 
         if (controller.isGrounded && inputManager.PlayerActions.Jump.triggered)
+        {
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+            if (audioSource && jumpSound)
+            {
+                audioSource.pitch = Random.Range(0.9f, 1.1f);
+                audioSource.PlayOneShot(jumpSound, 0.5f);
+            }
+        }
 
         if (!controller.isGrounded && yVel > 0.1f && inputManager.PlayerActions.Jump.WasReleasedThisFrame())
             yVel *= 0.5f;

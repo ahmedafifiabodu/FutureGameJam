@@ -57,7 +57,8 @@ MonoBehaviour:
   hitMarkerColor: {r: 1, g: 1, b: 1, a: 1}
   hitMarkerSize: 20
   hitMarkerDuration: 0.2
-  impactSounds: []
-  impactSoundVolume: 0.5
+  impactSounds:
+  - {fileID: 8300000, guid: 1500de9a453ab07499cb4721ecfe726c, type: 3}
+  impactSoundVolume: 0.8
   hitstopTime: 0.1
   hitstopSlow: 0.75

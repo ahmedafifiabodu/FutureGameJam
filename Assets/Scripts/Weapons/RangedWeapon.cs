@@ -158,7 +158,7 @@ public class RangedWeapon : WeaponBase
     private void Shoot()
     {
         if (weaponProfile.shootSounds.Length > 0)
-            PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)]);
+            PlaySound(weaponProfile.shootSounds[Random.Range(0, weaponProfile.shootSounds.Length)], weaponProfile.soundVolume);
 
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         Vector3 targetPoint = ray.GetPoint(weaponProfile.range);
@@ -334,11 +334,12 @@ public class RangedWeapon : WeaponBase
         weaponHolder.localRotation = weaponHolderBaseRotation * Quaternion.Euler(currentRecoilRotation);
     }
 
-    private void PlaySound(AudioClip clip)
+    private void PlaySound(AudioClip clip, float volume)
     {
         if (audioSource && clip)
         {
-            audioSource.PlayOneShot(clip);
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(clip, volume);
         }
     }
 

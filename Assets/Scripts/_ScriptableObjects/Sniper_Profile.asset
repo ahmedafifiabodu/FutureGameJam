@@ -33,7 +33,7 @@ MonoBehaviour:
   recoilRotation: {x: -270, y: 0, z: 0}
   recoilKickback: {x: -0.05, y: -0.1, z: -0.025}
   swayAmount: 0.001
-  swaySpeed: 1
+  swaySpeed: 0.5
   swayResetSpeed: 2
   bobSpeed: 1
   bobAmount: 0.0015
@@ -46,7 +46,9 @@ MonoBehaviour:
   muzzleFlash: {fileID: 6343699840357871614, guid: 9774ca58a2454764c848dc0c15538bbe, type: 3}
   impactEffectPrefab: {fileID: 0}
   bulletTrailPrefab: {fileID: 3636516122908459889, guid: 54b6056be18d4e345a115c22241662f2, type: 3}
-  shootSounds: []
+  shootSounds:
+  - {fileID: 8300000, guid: ac8dbef363b6dd9438bafc18eb8169d1, type: 3}
+  soundVolume: 1
   reloadSound: {fileID: 0}
   emptySound: {fileID: 0}
   feedbackProfile: {fileID: 11400000, guid: 9b0cbea5345fb3a49a1805fccc3064cc, type: 2}

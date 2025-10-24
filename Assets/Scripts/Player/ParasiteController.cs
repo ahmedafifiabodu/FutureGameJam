@@ -69,6 +69,16 @@ public class ParasiteController : MonoBehaviour, IDamageable
     [SerializeField] private float bobAmount = 0.05f;
     [SerializeField] private float bobTimer = Mathf.PI / 2;
 
+    [Header("Sound Effects")]
+    [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private float footstepCooldown = 0.2f;
+    [SerializeField] private AudioClip[] footstepSounds;
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip launchSound;
+    [SerializeField] private AudioClip possessionSound; // Sound when entering a host
+    [SerializeField] private AudioClip landSound; // Sound when landing from launch
+
     [Header("Visual Effects")]
     [SerializeField] private bool usePossessionTransition = true;
 
@@ -91,6 +101,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
     private Camera _parasiteCamera; // Cached camera reference
 
     private float mouseSensitivity;
+    private float lastFootstep;
     private bool lookInputIsDelta;
     public float gravity;
     private bool launchTimedOut = false;
@@ -281,12 +292,27 @@ public class ParasiteController : MonoBehaviour, IDamageable
             yVel = -2f;
 
         if (_controller.isGrounded && _inputManager.ParasiteActions.Jump.triggered)
+        {
             yVel = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+            // Play jump sound
+            if (audioSource && jumpSound)
+            {
+                audioSource.pitch = Random.Range(1.1f, 1.3f);
+                audioSource.PlayOneShot(jumpSound, 0.5f);
+            }
+        }
 
         yVel += gravity * Time.deltaTime;
         move.y = yVel;
 
         _controller.Move(move * Time.deltaTime);
+        if (moveDir != Vector3.zero && _controller.isGrounded && footstepSounds.Length > 0 && Time.time > lastFootstep + footstepCooldown)
+        {
+            lastFootstep = Time.time;
+            audioSource.pitch = Random.Range(0.75f, 1.25f);
+            audioSource.PlayOneShot(footstepSounds[Random.Range(0, footstepSounds.Length)]);
+        }
         if (!cameraPivot) return;
         if (moveDir != Vector3.zero && _controller.isGrounded)
         {
@@ -372,6 +398,13 @@ public class ParasiteController : MonoBehaviour, IDamageable
         lastLaunchTime = Time.time;
         launchStartTime = Time.time;
         gravity *= startGravityMultiplier;
+
+        // Play launch sound
+        if (audioSource && launchSound)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(launchSound);
+        }
 
         if (showDebug)
             Debug.Log($"[Parasite] Launched! Direction: {launchDir}");
@@ -515,6 +548,12 @@ public class ParasiteController : MonoBehaviour, IDamageable
         if (showDebug)
             Debug.Log($"[Parasite] Successfully attaching to host: {hostGameObject.name}");
 
+        // Play possession sound
+        if (possessionSound)
+        {
+            AudioSource.PlayClipAtPoint(possessionSound, transform.position);
+        }
+
         // Use cached camera reference
         Camera parasiteCamera = _parasiteCamera;
         Transform hostCameraPivot = hostController.GetCameraPivot();
@@ -563,8 +602,16 @@ public class ParasiteController : MonoBehaviour, IDamageable
         move += launchVelocity;
         move.y = 0;
         launchVelocity = Vector3.zero;
+
         if (zoneController != null)
             gravity = zoneController.Gravity;
+
+        // Play land sound when returning to ground after launch
+        if (audioSource && landSound)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(landSound);
+        }
 
         if (showDebug)
             Debug.Log("[Parasite] Returned to crawling state");
@@ -927,6 +974,8 @@ public class ParasiteController : MonoBehaviour, IDamageable
         lastLaunchTime = Time.time;
         launchStartTime = Time.time;
         gravity *= startGravityMultiplier;
+
+        audioSource.PlayOneShot(launchSound); // Play launch sound
 
         if (showDebug)
             Debug.Log($"[Parasite] Exit launched from host! Velocity: {velocity}");

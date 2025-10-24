@@ -133,13 +133,6 @@ namespace AI.Enemy.Configuration
         [Header("Projectile Settings (if ranged)")]
         public bool isRanged = false;
 
-        [Tooltip("Projectile prefab to shoot")]
-        public GameObject projectilePrefab;
-
-        [Tooltip("Projectile speed")]
-        [Range(1f, 50f)]
-        public float projectileSpeed = 20f;
-
         [Header("Animation Settings")]
         [Tooltip("Enable if this enemy has specific animations")]
         public bool hasCustomAnimations = false;
