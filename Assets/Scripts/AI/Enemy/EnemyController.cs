@@ -22,6 +22,8 @@ namespace AI.Enemy
         [SerializeField] private Animator animator;
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private GameObject deathEffect;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip deathSound;
 
         [Header("Patrol Points")]
         [SerializeField] private Transform[] patrolPoints;
@@ -672,6 +674,7 @@ namespace AI.Enemy
             isDead = true;
             agent.isStopped = true;
             agent.enabled = false;
+            audioSource.PlayOneShot(deathSound);
 
             ChangeState(deadState);
 

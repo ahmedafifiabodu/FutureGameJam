@@ -69,6 +69,11 @@ public class ParasiteController : MonoBehaviour, IDamageable
     [SerializeField] private float bobAmount = 0.05f;
     [SerializeField] private float bobTimer = Mathf.PI / 2;
 
+    [Header("Sound Effects")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private float footstepCooldown = 0.2f;
+    [SerializeField] private AudioClip[] footstepSounds;
+
     [Header("Visual Effects")]
     [SerializeField] private bool usePossessionTransition = true;
 
@@ -91,6 +96,7 @@ public class ParasiteController : MonoBehaviour, IDamageable
     private Camera _parasiteCamera; // Cached camera reference
 
     private float mouseSensitivity;
+    private float lastFootstep;
     private bool lookInputIsDelta;
     public float gravity;
     private bool launchTimedOut = false;
@@ -287,6 +293,11 @@ public class ParasiteController : MonoBehaviour, IDamageable
         move.y = yVel;
 
         _controller.Move(move * Time.deltaTime);
+        if (moveDir != Vector3.zero && _controller.isGrounded && footstepSounds.Length > 0 && Time.time > lastFootstep + footstepCooldown)
+        {
+            lastFootstep = Time.time;
+            audioSource.PlayOneShot(footstepSounds[Random.Range(0, footstepSounds.Length)]);
+        }
         if (!cameraPivot) return;
         if (moveDir != Vector3.zero && _controller.isGrounded)
         {
