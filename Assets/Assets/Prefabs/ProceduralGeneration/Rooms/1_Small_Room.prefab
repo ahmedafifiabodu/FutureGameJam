@@ -14351,9 +14351,6 @@ PrefabInstance:
       addedObject: {fileID: 7921295432726044683}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4f3928e71ae8046e29af2b503ce59a62, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1032819689466216415}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4f3928e71ae8046e29af2b503ce59a62, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 6894201163115713988}
     - targetCorrespondingSourceObject: {fileID: 5460790035337508435, guid: 4f3928e71ae8046e29af2b503ce59a62, type: 3}
       insertIndex: -1
@@ -14392,27 +14389,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!65 &1032819689466216415
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 164853778650475030}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.33676887, y: 2.0750132, z: 1.8125652}
-  m_Center: {x: 0, y: 0, z: 0.91}
 --- !u!114 &6894201163115713988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14426,7 +14402,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralGeneration.Door
   doorAnimator: {fileID: 7921295432726044683}
-  doorCollider: {fileID: 1032819689466216415}
+  doorCollider: {fileID: 0}
   doorLights:
   - {fileID: 2626550862666653876}
   - {fileID: 1877435189344092187}
