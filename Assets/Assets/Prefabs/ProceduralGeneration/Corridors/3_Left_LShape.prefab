@@ -115,7 +115,7 @@ Transform:
   m_GameObject: {fileID: 889290574170330815}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071078, z: -0, w: -0.70710576}
-  m_LocalPosition: {x: -17.5, y: 1, z: 12}
+  m_LocalPosition: {x: -16.939, y: 1, z: 12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -144,7 +144,7 @@ MonoBehaviour:
   disableProximityGeneration: 1
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
   trackEnemyMovement: 1
 --- !u!135 &242981966747873387
 SphereCollider:
@@ -1095,7 +1095,7 @@ Transform:
   m_GameObject: {fileID: 6006998934587905634}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.25, y: -0.25, z: -0.25}
+  m_LocalPosition: {x: 0.25, y: -0.25, z: 0.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2170,7 +2170,7 @@ Transform:
   m_GameObject: {fileID: 8106480331194806226}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0.0000029504295}
-  m_LocalPosition: {x: 0.25, y: 1, z: -10}
+  m_LocalPosition: {x: 0.25, y: 1, z: -9.673}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2199,7 +2199,7 @@ MonoBehaviour:
   disableProximityGeneration: 1
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
   trackEnemyMovement: 1
 --- !u!135 &4030426886624745720
 SphereCollider:
@@ -2299,7 +2299,7 @@ Transform:
   m_GameObject: {fileID: 8437078265182017467}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.000004485249, z: -0, w: -1}
-  m_LocalPosition: {x: -7.75, y: -0.25, z: 12}
+  m_LocalPosition: {x: -7.45, y: -0.25, z: 12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3607,7 +3607,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1162178083342593535, guid: e674cc8662f004841abea1fc90e927f6, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 1162178083342593535, guid: e674cc8662f004841abea1fc90e927f6, type: 3}
       propertyPath: m_LocalScale.y
@@ -3615,7 +3615,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1162178083342593535, guid: e674cc8662f004841abea1fc90e927f6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15.75
+      value: -15.552
       objectReference: {fileID: 0}
     - target: {fileID: 1162178083342593535, guid: e674cc8662f004841abea1fc90e927f6, type: 3}
       propertyPath: m_LocalPosition.y
