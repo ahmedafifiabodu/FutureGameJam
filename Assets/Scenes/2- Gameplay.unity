@@ -1911,6 +1911,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3517239282972842459, guid: bbd3098b64d6d9c408c9abc6f881c69a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 172a3ab7316c48241aac185d881a74d7, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2924,7 +2928,7 @@ MonoBehaviour:
   minVelocityThreshold: 0.5
   hostHeadLayerMask:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 8
   simulationLayers:
     serializedVersion: 2
     m_Bits: 55

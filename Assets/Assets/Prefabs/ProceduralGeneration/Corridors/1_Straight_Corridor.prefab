@@ -56,7 +56,7 @@ MonoBehaviour:
   disableProximityGeneration: 1
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
   trackEnemyMovement: 1
 --- !u!135 &6043904954931135316
 SphereCollider:
@@ -1659,7 +1659,7 @@ MonoBehaviour:
   disableProximityGeneration: 1
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
   trackEnemyMovement: 1
 --- !u!135 &5409934149847636402
 SphereCollider:
