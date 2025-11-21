@@ -240,13 +240,10 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
     /// <param name="maxDistance">Maximum distance to raycast for targets</param>
     /// <param name="targetLayerMask">Layer mask for potential targets</param>
     /// <param name="isValidDistance">Whether the target is at a valid distance to launch</param>
-    public void SimulateTrajectory(Vector3 startPosition, Vector3 velocity, float gravity, float maxDistance, LayerMask targetLayerMask,
-        float startGravityMultiplier, float endGravityMultiplier, float launchDuration, bool isValidDistance = true)
+    public void SimulateTrajectory(Vector3 startPosition, Vector3 velocity, float gravity, float maxDistance, LayerMask targetLayerMask, float startGravityMultiplier, float endGravityMultiplier, float launchDuration, bool isValidDistance = true)
     {
         if (line == null || !physicsScene.IsValid())
-        {
             return;
-        }
 
         // Calculate trajectory using the ACTUAL start position (no offset)
         // This ensures accurate physics prediction
@@ -445,15 +442,15 @@ public class ParasiteLaunchTrajectory : MonoBehaviour
             {
                 // Ensure emission is enabled
                 lineMaterialInstance.EnableKeyword("_EMISSION");
-                
+
                 // Create HDR emission color (multiply by intensity for bloom effect)
                 Color emissionColor = baseColor * emissionIntensity;
                 lineMaterialInstance.SetColor("_EmissionColor", emissionColor);
-        
+
                 // Force the material to update by setting the global illumination flags
                 lineMaterialInstance.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-     }
-    }
+            }
+        }
     }
 
     private void UpdateLandingIndicator(Vector3 position, Vector3 normal, bool isValidTarget)
