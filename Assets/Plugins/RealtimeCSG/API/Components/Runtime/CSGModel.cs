@@ -110,7 +110,7 @@ namespace RealtimeCSG.Components
         #if UNITY_EDITOR
         
         public bool             ShowGeneratedMeshes     = false;
-		public PhysicsMaterial   DefaultPhysicsMaterial  = null;
+		public PhysicMaterial   DefaultPhysicsMaterial  = null;
 
         #region Export settings
 		public ExportType		exportType				= ExportType.FBX;

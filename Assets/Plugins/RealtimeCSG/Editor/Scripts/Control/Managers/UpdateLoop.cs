@@ -65,7 +65,7 @@ namespace RealtimeCSG
 #endif
 
 #if UNITY_2018_3_OR_NEWER
-            UnityEditor.SceneManagement.PrefabStage.prefabSaving += OnPrefabSaving;
+            UnityEditor.Experimental.SceneManagement.PrefabStage.prefabSaving += OnPrefabSaving;
 
 #endif
 
