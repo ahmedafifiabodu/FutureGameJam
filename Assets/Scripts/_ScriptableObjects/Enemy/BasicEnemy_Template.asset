@@ -22,7 +22,7 @@ MonoBehaviour:
   patrolWaitTime: 2
   usePatrolPoints: 1
   sightRange: 15
-  fieldOfViewAngle: 90
+  fieldOfViewAngle: 60
   visionCheckInterval: 0.5
   visionObstacleMask:
     serializedVersion: 2

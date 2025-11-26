@@ -1297,7 +1297,7 @@ MonoBehaviour:
   decreaseLifetimeEachHost: 1
   lifetimeDecreasePerHost: 5
   minLifetime: 5
-  cameraPivot: {fileID: 0}
+  cameraPivot: {fileID: 4905547472514024518}
   hostMovementController: {fileID: 4127427391942442354}
   weaponManager: {fileID: 0}
   weaponProfile: {fileID: 11400000, guid: 2225c748f7e5c7742a810f76ee5aca06, type: 2}

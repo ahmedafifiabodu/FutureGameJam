@@ -269,7 +269,7 @@ public class HostController : MonoBehaviour, IDamageable
             if (TryGetComponent<AI.Enemy.EnemyController>(out var enemyController))
             {
                 // Find the room this enemy belongs to
-                if (enemyController.CurrentRoom.TryGetComponent<ProceduralGeneration.Room>(out var room))
+                if (enemyController.CurrentRoom && enemyController.CurrentRoom.TryGetComponent<ProceduralGeneration.Room>(out var room))
                     room.OnEnemyPossessed(enemyController);
             }
         }
