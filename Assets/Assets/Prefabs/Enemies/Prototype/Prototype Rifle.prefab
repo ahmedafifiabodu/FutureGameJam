@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6a9c5d1e447e9d4db3d1690f8a62a01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI.Enemy.EnemyController
-  config: {fileID: 11400000, guid: 66f9731d13a1cd9488e809510eae313a, type: 2}
+  config: {fileID: 11400000, guid: cf0e28ce7cf7ec3419628a0d22fd156d, type: 2}
   agent: {fileID: 3841605877911159721}
   animator: {fileID: 4704095968491979330}
   projectileSpawnPoint: {fileID: 6170872983534272724}
@@ -224,8 +224,8 @@ MonoBehaviour:
   cameraPivot: {fileID: 2241799648660360710}
   hostMovementController: {fileID: 3570550144833874600}
   weaponManager: {fileID: 0}
-  weaponProfile: {fileID: 11400000, guid: 2225c748f7e5c7742a810f76ee5aca06, type: 2}
-  weaponFeedbackProfile: {fileID: 11400000, guid: 9b0cbea5345fb3a49a1805fccc3064cc, type: 2}
+  weaponProfile: {fileID: 11400000, guid: 220f878e6fa31d047bd595122da20db5, type: 2}
+  weaponFeedbackProfile: {fileID: 11400000, guid: 9e1ae627d51eb6b46b1785d0f36ed310, type: 2}
   deathEffect: {fileID: 6343699840357871614, guid: 5b086e910fe4e454ca81ba941f9f92e4, type: 3}
   ragdollDuration: 0.51
   allowVoluntaryExit: 1
