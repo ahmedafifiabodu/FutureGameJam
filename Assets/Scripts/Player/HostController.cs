@@ -46,6 +46,7 @@ public class HostController : MonoBehaviour, IDamageable
 
     [Header("Visual Feedback")]
     [SerializeField] private Renderer hostRenderer;
+    [SerializeField] private MeshRenderer[] staticMeshRenderers;
 
     [SerializeField] private Color damageColor = Color.red;
     [SerializeField] private float damageFlashDuration = 0.1f;
@@ -484,6 +485,14 @@ public class HostController : MonoBehaviour, IDamageable
             {
                 if (smr != null)
                     smr.enabled = false;
+            }
+        }
+        if (staticMeshRenderers != null && staticMeshRenderers.Length > 0)
+        {
+            foreach (var mr in staticMeshRenderers)
+            {
+                if (mr != null)
+                    mr.enabled = false;
             }
         }
     }
