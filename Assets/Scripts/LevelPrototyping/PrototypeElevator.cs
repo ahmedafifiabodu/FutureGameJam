@@ -2,51 +2,24 @@ using UnityEngine;
 
 public class PrototypeElevator : MonoBehaviour
 {
-    public bool canMove = false;
-
     [SerializeField] private float speed = 2f;
-    [SerializeField] private int startPoint = 0;
-    [SerializeField] private Transform[] points;
+    [SerializeField] private Transform targetPoint;
+    private bool moving;
 
-    private int i;
-    private bool reverse;
-    
     void Start()
     {
-        transform.position = points[startPoint].position;
-        i = startPoint;
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        canMove = true;
+        moving = true;
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        if (!canMove) return;
+        if (!moving || targetPoint == null)
+            return;
+        transform.position = Vector3.MoveTowards(transform.position, targetPoint.position, speed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, points[i].position) < 0.01f)
+        if (Vector3.Distance(transform.position, targetPoint.position) < 0.01f)
         {
-            if (i == points.Length - 1)
-            {
-                reverse = true;
-                i--;
-            }
-            else if (i == 0)
-            {
-                reverse = false;
-                i++;
-            }
-            else
-            {
-                i += reverse ? -1 : 1;
-            }
+            moving = false;
         }
-
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            points[i].position,
-            speed * Time.deltaTime
-        );
     }
 }

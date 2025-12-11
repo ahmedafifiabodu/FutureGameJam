@@ -107,6 +107,12 @@ private void MovePlayer()
 private void OnCollisionEnter(Collision collision)
 {
     groundCollisions.Add(collision);
+
+    if (collision.collider.CompareTag("Finish"))
+    {
+        Debug.Log("Player entered elevator — parenting to platform.");
+        transform.SetParent(collision.transform);
+    }
 }
 
 private void OnCollisionStay(Collision collision)
@@ -118,6 +124,12 @@ private void OnCollisionStay(Collision collision)
 private void OnCollisionExit(Collision collision)
 {
     groundCollisions.Remove(collision);
+
+    if (collision.collider.CompareTag("Finish"))
+    {
+        Debug.Log("Player left elevator — unparenting.");
+        transform.SetParent(null);
+    }
 }
 
 public bool IsGrounded()
