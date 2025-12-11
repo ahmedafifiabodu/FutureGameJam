@@ -93,7 +93,7 @@ public class GameStateManager : MonoBehaviour
 
         InitializeParasite();
         InitializeGameOverUI();
-        StartParasiteMode();
+        // StartParasiteMode();
     }
 
     private void Update()
@@ -190,7 +190,7 @@ public class GameStateManager : MonoBehaviour
         Debug.Log($"[GameState] Switched to Host Mode. Hosts consumed: {hostsConsumed}");
     }
 
-    private void StartParasiteMode()
+    public void StartParasiteMode()
     {
         currentMode = GameMode.Parasite;
 
